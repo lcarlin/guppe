@@ -33,5 +33,5 @@ deq.pop() # remove e retorna item removido do final
 print(deq)
 
 print ("**********************")
-deq.popleft() # removoe e retorna o item removido do inicio 
+deq.popleft() # removoe e retorna o item removido do inicio
 print(deq)

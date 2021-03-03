@@ -1,0 +1,133 @@
+Resumo das Qualificações
+•	Experiência de 20 anos em empresas de Telecomunicação, já tendo passado pela Vivo, Brasil Telecom (Atual Oi), TIM, Nextel e Claro;
+•	Experiência de 05 anos em gerenciamento de equipe de até 06 operadores Nivel 1 ;
+•	Especializado em sistema de Billing: BSCS, Convergys (Geneva) e Amdocs
+•	Especializado em Módulos de Rating;
+•	Capacitado em analise e tratamento de rejeições de Billing e rating
+•	Automatização de processos e cadeias em ambiente Control-M;
+•	Criação, configuração e manutenção de processos batchs;
+•	Desenvolvimento Avançado de Unix Shell Scripts;
+•	Instalação de Mudanças em ambientes produtivos (GMUD);
+•	Conhecimento de Metodologias de Governança de TI, Cobit e ITIL;
+•	Conhecimento de Metodologia Scrum, Lean e Kanban
+•	Programação Avançada em Oracle PL/SQL:
+•	Criação de Tabelas, Views, Constraints e demais artefatos e banco-de-dados Oracle;
+•	Criação de Tables, Views, Packages, Procedures Functions e Triggers em Oracle PL/SQL;
+•	Conhecimento de linguagens Java, Python;
+•	Capacitado de grande didática e flexibilidade para treinar novos recursos;
+
+GLOBAL HITSS DO BRASIL | São Paulo, SP
+Especialista em Soluções I  (nov/2019 até a Março/2020  - 04 Meses)
+•	Reportando ao Gerente Operacional e atuando como on-site na empresa Claro Telecomunicações
+•	Profissional alocado no projeto NETUNO, novo sistema de faturamento destinado a clientes que possuem produtos específicos de internet, TV a cabo e telefonia 
+•	Criação e configuração de novas cadeias de processamento Batch 
+•	desenvolvimento de Shell Scripts, programação avançada em Oracle PL/SQL e SQL 
+•	Domínio da ferramenta BMC CONTROL-M de Schedule de processos para a criação de cadeias Batch de processamento 
+•	Gerenciamento da produção da cadeia de Billing (emissão de faturas) de pós-pago.
+•	Analise reativa de rejeições de faturamento e posterior analise de causa raiz e implementação de soluções (paliativas ou definitivas) 
+•	Analise de críticas apontadas em faturas de Quality Assurance pelos clientes internos do novo sistema, a fim de verificar se são pertinentes ou falta de entendimento de regra de negócios e posterior correção em massa das criticas
+•	Levantamento massivo de clientes apontados pelos cenários de críticas.
+•	Reuniões de definição de escopo de projetos
+
+EVERIS DO BRASIL | São Paulo, SP
+Especialista em Sistemas de Fidelização SKN2 (nov/2018 à set/2019 – 10 Meses)
+•	Reportando ao Gerente Operacional e atuando como recurso alocado on site na empresa TIM Brasil e responsável por uma equipe de 6 colaboradores
+•	Gerenciamento da produção da cadeia de Fidelização de pós-pago.
+•	Roll-out de novos projetos em produção
+•	Conhecimento da regra de negócios dos sistemas de Fidelização e grande utilização e desenvolvimento de Shell Scripts, programação avançada em Oracle PL/SQL e SQL 
+•	Criação e configuração de novas cadeias de processamento Batch
+•	Domínio da ferramenta BMC CONTROL-M de Schedule de processos para a criação de cadeias Batch de processamento 
+•	Análise e configuração de toda a cadeia de processamento com base no fluxo das informações
+•	Validações pré e pós-processamento, notificações de erro e/ou sucesso e métodos de recuperação de problemas
+•	Ação de medidas contingenciais e relatórios de processamento de cadeia em níveis técnicos, macros e resumidos
+
+Especialista em Sistemas de Billing SKN2 (mar/2015 à nov/2018 - 3 anos e 8 meses)
+•	Reportando ao Gerente Operacional e atuando como recurso  on site na empresa TIM Brasil e responsável por uma equipe de 6 colaboradores
+•	Gerenciamento da produção da cadeia de Billing - BSCS pós-pago
+•	Experiência em ambientes de produção de Billing e Rating pós-pago
+•	Tratamento de exceções e rejeições de processamento, trabalho desenvolvido na Brasil Telecom e TIM Brasil S/A
+•	Conhecimento da regra de negócios dos sistemas de Billing e grande utilização e desenvolvimento de Shell Scripts, programação avançada em Oracle PL/SQL e SQL 
+•	Experiência em Roll-out para a produção de novos projetos
+•	Reuniões de definição de escopo de novos projetos
+•	Treinamento e capacitação on site de equipe de operadores e analistas Jr. 
+•	Criação e configuração de novas cadeias de processamento Batch
+•	Domínio da ferramenta BMC CONTROL-M de Schedule de processos para a criação de cadeias Batch de processamento 
+•	Análise e configuração de toda a cadeia de processamento com base no fluxo das informações
+•	Validações pré e pós-processamento, notificações de erro e/ou sucesso e métodos de recuperação de problemas
+•	Ação de medidas contingenciais e relatórios de processamento de cadeia em níveis técnicos, macros e resumidos
+•	
+
+INSAT TECNOLOGY | São Paulo, SP
+Analista Sênior de Automação (set/2014 a fev/2015 - 6 meses)
+•	Reportando ao Proprietário e atuando como recurso on site na empresa Nextel Brasil
+•	Criação de fluxos de processos e jobs, utilizando: Unix Shell Script, Oracle PL/SQL e BMC CONTROL-M
+
+TIM BRASIL | Santo André, SP
+Analista Sênior de Sistemas – Arrecadação e Cobrança (SAP/RMCA) (Jun/2013 a Fev/2014 -8 meses)
+•	Alocado no sistema de Arrecadação e Cobrança (SAP/RMCA), responsável pelos sistemas batchs que realizavam a contabilização de pagamentos de faturas d clientes pós-pago
+•	Desenvolvimento avançado de Unix Shell Scripts e automatização de processos e cadeias em ambiente Control-M
+•	Domínio da ferramenta BMC CONTROL-M de Schedule de processos para a criação de cadeias Batch de processamento 
+•	Aplicação de Mudanças em ambientes produtivos - GMUD
+•	Reuniões de definição de escopo de novos projetos
+
+Analista Sênior de Sistemas - Especialista em Sistemas de Billing (dez/2005 a Jun/2013 - 7 anos e 6 meses)
+•	Reportando à Gerência de Faturamento T.I. Pós Pago, e responsável por uma equipe de 6 colaboradores
+•	Gestão do sistema de faturamento pós pagos - Billing 
+•	Desenvolvimento avançado de Unix Shell Scripts e automatização de processos e cadeias em ambiente Control-M
+•	Domínio da ferramenta BMC CONTROL-M de Schedule de processos para a criação de cadeias Batch de processamento 
+•	Aplicação de Mudanças em ambientes produtivos - GMUD
+•	Treinamento e capacitação on site de equipe de operadores e analistas Jr. 
+•	KPI´s
+•	competencia na sustentação (On-going)	
+•	
+•	
+•	
+
+UNITECH - TECNOLOGIA DA INFORMAÇÃO - CPM BRAXIS CAPGEMINI DO BRASIL | Brasília, DF
+Outsourcing na área de Tecnologia de Informação
+Analista Sênior de Sistemas - Especialista em B.I. (abr/2005 a nov/2005 - 8 meses)
+•	Reportando ao Gerente de Operações e atuando on site na empresa Brasil Telecom
+•	Gerenciamento e operação do sistema de Data Ware House da Brasil Telecom
+•	Criação, alteração e manutenção de Shell Scripts, sentenças SQL e PL/SQL, utilizando banco de dados DB2
+
+Projetos Relevantes
+•	Emissão de indicadores e relatórios de análise para tomada de decisões críticas da Brasil Telecom
+•	Métricas da qualidade de atendimento dos clientes externos
+•	Criação de novos processos automatizados
+
+Resultados
+•	Entrega de relatório de maneira antecipada
+
+BEARING POINT - CSC COMPUTER SCIENCE DO BRASIL | Brasília, DF
+Outsourcing em TI, prestação de serviços na área de Tecnologia de Informação
+Consultor Sênior - Billing (set/2004 a mar/2005 - 7 meses)
+•	Reportando ao Gerente de Operações e atuando on site na empresa Brasil Telecom
+•	Gerenciamento e operação do Sistema de Billing Geneva – Convergys
+•	Criação, alteração e manutenção de Shell Scripts, sentenças SQL e PL/SQL, utilizando banco de dados Oracle 9i 
+
+Projetos Relevantes
+•	Implementação do novo sistema de tarifação de chamadas e faturamento: Rating +Billing, convergente - telefonia celular mais telefonia fixa
+Resultados
+•	Criei processos de Seleção/Marcação de clientes para o faturamento seletivo, o qual otimizou o tempo de processamento
+•	Automatizei processes de clean-Up de inconsistências de cadastro de clientes para evitar erro de faturamento, garantindo assim performance no Billing
+•	Automatizei vários fluxos de envio de arquivos.
+
+EXACTUS SOFTWARE | Londrina, PR
+Soluções tecnológicas em sistema contábil e sistema ERP
+Administrador de Banco-de-Dados (dez/2003 a set/2004 - 10 meses)
+•	Reportando ao Gerente de projetos do projeto AMPLUS/CELERA
+•	Gerenciamento dos bancos-de-dados MS SQL Server 2000
+•	Responsável em criar os CDs/Pacotes de instalação da aplicação AMPLUS
+
+Resultados
+•	Padronizei a criação de procedures de extração de results-sets
+•	Melhorei o processo de espelhamento de base-de-dados de produção para desenvolvimento. Tal processo levava em torno de 5 horas e consegui reduzir para 40 minutos
+•	Criei várias DTS (Data Transformation Services) para importar dados não padronizados e gerar Relatórios. 
+•	Automatizei vários fluxos de envio de arquivos.
+
+GLOBAL TELECOM – VIVO TELEFÔNICA | Londrina, PR
+Atual líder no mercado de Telefonia Móvel + Fixa e banda-larga
+Analista Júnior de Sistemas (jun/2001 a dez/2003 - 2 anos e 7 meses)
+•	Reportando ao Gerente de Sistemas Pós Pago
+•	Gerenciamento e operação do Sistema de Billing Amdocs 
+•	Criação, alteração e manutenção de Shell Scripts, sentenças SQL e PL/SQL, utilizando banco de dados Oracle 9i

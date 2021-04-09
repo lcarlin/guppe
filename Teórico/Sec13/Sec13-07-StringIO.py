@@ -7,7 +7,6 @@ Atenção, para Ler ou escrever dados em arqauivos do sistema operacional o Soft
 StringIO -> Utilizado para Ler e Criar arquivos em Memória.
 
 ====================================================================================================================
-====================================================================================================================
 """
 # primeiro, faz-se o Import
 from io import StringIO

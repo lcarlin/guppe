@@ -1,0 +1,133 @@
+R*s*m* d*s Q**l*f*c*çõ*s
+•	*xp*r*ênc** d* 20 *n*s *m *mpr*s*s d* T*l*c*m*n*c*çã*, já t*nd* p*ss*d* p*l* V*v*, Br*s*l T*l*c*m (*t**l **), T*M, N*xt*l * Cl*r*;
+•	*xp*r*ênc** d* 05 *n*s *m g*r*nc**m*nt* d* *q**p* d* *té 06 *p*r*d*r*s N*v*l 1 ;
+•	*sp*c**l*z*d* *m s*st*m* d* B*ll*ng: BSCS, C*nv*rgys (G*n*v*) * *md*cs
+•	*sp*c**l*z*d* *m Mód*l*s d* R*t*ng;
+•	C*p*c*t*d* *m *n*l*s* * tr*t*m*nt* d* r*j**çõ*s d* B*ll*ng * r*t*ng
+•	**t*m*t*z*çã* d* pr*c*ss*s * c*d***s *m *mb**nt* C*ntr*l-M;
+•	Cr**çã*, c*nf*g*r*çã* * m*n*t*nçã* d* pr*c*ss*s b*tchs;
+•	D*s*nv*lv*m*nt* *v*nç*d* d* *n*x Sh*ll Scr*pts;
+•	*nst*l*çã* d* M*d*nç*s *m *mb**nt*s pr*d*t*v*s (GM*D);
+•	C*nh*c*m*nt* d* M*t*d*l*g**s d* G*v*rn*nç* d* T*, C*b*t * *T*L;
+•	C*nh*c*m*nt* d* M*t*d*l*g** Scr*m, L**n * K*nb*n
+•	Pr*gr*m*çã* *v*nç*d* *m *r*cl* PL/SQL:
+•	Cr**çã* d* T*b*l*s, V**ws, C*nstr**nts * d*m**s *rt*f*t*s * b*nc*-d*-d*d*s *r*cl*;
+•	Cr**çã* d* T*bl*s, V**ws, P*ck*g*s, Pr*c*d*r*s F*nct**ns * Tr*gg*rs *m *r*cl* PL/SQL;
+•	C*nh*c*m*nt* d* l*ng**g*ns J*v*, Pyth*n;
+•	C*p*c*t*d* d* gr*nd* d*dát*c* * fl*x*b*l*d*d* p*r* tr**n*r n*v*s r*c*rs*s;
+
+GL*B*L H*TSS D* BR*S*L | Sã* P**l*, SP
+*sp*c**l*st* *m S*l*çõ*s *  (n*v/2019 *té * M*rç*/2020  - 04 M*s*s)
+•	R*p*rt*nd* ** G*r*nt* *p*r*c**n*l * *t**nd* c*m* *n-s*t* n* *mpr*s* Cl*r* T*l*c*m*n*c*çõ*s
+•	Pr*f*ss**n*l *l*c*d* n* pr*j*t* N*T*N*, n*v* s*st*m* d* f*t*r*m*nt* d*st*n*d* * cl**nt*s q** p*ss**m pr*d*t*s *sp*cíf*c*s d* *nt*rn*t, TV * c*b* * t*l*f*n** 
+•	Cr**çã* * c*nf*g*r*çã* d* n*v*s c*d***s d* pr*c*ss*m*nt* B*tch 
+•	d*s*nv*lv*m*nt* d* Sh*ll Scr*pts, pr*gr*m*çã* *v*nç*d* *m *r*cl* PL/SQL * SQL 
+•	D*mín** d* f*rr*m*nt* BMC C*NTR*L-M d* Sch*d*l* d* pr*c*ss*s p*r* * cr**çã* d* c*d***s B*tch d* pr*c*ss*m*nt* 
+•	G*r*nc**m*nt* d* pr*d*çã* d* c*d*** d* B*ll*ng (*m*ssã* d* f*t*r*s) d* pós-p*g*.
+•	*n*l*s* r**t*v* d* r*j**çõ*s d* f*t*r*m*nt* * p*st*r**r *n*l*s* d* c**s* r**z * *mpl*m*nt*çã* d* s*l*çõ*s (p*l**t*v*s ** d*f*n*t*v*s) 
+•	*n*l*s* d* crít*c*s *p*nt*d*s *m f*t*r*s d* Q**l*ty *ss*r*nc* p*l*s cl**nt*s *nt*rn*s d* n*v* s*st*m*, * f*m d* v*r*f*c*r s* sã* p*rt*n*nt*s ** f*lt* d* *nt*nd*m*nt* d* r*gr* d* n*góc**s * p*st*r**r c*rr*çã* *m m*ss* d*s cr*t*c*s
+•	L*v*nt*m*nt* m*ss*v* d* cl**nt*s *p*nt*d*s p*l*s c*nár**s d* crít*c*s.
+•	R**n*õ*s d* d*f*n*çã* d* *sc*p* d* pr*j*t*s
+
+*V*R*S D* BR*S*L | Sã* P**l*, SP
+*sp*c**l*st* *m S*st*m*s d* F*d*l*z*çã* SKN2 (n*v/2018 à s*t/2019 – 10 M*s*s)
+•	R*p*rt*nd* ** G*r*nt* *p*r*c**n*l * *t**nd* c*m* r*c*rs* *l*c*d* *n s*t* n* *mpr*s* T*M Br*s*l * r*sp*nsáv*l p*r *m* *q**p* d* 6 c*l*b*r*d*r*s
+•	G*r*nc**m*nt* d* pr*d*çã* d* c*d*** d* F*d*l*z*çã* d* pós-p*g*.
+•	R*ll-**t d* n*v*s pr*j*t*s *m pr*d*çã*
+•	C*nh*c*m*nt* d* r*gr* d* n*góc**s d*s s*st*m*s d* F*d*l*z*çã* * gr*nd* *t*l*z*çã* * d*s*nv*lv*m*nt* d* Sh*ll Scr*pts, pr*gr*m*çã* *v*nç*d* *m *r*cl* PL/SQL * SQL 
+•	Cr**çã* * c*nf*g*r*çã* d* n*v*s c*d***s d* pr*c*ss*m*nt* B*tch
+•	D*mín** d* f*rr*m*nt* BMC C*NTR*L-M d* Sch*d*l* d* pr*c*ss*s p*r* * cr**çã* d* c*d***s B*tch d* pr*c*ss*m*nt* 
+•	*nál*s* * c*nf*g*r*çã* d* t*d* * c*d*** d* pr*c*ss*m*nt* c*m b*s* n* fl*x* d*s *nf*rm*çõ*s
+•	V*l*d*çõ*s pré * pós-pr*c*ss*m*nt*, n*t*f*c*çõ*s d* *rr* */** s*c*ss* * mét*d*s d* r*c*p*r*çã* d* pr*bl*m*s
+•	*çã* d* m*d*d*s c*nt*ng*nc***s * r*l*tór**s d* pr*c*ss*m*nt* d* c*d*** *m nív**s técn*c*s, m*cr*s * r*s*m*d*s
+
+*sp*c**l*st* *m S*st*m*s d* B*ll*ng SKN2 (m*r/2015 à n*v/2018 - 3 *n*s * 8 m*s*s)
+•	R*p*rt*nd* ** G*r*nt* *p*r*c**n*l * *t**nd* c*m* r*c*rs*  *n s*t* n* *mpr*s* T*M Br*s*l * r*sp*nsáv*l p*r *m* *q**p* d* 6 c*l*b*r*d*r*s
+•	G*r*nc**m*nt* d* pr*d*çã* d* c*d*** d* B*ll*ng - BSCS pós-p*g*
+•	*xp*r*ênc** *m *mb**nt*s d* pr*d*çã* d* B*ll*ng * R*t*ng pós-p*g*
+•	Tr*t*m*nt* d* *xc*çõ*s * r*j**çõ*s d* pr*c*ss*m*nt*, tr*b*lh* d*s*nv*lv*d* n* Br*s*l T*l*c*m * T*M Br*s*l S/*
+•	C*nh*c*m*nt* d* r*gr* d* n*góc**s d*s s*st*m*s d* B*ll*ng * gr*nd* *t*l*z*çã* * d*s*nv*lv*m*nt* d* Sh*ll Scr*pts, pr*gr*m*çã* *v*nç*d* *m *r*cl* PL/SQL * SQL 
+•	*xp*r*ênc** *m R*ll-**t p*r* * pr*d*çã* d* n*v*s pr*j*t*s
+•	R**n*õ*s d* d*f*n*çã* d* *sc*p* d* n*v*s pr*j*t*s
+•	Tr**n*m*nt* * c*p*c*t*çã* *n s*t* d* *q**p* d* *p*r*d*r*s * *n*l*st*s Jr. 
+•	Cr**çã* * c*nf*g*r*çã* d* n*v*s c*d***s d* pr*c*ss*m*nt* B*tch
+•	D*mín** d* f*rr*m*nt* BMC C*NTR*L-M d* Sch*d*l* d* pr*c*ss*s p*r* * cr**çã* d* c*d***s B*tch d* pr*c*ss*m*nt* 
+•	*nál*s* * c*nf*g*r*çã* d* t*d* * c*d*** d* pr*c*ss*m*nt* c*m b*s* n* fl*x* d*s *nf*rm*çõ*s
+•	V*l*d*çõ*s pré * pós-pr*c*ss*m*nt*, n*t*f*c*çõ*s d* *rr* */** s*c*ss* * mét*d*s d* r*c*p*r*çã* d* pr*bl*m*s
+•	*çã* d* m*d*d*s c*nt*ng*nc***s * r*l*tór**s d* pr*c*ss*m*nt* d* c*d*** *m nív**s técn*c*s, m*cr*s * r*s*m*d*s
+•	
+
+*NS*T T*CN*L*GY | Sã* P**l*, SP
+*n*l*st* Sên**r d* **t*m*çã* (s*t/2014 * f*v/2015 - 6 m*s*s)
+•	R*p*rt*nd* ** Pr*pr**tár** * *t**nd* c*m* r*c*rs* *n s*t* n* *mpr*s* N*xt*l Br*s*l
+•	Cr**çã* d* fl*x*s d* pr*c*ss*s * j*bs, *t*l*z*nd*: *n*x Sh*ll Scr*pt, *r*cl* PL/SQL * BMC C*NTR*L-M
+
+T*M BR*S*L | S*nt* *ndré, SP
+*n*l*st* Sên**r d* S*st*m*s – *rr*c*d*çã* * C*br*nç* (S*P/RMC*) (J*n/2013 * F*v/2014 -8 m*s*s)
+•	*l*c*d* n* s*st*m* d* *rr*c*d*çã* * C*br*nç* (S*P/RMC*), r*sp*nsáv*l p*l*s s*st*m*s b*tchs q** r**l*z*v*m * c*nt*b*l*z*çã* d* p*g*m*nt*s d* f*t*r*s d cl**nt*s pós-p*g*
+•	D*s*nv*lv*m*nt* *v*nç*d* d* *n*x Sh*ll Scr*pts * **t*m*t*z*çã* d* pr*c*ss*s * c*d***s *m *mb**nt* C*ntr*l-M
+•	D*mín** d* f*rr*m*nt* BMC C*NTR*L-M d* Sch*d*l* d* pr*c*ss*s p*r* * cr**çã* d* c*d***s B*tch d* pr*c*ss*m*nt* 
+•	*pl*c*çã* d* M*d*nç*s *m *mb**nt*s pr*d*t*v*s - GM*D
+•	R**n*õ*s d* d*f*n*çã* d* *sc*p* d* n*v*s pr*j*t*s
+
+*n*l*st* Sên**r d* S*st*m*s - *sp*c**l*st* *m S*st*m*s d* B*ll*ng (d*z/2005 * J*n/2013 - 7 *n*s * 6 m*s*s)
+•	R*p*rt*nd* à G*rênc** d* F*t*r*m*nt* T.*. Pós P*g*, * r*sp*nsáv*l p*r *m* *q**p* d* 6 c*l*b*r*d*r*s
+•	G*stã* d* s*st*m* d* f*t*r*m*nt* pós p*g*s - B*ll*ng 
+•	D*s*nv*lv*m*nt* *v*nç*d* d* *n*x Sh*ll Scr*pts * **t*m*t*z*çã* d* pr*c*ss*s * c*d***s *m *mb**nt* C*ntr*l-M
+•	D*mín** d* f*rr*m*nt* BMC C*NTR*L-M d* Sch*d*l* d* pr*c*ss*s p*r* * cr**çã* d* c*d***s B*tch d* pr*c*ss*m*nt* 
+•	*pl*c*çã* d* M*d*nç*s *m *mb**nt*s pr*d*t*v*s - GM*D
+•	Tr**n*m*nt* * c*p*c*t*çã* *n s*t* d* *q**p* d* *p*r*d*r*s * *n*l*st*s Jr. 
+•	KP*´s
+•	c*mp*t*nc** n* s*st*nt*çã* (*n-g**ng)	
+•	
+•	
+•	
+
+*N*T*CH - T*CN*L*G** D* *NF*RM*ÇÃ* - CPM BR*X*S C*PG*M*N* D* BR*S*L | Br*síl**, DF
+**ts**rc*ng n* ár** d* T*cn*l*g** d* *nf*rm*çã*
+*n*l*st* Sên**r d* S*st*m*s - *sp*c**l*st* *m B.*. (*br/2005 * n*v/2005 - 8 m*s*s)
+•	R*p*rt*nd* ** G*r*nt* d* *p*r*çõ*s * *t**nd* *n s*t* n* *mpr*s* Br*s*l T*l*c*m
+•	G*r*nc**m*nt* * *p*r*çã* d* s*st*m* d* D*t* W*r* H**s* d* Br*s*l T*l*c*m
+•	Cr**çã*, *lt*r*çã* * m*n*t*nçã* d* Sh*ll Scr*pts, s*nt*nç*s SQL * PL/SQL, *t*l*z*nd* b*nc* d* d*d*s DB2
+
+Pr*j*t*s R*l*v*nt*s
+•	*m*ssã* d* *nd*c*d*r*s * r*l*tór**s d* *nál*s* p*r* t*m*d* d* d*c*sõ*s crít*c*s d* Br*s*l T*l*c*m
+•	Métr*c*s d* q**l*d*d* d* *t*nd*m*nt* d*s cl**nt*s *xt*rn*s
+•	Cr**çã* d* n*v*s pr*c*ss*s **t*m*t*z*d*s
+
+R*s*lt*d*s
+•	*ntr*g* d* r*l*tór** d* m*n**r* *nt*c*p*d*
+
+B**R*NG P**NT - CSC C*MP*T*R SC**NC* D* BR*S*L | Br*síl**, DF
+**ts**rc*ng *m T*, pr*st*çã* d* s*rv*ç*s n* ár** d* T*cn*l*g** d* *nf*rm*çã*
+C*ns*lt*r Sên**r - B*ll*ng (s*t/2004 * m*r/2005 - 7 m*s*s)
+•	R*p*rt*nd* ** G*r*nt* d* *p*r*çõ*s * *t**nd* *n s*t* n* *mpr*s* Br*s*l T*l*c*m
+•	G*r*nc**m*nt* * *p*r*çã* d* S*st*m* d* B*ll*ng G*n*v* – C*nv*rgys
+•	Cr**çã*, *lt*r*çã* * m*n*t*nçã* d* Sh*ll Scr*pts, s*nt*nç*s SQL * PL/SQL, *t*l*z*nd* b*nc* d* d*d*s *r*cl* 9* 
+
+Pr*j*t*s R*l*v*nt*s
+•	*mpl*m*nt*çã* d* n*v* s*st*m* d* t*r*f*çã* d* ch*m*d*s * f*t*r*m*nt*: R*t*ng +B*ll*ng, c*nv*rg*nt* - t*l*f*n** c*l*l*r m**s t*l*f*n** f*x*
+R*s*lt*d*s
+•	Cr*** pr*c*ss*s d* S*l*çã*/M*rc*çã* d* cl**nt*s p*r* * f*t*r*m*nt* s*l*t*v*, * q**l *t*m*z** * t*mp* d* pr*c*ss*m*nt*
+•	**t*m*t*z** pr*c*ss*s d* cl**n-*p d* *nc*ns*stênc**s d* c*d*str* d* cl**nt*s p*r* *v*t*r *rr* d* f*t*r*m*nt*, g*r*nt*nd* *ss*m p*rf*rm*nc* n* B*ll*ng
+•	**t*m*t*z** vár**s fl*x*s d* *nv** d* *rq**v*s.
+
+*X*CT*S S*FTW*R* | L*ndr*n*, PR
+S*l*çõ*s t*cn*lóg*c*s *m s*st*m* c*ntáb*l * s*st*m* *RP
+*dm*n*str*d*r d* B*nc*-d*-D*d*s (d*z/2003 * s*t/2004 - 10 m*s*s)
+•	R*p*rt*nd* ** G*r*nt* d* pr*j*t*s d* pr*j*t* *MPL*S/C*L*R*
+•	G*r*nc**m*nt* d*s b*nc*s-d*-d*d*s MS SQL S*rv*r 2000
+•	R*sp*nsáv*l *m cr**r *s CDs/P*c*t*s d* *nst*l*çã* d* *pl*c*çã* *MPL*S
+
+R*s*lt*d*s
+•	P*dr*n*z** * cr**çã* d* pr*c*d*r*s d* *xtr*çã* d* r*s*lts-s*ts
+•	M*lh*r** * pr*c*ss* d* *sp*lh*m*nt* d* b*s*-d*-d*d*s d* pr*d*çã* p*r* d*s*nv*lv*m*nt*. T*l pr*c*ss* l*v*v* *m t*rn* d* 5 h*r*s * c*ns*g** r*d*z*r p*r* 40 m*n*t*s
+•	Cr*** vár**s DTS (D*t* Tr*nsf*rm*t**n S*rv*c*s) p*r* *mp*rt*r d*d*s nã* p*dr*n*z*d*s * g*r*r R*l*tór**s. 
+•	**t*m*t*z** vár**s fl*x*s d* *nv** d* *rq**v*s.
+
+GL*B*L T*L*C*M – V*V* T*L*FÔN*C* | L*ndr*n*, PR
+*t**l líd*r n* m*rc*d* d* T*l*f*n** Móv*l + F*x* * b*nd*-l*rg*
+*n*l*st* Jún**r d* S*st*m*s (j*n/2001 * d*z/2003 - 2 *n*s * 7 m*s*s)
+•	R*p*rt*nd* ** G*r*nt* d* S*st*m*s Pós P*g*
+•	G*r*nc**m*nt* * *p*r*çã* d* S*st*m* d* B*ll*ng *md*cs 
+•	Cr**çã*, *lt*r*çã* * m*n*t*nçã* d* Sh*ll Scr*pts, s*nt*nç*s SQL * PL/SQL, *t*l*z*nd* b*nc* d* d*d*s *r*cl* 9*

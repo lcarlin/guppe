@@ -15,6 +15,7 @@ print(vetorGrande)
 try:
     with open(arquivoSaida, 'w') as saida:
         for atual in vetorGrande:
-            saida.write(str(atual).zfill(4) + " -> " + "{0:b}".format(atual).zfill(20) + '\n')
+            # saida.write(str(atual).zfill(4) + " -> " + "{0:b}".format(atual).zfill(20) + '\n')
+            saida.write(str(atual).zfill(4) + " -> " + ("{0:b}".format(atual)).rjust(12, ' ') + '\n')
 except FileNotFoundError:
     print('Arquivo não achado')

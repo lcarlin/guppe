@@ -21,7 +21,7 @@ try:
             counter += 1
         numLinhas = int(matrizACriar[0])
         numColunas = int(matrizACriar[1])
-        aZerar = int(matrizACriar[2])
+
         for j in range(0, int(numLinhas)):
             linhaTemp = []
             for k in range(0, numColunas):
@@ -29,13 +29,23 @@ try:
 
             matrizFinal.append(linhaTemp)
 
-        print(matrizFinal)
-        # fase 02 - AGora temos que zerar as posições
+        # com isso, temos a garantia de não estourar os limites da matriz
+        tamanhoMatrizFinal = len(matrizFinal)
+        aZerar = min(int(matrizACriar[2]),len(posicoesAZerar) )
         for i in range(0, aZerar):
             linha = int(posicoesAZerar[i][0])
             coluna = int(posicoesAZerar[i][1])
-            print(linha, coluna)
-            matrizFinal[linha][coluna] = 0
+            if linha <= tamanhoMatrizFinal :
+                tamanhoColunaAZerar = len(matrizFinal[linha])
+                if coluna <= tamanhoColunaAZerar :
+                   print(linha, coluna)
+                   matrizFinal[linha][coluna] = 0
+                else:
+                    print(f'Valores da linha {i + 1} arquivo de entrada fora do ALcance ')
+                    print(f' LInha :-> {linha} / Coluna :->{coluna}')
+            else:
+                print(f'Valores da linha {i+1} arquivo de entrada fora do ALcance ')
+                print(f' LInha :-> {linha} / Coluna :->{coluna}')
 
         # Fase 03 - Gravar linha-a-linha no arquivo de saida
         for k in range(0, len(matrizFinal)):

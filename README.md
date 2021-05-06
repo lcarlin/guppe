@@ -1,2 +1,2 @@
 # guppe
- Geek University Programação Python
+ Geek University Programação Python Essencial

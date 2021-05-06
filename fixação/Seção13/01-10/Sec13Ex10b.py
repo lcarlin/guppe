@@ -8,9 +8,7 @@ try:
         linhasUm = entradaUm.readlines()
 
         for linhas in linhasUm :
-            # regCidade = linhas.split('|')
-            # dictCidadesFull[regCidade[0]] = int(regCidade[1])
-            dictCidadesFull[linhas[0:40]] = int(linhas[41:])
+            dictCidadesFull[linhas[0:40].strip()] = int(linhas[41:])
 
         maiorCidade = max(dictCidadesFull, key=dictCidadesFull.get)
 

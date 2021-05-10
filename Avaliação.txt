@@ -1,11 +1,11 @@
-considerações sobre o curso de Python
-*	Poderia criar um roteiro antes de gravar
-*	Antes de gravar, testar tudo para  não ficar refazendo as coisas durante a gravação
-*	Melhorar a Edição, tirando periodos em qual não se fala nada
-*	cuidados com Vicios de Linguagem, como "Tá Ok "
+Considerações sobre o curso de Python
+*	Poderia criar um roteiro antes de gravar;
+*	Antes de gravar, testar tudo para não ficar refazendo as coisas OU corrigindo BUGs durante a gravação;
+*	Melhorar a Edição, tirando periodos em qual não se fala nada;
+*	cuidados com Vicios de Linguagem, como "Tá Ok ";
 
 
 No mais, adorei o curso, me abriu muitos horizontes e me fez relembrar teorias de programação que aprendi no inicio da Decada de 1990!
-A quantidade de Exercicios propostos é muito boa. realmente um grande diferencial e a dificuldade dos  exercicios vao progradindo de forma coerente.
-O Curso é Otimo e o instrutor (E toda a equipe da Geek University) está de parabéns
+A quantidade de Exercicios propostos é muito boa. Realmente um grande diferencial e a dificuldade dos  exercicios vao progradindo de forma coerente.
+O Curso é Otimo e o instrutor (E toda a equipe da Geek University) está de parabéns !
 Com certeza vou comprar outros cursos da Geek University, cursos de coisas que já aprendi, pois gostei muito da metodologia deles.

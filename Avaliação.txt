@@ -3,7 +3,7 @@ Considerações sobre o curso de Python
 *	Antes de gravar, testar tudo para não ficar refazendo as coisas OU corrigindo BUGs durante a gravação;
 *	Melhorar a Edição, tirando periodos em qual não se fala nada;
 *	cuidados com Vicios de Linguagem, como "Tá Ok ";
-
+*   Cuidado com os Erros de Português;
 
 No mais, adorei o curso, me abriu muitos horizontes e me fez relembrar teorias de programação que aprendi no inicio da Decada de 1990!
 A quantidade de Exercicios propostos é muito boa. Realmente um grande diferencial e a dificuldade dos  exercicios vao progradindo de forma coerente.

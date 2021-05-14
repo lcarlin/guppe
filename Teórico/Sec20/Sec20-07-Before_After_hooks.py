@@ -1,7 +1,11 @@
 """
 Seção 20: TEste com Python
-    02 - Por que Testar os Cóodigos ??? ?? ?
+    07 - Hooks
+    São os testes PPDF, ou seja a execução dos testes
 
+setup() -> é executado antres de cada metdo de Teste. é util paa criarmos instancias de objetos eoutros dados ;
+
+teardown() -> é executado ao final de cado metodo de testes. É uytil para excluir dados oi fechar conexões com o BD.
 ====================================================================================================================
 ====================================================================================================================
 ====================================================================================================================
@@ -17,6 +21,30 @@ Seção 20: TEste com Python
 ====================================================================================================================
 ====================================================================================================================
 """
+import unittest
+
+class ModuloTEste(unittest.TestCase):
+    def setUp(self):
+        # configurações do setup
+        pass
+
+    def test_primeiro(self):
+        #Setup vai rodar antes do test
+        # tearFDoewn() vcai rodar apos o test
+        pass
+
+    def test_segundo(self):
+        #Setup vai rodar antes do test
+        # tearFDoewn() vcai rodar apos o test
+        pass
+
+    def tearDown(self):
+        # configuracoes do TearDown()
+        pass
+
+
+
+
 
 def main():
     print('-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-')

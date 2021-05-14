@@ -1,10 +1,16 @@
 """
 Seção 20: TEste com Python
-    02 - Por que Testar os Cóodigos ??? ?? ?
-
+    04 - DcoTests
+O Seu proprio testes é a documentação do seu código/projetos
+Documentação para as funções que funcionam como testes
 ====================================================================================================================
+São testes que colocamos na DocString das funções/MEtodos  Python
+para se executar com DocTestes
+python -m doctest -v arquivo.py
 ====================================================================================================================
+As mensagens tem que ser exatamente o mesmo comportamento do consolo de Pythão
 ====================================================================================================================
+Dentro do DocTest o Python não reconhece Strings com aspas duplas, precisa ser com aspas simples
 ====================================================================================================================
 ====================================================================================================================
 ====================================================================================================================
@@ -17,6 +23,46 @@ Seção 20: TEste com Python
 ====================================================================================================================
 ====================================================================================================================
 """
+def soma (a, b):
+    """soma numeros a e b
+    >>> soma (1,2)
+    3
+
+    >>> soma (4,6)
+    10
+    """
+def duplicar(valores):
+    """ duplica os valores em uma lista
+    >>> duplicar([1,2,3,4])
+    [2,4,6,8]
+
+    >>> duplicar([])
+    []
+
+    >>> duplicar(['a','b','c'])
+    ['aa','bb','cc']
+
+    >>> duplicar([True, None])
+    Traceback (most recent call last):
+        ...
+    TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'
+    """
+
+    return [ 2 *  elemento for elemento in valores ]
+
+def fala_oi():
+    """fala OI
+    >>> fala_oi()
+    "oi"
+    """
+    return "oi"
+
+def verdade():
+    """retorna verdade
+    >>> verdade()
+    True
+    """
+    return True
 
 def main():
     print('-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-|-=-')

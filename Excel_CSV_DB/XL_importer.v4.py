@@ -15,9 +15,9 @@ import numpy as np
 
 def data_xPortator1(dataBaseFile, dir_out, file_Out, table_Name):
     connection = sqlite3.connect(dataBaseFile)
-    fileFullPath = dir_out + file_Out + 'FULL.xlsx'
+    fileFullPath = dir_out + file_Out + '.xlsx'
     print(f"Exporting {fileFullPath} to file ")
-    sqlStatment = "SELECT date(LG.DATA) as QUANDO' \
+    sqlStatment = "SELECT date(LG.DATA) as QUANDO \
       , LG.Tipo \
 	  , LG.DESCRICAO \
 	  , LG.Credito \
@@ -127,7 +127,7 @@ def main():
     conn.commit()
     conn.close()
 
-    data_xPortator1(Sqlite_database, Work_dir, General_Entries_table + '.FULL.', General_Entries_table)
+    data_xPortator1(Sqlite_database, Work_dir, General_Entries_table + '.FULL', General_Entries_table)
 
 
 if __name__ == '__main__':

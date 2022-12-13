@@ -13,14 +13,26 @@ import datetime
 import numpy as np
 
 
-def data_xPortator1(conexao, dir_out, file_Out, table_Name):
-    print(f' Exporting {table_Name} to file {dir_out} / {file_Out} ')
-    sqlStatment = "SELECT * FROM " + table_Name + " ORDER  BY DATA DESC; "
-    df = pd.read_sql_query(sqlStatment, conexao)
-    writer = pd.ExcelWriter(dir_out + '/' + 'file_Out')
-    df.to_excel(writer, sheet_name='bar')
-    writer.save()
+def data_xPortator1(dataBaseFile, dir_out, file_Out, table_Name):
+    connection = sqlite3.connect(dataBaseFile)
+    fileFullPath = dir_out + file_Out + 'FULL.xlsx'
+    print(f"Exporting {fileFullPath} to file ")
+    sqlStatment = "SELECT date(LG.DATA) as QUANDO' \
+      , LG.Tipo \
+	  , LG.DESCRICAO \
+	  , LG.Credito \
+	  , LG.DEBITO \
+	  , LG.Mes \
+	  , LG.Ano \
+	  , LG.MesAno \
+	  , LG.ORIGEM \
+ FROM LANCAMENTOS_GERAIS LG \
+ ORDER  BY DATA DESC ; "
+    df_out = pd.read_sql(sqlStatment, connection)
+    df_out.to_excel(fileFullPath,  sheet_name=table_Name, index=False)
 
+    print(f'Excel Sheet {table_Name} has been created successfully!')
+    connection.close()
 
 def data_correjeitor(conexao):
     print(f'Normalizing data on LANCAMENTOS_GERAIS Table ...  ')
@@ -75,14 +87,14 @@ def main():
     # Creating a cursor object using the cursor() method
     table_truncator(conn.cursor(), General_Entries_table)
 
-    print("Executando a carga das tabelas ")
+    print("Running Loader of the Sheets into database Tables ... .. .  ")
     for i, infos in sheets_dataframe.iterrows():
         table_To_Load = infos.TABLE_NAME
         isAccounting = infos.ACCOUNTING
         isCleanable = infos.CLEANABLE
         isLoadeable = infos.LOADABLE
 
-        print(f'Passo: {i} ; Tabelas: {table_To_Load} ')
+        print(f'Step :->  { i + 1 } ; Table (Sheet) :-> {table_To_Load} ')
         DataFrame = pd.read_excel(excel_File, sheet_name=table_To_Load)
         if 'X' == isLoadeable:
             if 'X' == isAccounting and 'X' == isCleanable:
@@ -113,12 +125,9 @@ def main():
     #    if 'X' == isAccounting:
     data_correjeitor(conn.cursor())
     conn.commit()
-
-    data_xPortator1(conn.cursor(), Work_dir, General_Entries_table + '.FULL.', General_Entries_table)
-
     conn.close()
 
-
+    data_xPortator1(Sqlite_database, Work_dir, General_Entries_table + '.FULL.', General_Entries_table)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 # -*- coding: ansi -*-
 # import sqlite3
-import pandas as pd
+import pandas as pd 
 
 # cbanco de dados.
 #con = sqlite3.connect('Lancamentos_Gerais.FULL.db')

@@ -1,11 +1,28 @@
 # -*-encoding:ansi-*-
-
 """
+Dependencies: 
 pip install pandas
 pip install xlrd
 pip install openpyxl
 pip install sqlalchemy
 pip install numpy
+####################################################################################
+# Author  : Carlin, Luiz A. .'. 
+# e-mail  : luiz.carlin@gmail.com
+# Date    : 13-DEC-2022 
+# purpose :  Import Sheets from Excel Workbook into SQlite3 Tables
+#
+####################################################################################
+# Version control
+# Date    #    What     #   Who
+#
+####################################################################################
+# Todo List
+# Separar o Loader em uma função especifica
+# criar tabelas Pivots Historicos
+# Gerar Export de tabelas Pivots Históricos
+# Gerar exports deiversos 
+####################################################################################
 
 """
 

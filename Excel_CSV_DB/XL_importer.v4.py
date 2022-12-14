@@ -1,3 +1,5 @@
+# -*-encoding:ansi-*-
+
 """
 pip install pandas
 pip install xlrd
@@ -15,31 +17,32 @@ import numpy as np
 
 def data_xPortator1(dataBaseFile, dir_out, file_Out, table_Name):
     connection = sqlite3.connect(dataBaseFile)
-    fileFullPath = dir_out + file_Out + '.xlsx'
+    fileFullPath = dir_out + file_Out + 'v2.xlsx'
     print(f"Exporting {fileFullPath} to file ")
-    sqlStatment = "SELECT date(LG.DATA) as QUANDO \
-      , LG.Tipo \
-	  , LG.DESCRICAO \
-	  , LG.Credito \
-	  , LG.DEBITO \
-	  , LG.Mes \
-	  , LG.Ano \
-	  , LG.MesAno \
-	  , LG.ORIGEM \
- FROM LANCAMENTOS_GERAIS LG \
- ORDER  BY DATA DESC ; "
+    sqlStatment = "SELECT substr (LG.DATA, 9,2 ) || '-' || substr (LG.DATA, 6,2 ) || '-' || substr(LG.DATA, 1,4)  AS Quando " \
+                  ", LG.Tipo as 'Tipo' " \
+                  ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
+                  ", replace (LG.Credito, '.', ',') as 'Credito' "\
+                  ", replace (LG.DEBITO, '.', ',') as 'Debito' "\
+                  ", ''''||cast (mes as text) as 'Mes' "\
+                  ", ''''||cast (ano as text) as 'Ano' "\
+                  ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
+                  ", LG.ORIGEM  as Origem "\
+            " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
-    df_out.to_excel(fileFullPath,  sheet_name=table_Name, index=False)
+    df_out.to_excel(fileFullPath,  sheet_name=table_Name, index=False )
+    df_out.to_csv(dir_out + file_Out + 'v2.csv', sep=';', encoding='ansi')
 
     print(f'Excel Sheet {table_Name} has been created successfully!')
     connection.close()
+
 
 def data_correjeitor(conexao):
     print(f'Normalizing data on LANCAMENTOS_GERAIS Table ...  ')
     cursor = conexao
     Data_Normalizer_1 = "Update LANCAMENTOS_GERAIS \
        set Mes = strftime ('%m',data )  \
-       , Ano = strftime ('%m',data )  \
+       , Ano = strftime ('%Y',data )  \
        , mesAno = strftime ('%m',data ) ||'/'||strftime ('%Y',data ); "
 
     Data_Normalizer_2 = "update LANCAMENTOS_GERAIS set credito = 0 where credito is null; "
@@ -94,9 +97,10 @@ def main():
         isCleanable = infos.CLEANABLE
         isLoadeable = infos.LOADABLE
 
-        print(f'Step :->  { i + 1 } ; Table (Sheet) :-> {table_To_Load} ')
-        DataFrame = pd.read_excel(excel_File, sheet_name=table_To_Load)
+        print(f'Step :->  {i + 1} ; Table (Sheet) :-> {table_To_Load} ')
+
         if 'X' == isLoadeable:
+            DataFrame = pd.read_excel(excel_File, sheet_name=table_To_Load)
             if 'X' == isAccounting and 'X' == isCleanable:
                 ## limpa registros com os Tipos Nulos
                 DataFrame['TIPO'].replace('', np.nan, inplace=True)

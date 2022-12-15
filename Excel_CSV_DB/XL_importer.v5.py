@@ -89,15 +89,15 @@ def data_loader(conn, WorkBooks, General_Entries_table, Guindind_Sheet, excel_Fi
 
     print("Running Loader of the Sheets into database Tables ... .. .  ")
     for i, infos in sheets_dataframe.iterrows():
-        table_To_Load = infos.TABLE_NAME
+        table_to_load = infos.TABLE_NAME
         isAccounting = infos.ACCOUNTING
         isCleanable = infos.CLEANABLE
         isLoadeable = infos.LOADABLE
 
-        print(f'Step :->  {i + 1} ; Table (Sheet) :-> {table_To_Load} ')
+        print(f'Step :->  {i + 1} ; Table (Sheet) :-> {table_to_load} ')
 
         if 'X' == isLoadeable:
-            DataFrame = pd.read_excel(excel_File, sheet_name=table_To_Load)
+            DataFrame = pd.read_excel(excel_File, sheet_name=table_to_load)
             if 'X' == isAccounting and 'X' == isCleanable:
                 ## limpa registros com os Tipos Nulos
                 DataFrame['TIPO'].replace('', np.nan, inplace=True)
@@ -114,13 +114,13 @@ def data_loader(conn, WorkBooks, General_Entries_table, Guindind_Sheet, excel_Fi
                 GeneralEntriesDF['Mes'] = 'MM'
                 GeneralEntriesDF['Ano'] = 'YYYY'
                 GeneralEntriesDF['MesAno'] = 'MM/YYYY'
-                GeneralEntriesDF['Origem'] = table_To_Load
+                GeneralEntriesDF['Origem'] = table_to_load
 
                 # Ja joga os dados limpos na lançamentos gerais
                 GeneralEntriesDF.to_sql(General_Entries_table, conn, index=False, if_exists="append")
 
             ## grava a tabela (UNITÁRIA) do DataFrame do BD
-            DataFrame.to_sql(table_To_Load, conn, index=False, if_exists="replace")
+            DataFrame.to_sql(table_to_load, conn, index=False, if_exists="replace")
             conn.commit()
 
 
@@ -131,24 +131,43 @@ def create_pivot_history_anual():
 def create_pivot_history_full(dataBaseFile, typesTable, EntriesTable):
     print('Creating pivot Table for summarized history ... .. . ')
     connection = sqlite3.connect(dataBaseFile)
+    ref_anterior = 'MM/YYYY'
+    out_table = 'HistoricoGeral'
     sqlStatmentTypes = 'SELECT Código as COD, Descrição as DESC FROM TiposLancamentos ;'
-    sqlStatmentSummary = 'select MesAno, TIPO, sum(Debito) as Debitos FROM LANCAMENTOS_GERAIS GROUP BY MesAno, TIPO ' \
+    sqlStatmentSummary = 'select MesAno as Referencia, TIPO, sum(Debito) as DEBITOS FROM LANCAMENTOS_GERAIS GROUP BY MesAno, TIPO ' \
                          'order by Ano , Mes  ;'
 
     df_types = pd.read_sql(sqlStatmentTypes, connection)
     df_summary = pd.read_sql(sqlStatmentSummary, connection)
+    dict_hist_base = {'Referencia': '99/9999'}
+    lista_header = ['Referencia']
 
     for i, DADOS in df_types.iterrows():
-        print(f'i {i}')
-        print(f'DADOS {DADOS}')
-        print(f'DADOS {DADOS.COD}')
-        print(f'CODIGO {DADOS.TIPO}')
-        print(f'DESC {DADOS}')
-        print()
+        dict_hist_base.update({DADOS.DESC: 0.00})
+        lista_header.append(DADOS.DESC)
 
-    # print (df_types)
-    # print(df_summary)
-    pass
+    lista_full = []
+    # current_dict = dict_hist_base.copy()
+
+    for j, Fetcher in df_summary.iterrows():
+        ## BUG - mnão esta saindo o ultimo Mes/Ano
+        print(f'MesAno {Fetcher.Referencia} ; Tipo {Fetcher.TIPO}; Valor {Fetcher.DEBITOS}')
+        if ref_anterior == Fetcher.Referencia:
+            current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
+        else:
+            if ref_anterior != 'MM/YYYY':
+                lista_full.append(current_dict)
+            ref_anterior = Fetcher.Referencia
+            current_dict = dict_hist_base.copy()
+            current_dict['Referencia'] = Fetcher.Referencia
+
+    lista_full.append(current_dict)
+
+    ## grava a tabela (UNITÁRIA) do DataFrame do BD
+    print(lista_full)
+    data_to_write = pd.DataFrame(lista_full)
+    data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
+    connection.commit()
 
 
 def data_xPortator2(Sqlite_database, Work_dir, param, General_Entries_table):

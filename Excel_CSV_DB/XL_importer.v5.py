@@ -1,4 +1,3 @@
-# -*-encoding:ansi-*-
 """
 Dependencies: 
 pip install pandas
@@ -18,7 +17,7 @@ pip install numpy
 #
 ####################################################################################
 # Todo List
-# Separar o Loader em uma função especifica
+#
 # criar tabelas Pivots Historicos
 # Gerar Export de tabelas Pivots Históricos
 # Gerar exports deiversos 
@@ -34,23 +33,23 @@ import numpy as np
 
 def data_xPortator1(dataBaseFile, dir_out, file_Out, table_Name):
     connection = sqlite3.connect(dataBaseFile)
-    fileFullPath = dir_out + file_Out + 'v2.xlsx'
-    print(f"Exporting {fileFullPath} to file ")
+    fileFullPath = dir_out + file_Out + '.v2'
+    print(f"Exporting {fileFullPath} to file(s) ")
     sqlStatment = "SELECT substr (LG.DATA, 9,2 ) || '-' || substr (LG.DATA, 6,2 ) || '-' || substr(LG.DATA, 1,4)  AS Quando " \
                   ", LG.Tipo as 'Tipo' " \
                   ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
-                  ", replace (LG.Credito, '.', ',') as 'Credito' "\
-                  ", replace (LG.DEBITO, '.', ',') as 'Debito' "\
-                  ", ''''||cast (mes as text) as 'Mes' "\
-                  ", ''''||cast (ano as text) as 'Ano' "\
+                  ", replace (LG.Credito, '.', ',') as 'Credito' " \
+                  ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
+                  ", ''''||cast (mes as text) as 'Mes' " \
+                  ", ''''||cast (ano as text) as 'Ano' " \
                   ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
-                  ", LG.ORIGEM  as Origem "\
-            " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; "
+                  ", LG.ORIGEM  as Origem " \
+                  " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
-    df_out.to_excel(fileFullPath,  sheet_name=table_Name, index=False )
-    df_out.to_csv(dir_out + file_Out + 'v2.csv', sep=';', encoding='ansi')
+    df_out.to_excel(fileFullPath + '.xlsx', sheet_name=table_Name, index=False)
+    df_out.to_csv(fileFullPath + '.csv', sep=';', index=False , encoding='ansi')
 
-    print(f'Excel Sheet {table_Name} has been created successfully!')
+    print(f'Excel export(s) for table "{table_Name}" has been created successfully!')
     connection.close()
 
 
@@ -66,7 +65,12 @@ def data_correjeitor(conexao):
     listaAcoes.append("update LANCAMENTOS_GERAIS set credito = 0 where credito is null; ")
     listaAcoes.append("update LANCAMENTOS_GERAIS set debito = 0 where debito is null ;")
     listaAcoes.append("Delete from TiposLancamentos WHERE ( Código IS NULL or Descrição IS NULL) ;")
-    for i in len(listaAcoes):
+
+    listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'∴', '.''.')  ;")
+    listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'ś', '''s')  ;")
+    #listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'', '''s')  ;")
+
+    for i in range(0, len(listaAcoes)):
         cursor.execute(listaAcoes[i])
 
 
@@ -76,31 +80,10 @@ def table_truncator(conexao, table_name):
     cursor.execute("DROP TABLE " + table_name)
     print(f"Table {table_name} dropped... ")
 
-def main():
-    # Environment / Variables
-    # current date and time
-    currentDT = datetime.datetime.now()
-    now = currentDT.strftime("%Y%m%d.%H%M%S")
 
-    Work_dir = 'G:/Meu Drive/PDW/'
-    excel_File = Work_dir + 'PDW.xls'
-    Sqlite_database = Work_dir + 'PDW.' + now + '.db'
-    Sqlite_database = Work_dir + 'PDW.db'
-    Guindind_Sheet = 'GUIDING'
-
-    # Debugging
-    print("===============================================")
-    print(excel_File)
-    print(Sqlite_database)
-    print(Guindind_Sheet)
-    print("===============================================")
-
-    conn = sqlite3.connect(Sqlite_database)
-    WorkBooks = pd.ExcelFile(excel_File)
+def data_loader(conn, WorkBooks, General_Entries_table, Guindind_Sheet, excel_File):
     sheets_dataframe = WorkBooks.parse(sheet_name=Guindind_Sheet)
     # print (sheets_dataframe)
-    General_Entries_table = 'LANCAMENTOS_GERAIS'
-
     # Creating a cursor object using the cursor() method
     table_truncator(conn.cursor(), General_Entries_table)
 
@@ -140,12 +123,54 @@ def main():
             DataFrame.to_sql(table_To_Load, conn, index=False, if_exists="replace")
             conn.commit()
 
-    #    if 'X' == isAccounting:
-    data_correjeitor(conn.cursor())
-    conn.commit()
-    conn.close()
+
+def create_pivot_history_anual():
+    pass
+
+def create_pivot_history_full():
+    pass
+
+
+def data_xPortator2(Sqlite_database, Work_dir, param, General_Entries_table):
+    pass
+
+
+def main():
+    # Environment / Variables
+    # current date and time
+    currentDT = datetime.datetime.now()
+    now = currentDT.strftime("%Y%m%d.%H%M%S")
+
+    Work_dir = 'G:/Meu Drive/PDW/'
+    input_file = Work_dir + 'PDW.xls'
+    Sqlite_database = Work_dir + 'PDW.' + now + '.db'
+    Sqlite_database = Work_dir + 'PDW.db'
+    Guindind_Sheet = 'GUIDING'
+    General_Entries_table = 'LANCAMENTOS_GERAIS'
+
+    # Debugging
+    print("===============================================")
+    print(input_file)
+    print(Sqlite_database)
+    print(Guindind_Sheet)
+    print("===============================================")
+
+    dataBase = sqlite3.connect(Sqlite_database)
+    WorkBooks = pd.ExcelFile(input_file)
+
+    data_loader(dataBase, WorkBooks, General_Entries_table, Guindind_Sheet, input_file)
+
+    data_correjeitor(dataBase.cursor())
+    dataBase.commit()
+    dataBase.close()
 
     data_xPortator1(Sqlite_database, Work_dir, General_Entries_table + '.FULL', General_Entries_table)
+
+    create_pivot_history_full()
+
+    create_pivot_history_anual()
+
+    data_xPortator2(Sqlite_database, Work_dir, General_Entries_table + '.FULL', General_Entries_table)
 
 
 if __name__ == '__main__':

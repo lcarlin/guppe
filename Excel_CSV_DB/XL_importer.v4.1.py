@@ -102,7 +102,7 @@ def main():
     General_Entries_table = 'LANCAMENTOS_GERAIS'
 
     # Creating a cursor object using the cursor() method
-    table_truncator(conn.cursor(), General_Entries_table)
+    # table_truncator(conn.cursor(), General_Entries_table)
 
     print("Running Loader of the Sheets into database Tables ... .. .  ")
     for i, infos in sheets_dataframe.iterrows():

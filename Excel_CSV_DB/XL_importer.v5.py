@@ -47,7 +47,7 @@ def data_xPortator1(dataBaseFile, dir_out, file_Out, table_Name):
                   " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
     df_out.to_excel(fileFullPath + '.xlsx', sheet_name=table_Name, index=False)
-    df_out.to_csv(fileFullPath + '.csv', sep=';', index=False , encoding='ansi')
+    df_out.to_csv(fileFullPath + '.csv', sep=';', index=False, encoding='ansi')
 
     print(f'Excel export(s) for table "{table_Name}" has been created successfully!')
     connection.close()
@@ -68,7 +68,7 @@ def data_correjeitor(conexao):
 
     listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'∴', '.''.')  ;")
     listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'ś', '''s')  ;")
-    #listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'', '''s')  ;")
+    # listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'', '''s')  ;")
 
     for i in range(0, len(listaAcoes)):
         cursor.execute(listaAcoes[i])
@@ -127,11 +127,32 @@ def data_loader(conn, WorkBooks, General_Entries_table, Guindind_Sheet, excel_Fi
 def create_pivot_history_anual():
     pass
 
-def create_pivot_history_full():
+
+def create_pivot_history_full(dataBaseFile, typesTable, EntriesTable):
+    print('Creating pivot Table for summarized history ... .. . ')
+    connection = sqlite3.connect(dataBaseFile)
+    sqlStatmentTypes = 'SELECT Código as COD, Descrição as DESC FROM TiposLancamentos ;'
+    sqlStatmentSummary = 'select MesAno, TIPO, sum(Debito) as Debitos FROM LANCAMENTOS_GERAIS GROUP BY MesAno, TIPO ' \
+                         'order by Ano , Mes  ;'
+
+    df_types = pd.read_sql(sqlStatmentTypes, connection)
+    df_summary = pd.read_sql(sqlStatmentSummary, connection)
+
+    for i, DADOS in df_types.iterrows():
+        print(f'i {i}')
+        print(f'DADOS {DADOS}')
+        print(f'DADOS {DADOS.COD}')
+        print(f'CODIGO {DADOS.TIPO}')
+        print(f'DESC {DADOS}')
+        print()
+
+    # print (df_types)
+    # print(df_summary)
     pass
 
 
 def data_xPortator2(Sqlite_database, Work_dir, param, General_Entries_table):
+    print('Creating pivot Table for Anual summarized history ... .. . ')
     pass
 
 
@@ -146,6 +167,7 @@ def main():
     Sqlite_database = Work_dir + 'PDW.' + now + '.db'
     Sqlite_database = Work_dir + 'PDW.db'
     Guindind_Sheet = 'GUIDING'
+    types_of_entries = 'TiposLancamentos'
     General_Entries_table = 'LANCAMENTOS_GERAIS'
 
     # Debugging
@@ -158,6 +180,7 @@ def main():
     dataBase = sqlite3.connect(Sqlite_database)
     WorkBooks = pd.ExcelFile(input_file)
 
+    """
     data_loader(dataBase, WorkBooks, General_Entries_table, Guindind_Sheet, input_file)
 
     data_correjeitor(dataBase.cursor())
@@ -165,8 +188,9 @@ def main():
     dataBase.close()
 
     data_xPortator1(Sqlite_database, Work_dir, General_Entries_table + '.FULL', General_Entries_table)
+    """
 
-    create_pivot_history_full()
+    create_pivot_history_full(Sqlite_database, types_of_entries, General_Entries_table)
 
     create_pivot_history_anual()
 

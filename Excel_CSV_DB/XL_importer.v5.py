@@ -17,10 +17,13 @@ pip install numpy
 #
 ####################################################################################
 # Todo List
+# Pput Threads on Loader process
+# FIX output messages
+# command line parameters ( directories, input file name)
+# GUI Interface
+# Configuratin file ?
 #
-# criar tabelas Pivots Historicos
-# Gerar Export de tabelas Pivots Históricos
-# Gerar exports deiversos 
+#
 ####################################################################################
 
 """
@@ -33,8 +36,8 @@ import numpy as np
 
 def data_xPortator1(dataBaseFile, dir_out, file_Out, table_Name):
     connection = sqlite3.connect(dataBaseFile)
-    fileFullPath = dir_out + file_Out + '.v2'
-    print(f"Exporting {fileFullPath} to file(s) ")
+    file_full_path = dir_out + file_Out + '.v2'
+    print(f"Exporting {file_full_path} to file(s) ")
     sqlStatment = "SELECT substr (LG.DATA, 9,2 ) || '-' || substr (LG.DATA, 6,2 ) || '-' || substr(LG.DATA, 1,4)  AS Quando " \
                   ", LG.Tipo as 'Tipo' " \
                   ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
@@ -46,32 +49,57 @@ def data_xPortator1(dataBaseFile, dir_out, file_Out, table_Name):
                   ", LG.ORIGEM  as Origem " \
                   " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
-    df_out.to_excel(fileFullPath + '.xlsx', sheet_name=table_Name, index=False)
-    df_out.to_csv(fileFullPath + '.csv', sep=';', index=False, encoding='ansi')
+    df_out.to_excel(file_full_path + '.xlsx', sheet_name=table_Name, index=False)
+    df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='ansi')
 
     print(f'Excel export(s) for table "{table_Name}" has been created successfully!')
+    connection.close()
+
+def data_xPortator2(Sqlite_database, dir_out, file_name):
+    print('Exporting Summarized data ... .. .  ')
+    connection = sqlite3.connect(Sqlite_database)
+    file_full_path = dir_out + file_name + '.v2.' + 'xlsx'
+    lista_consultas = []
+
+    lista_consultas.append(["select * from Historicogeral where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
+                               ,"HistoricoGeral12Meses"])
+    lista_consultas.append(["select * from HistoricoGeral;", "HistoricoGeral"])
+    lista_consultas.append(["select * from HistoricoAnual;", "HistoricoAnual"])
+    lista_consultas.append(["select tipo as Categoria , sum(debito) as Valor , count(1) as QTD from LANCAMENTOS_GERAIS" \
+                            " where Data between date('now','-1 month')  and date('now') and debito > 0 group by tipo "\
+                            " order by 2 desc;", "Ultimos30Dias"])
+
+    for k in range(0, len(lista_consultas)):
+        consulta = lista_consultas[k]
+        sql_statment = consulta[0]
+        excel_sheet = consulta[1]
+        file_full_path = dir_out + excel_sheet + '.v2.' + 'xlsx'
+        print(f"Exporting {file_full_path} to file(s) ")
+        df_out = pd.read_sql(sql_statment, connection)
+        df_out.to_excel(file_full_path , sheet_name=excel_sheet, index=False)
+
     connection.close()
 
 
 def data_correjeitor(conexao):
     print(f'Normalizing data on LANCAMENTOS_GERAIS Table ...  ')
     cursor = conexao
-    listaAcoes = []
-    listaAcoes.append("Update LANCAMENTOS_GERAIS \
+    lista_acoes = []
+    lista_acoes.append("Update LANCAMENTOS_GERAIS \
        set Mes = strftime ('%m',data )  \
        , Ano = strftime ('%Y',data )  \
        , mesAno = strftime ('%m',data ) ||'/'||strftime ('%Y',data ); ")
 
-    listaAcoes.append("update LANCAMENTOS_GERAIS set credito = 0 where credito is null; ")
-    listaAcoes.append("update LANCAMENTOS_GERAIS set debito = 0 where debito is null ;")
-    listaAcoes.append("Delete from TiposLancamentos WHERE ( Código IS NULL or Descrição IS NULL) ;")
+    lista_acoes.append("update LANCAMENTOS_GERAIS set credito = 0 where credito is null; ")
+    lista_acoes.append("update LANCAMENTOS_GERAIS set debito = 0 where debito is null ;")
+    lista_acoes.append("Delete from TiposLancamentos WHERE ( Código IS NULL or Descrição IS NULL) ;")
 
-    listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'∴', '.''.')  ;")
-    listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'ś', '''s')  ;")
+    lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'∴', '.''.')  ;")
+    lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'ś', '''s')  ;")
     # listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'', '''s')  ;")
 
-    for i in range(0, len(listaAcoes)):
-        cursor.execute(listaAcoes[i])
+    for i in range(0, len(lista_acoes)):
+        cursor.execute(lista_acoes[i])
 
 
 def table_truncator(conexao, table_name):
@@ -124,8 +152,44 @@ def data_loader(conn, WorkBooks, General_Entries_table, Guindind_Sheet, excel_Fi
             conn.commit()
 
 
-def create_pivot_history_anual():
-    pass
+def create_pivot_history_anual(dataBaseFile, typesTable, EntriesTable):
+    print('Creating pivot Table for Anual summarized history ... .. . ')
+    connection = sqlite3.connect(dataBaseFile)
+    ref_anterior = 'MM/YYYY'
+    out_table = 'HistoricoAnual'
+    sqlStatmentTypes = 'SELECT Código as COD, Descrição as DESC FROM TiposLancamentos ;'
+    sqlStatmentSummary = 'select Ano as Referencia, TIPO, sum(Debito) as DEBITOS FROM LANCAMENTOS_GERAIS GROUP BY Ano, TIPO ' \
+                         'order by Ano ;'
+
+    df_types = pd.read_sql(sqlStatmentTypes, connection)
+    df_summary = pd.read_sql(sqlStatmentSummary, connection)
+    dict_hist_base = {'Referencia': '9999'}
+    lista_header = ['Referencia']
+
+    for i, DADOS in df_types.iterrows():
+        dict_hist_base.update({DADOS.DESC: 0.00})
+        lista_header.append(DADOS.DESC)
+
+    lista_full = []
+    current_dict = dict_hist_base.copy()
+
+    for j, Fetcher in df_summary.iterrows():
+        # print(f'Ano {Fetcher.Referencia} ; Tipo {Fetcher.TIPO}; Valor {Fetcher.DEBITOS}')
+        if ref_anterior == Fetcher.Referencia:
+            current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
+        else:
+            if ref_anterior != 'YYYY':
+                lista_full.append(current_dict)
+            ref_anterior = Fetcher.Referencia
+            current_dict = dict_hist_base.copy()
+            current_dict['Referencia'] = Fetcher.Referencia
+
+    lista_full.append(current_dict)
+
+    data_to_write = pd.DataFrame(lista_full)
+    data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
+    connection.commit()
+    connection.close()
 
 
 def create_pivot_history_full(dataBaseFile, typesTable, EntriesTable):
@@ -133,12 +197,12 @@ def create_pivot_history_full(dataBaseFile, typesTable, EntriesTable):
     connection = sqlite3.connect(dataBaseFile)
     ref_anterior = 'MM/YYYY'
     out_table = 'HistoricoGeral'
-    sqlStatmentTypes = 'SELECT Código as COD, Descrição as DESC FROM TiposLancamentos ;'
-    sqlStatmentSummary = 'select MesAno as Referencia, TIPO, sum(Debito) as DEBITOS FROM LANCAMENTOS_GERAIS GROUP BY MesAno, TIPO ' \
-                         'order by Ano , Mes  ;'
+    sql_statment_types = 'SELECT Código as COD, Descrição as DESC FROM TiposLancamentos ;'
+    sql_statment_summary = 'select MesAno as Referencia, TIPO, sum(Debito) as DEBITOS FROM LANCAMENTOS_GERAIS GROUP BY MesAno, TIPO ' \
+                           'order by Ano , Mes  ;'
 
-    df_types = pd.read_sql(sqlStatmentTypes, connection)
-    df_summary = pd.read_sql(sqlStatmentSummary, connection)
+    df_types = pd.read_sql(sql_statment_types, connection)
+    df_summary = pd.read_sql(sql_statment_summary, connection)
     dict_hist_base = {'Referencia': '99/9999'}
     lista_header = ['Referencia']
 
@@ -147,11 +211,9 @@ def create_pivot_history_full(dataBaseFile, typesTable, EntriesTable):
         lista_header.append(DADOS.DESC)
 
     lista_full = []
-    # current_dict = dict_hist_base.copy()
+    current_dict = dict_hist_base.copy()
 
     for j, Fetcher in df_summary.iterrows():
-        ## BUG - mnão esta saindo o ultimo Mes/Ano
-        print(f'MesAno {Fetcher.Referencia} ; Tipo {Fetcher.TIPO}; Valor {Fetcher.DEBITOS}')
         if ref_anterior == Fetcher.Referencia:
             current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
         else:
@@ -162,58 +224,53 @@ def create_pivot_history_full(dataBaseFile, typesTable, EntriesTable):
             current_dict['Referencia'] = Fetcher.Referencia
 
     lista_full.append(current_dict)
-
-    ## grava a tabela (UNITÁRIA) do DataFrame do BD
-    print(lista_full)
     data_to_write = pd.DataFrame(lista_full)
     data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
     connection.commit()
-
-
-def data_xPortator2(Sqlite_database, Work_dir, param, General_Entries_table):
-    print('Creating pivot Table for Anual summarized history ... .. . ')
-    pass
+    connection.close()
 
 
 def main():
     # Environment / Variables
     # current date and time
-    currentDT = datetime.datetime.now()
-    now = currentDT.strftime("%Y%m%d.%H%M%S")
+    current_dt = datetime.datetime.now()
+    now = current_dt.strftime("%Y%m%d.%H%M%S")
 
-    Work_dir = 'G:/Meu Drive/PDW/'
-    input_file = Work_dir + 'PDW.xls'
-    Sqlite_database = Work_dir + 'PDW.' + now + '.db'
-    Sqlite_database = Work_dir + 'PDW.db'
-    Guindind_Sheet = 'GUIDING'
+    work_dir = 'G:/Meu Drive/PDW/'
+    input_file = work_dir + 'PDW.xls'
+    output_name = 'PDW_reports'
+    sqlite_database = work_dir + 'PDW.' + now + '.db'
+    sqlite_database = work_dir + 'PDW.db'
+    guindind_sheet = 'GUIDING'
     types_of_entries = 'TiposLancamentos'
-    General_Entries_table = 'LANCAMENTOS_GERAIS'
+    general_entries_table = 'LANCAMENTOS_GERAIS'
 
     # Debugging
     print("===============================================")
-    print(input_file)
-    print(Sqlite_database)
-    print(Guindind_Sheet)
+    print(f'Excel Sheet  Input file :-> {input_file}' )
+    print(f'Output SQLite3 Database :-> {sqlite_database}')
+    print(f'Guidind Excel Sheet     :-> {guindind_sheet}')
     print("===============================================")
+    print("Personal DataWare House Process Starting")
 
-    dataBase = sqlite3.connect(Sqlite_database)
-    WorkBooks = pd.ExcelFile(input_file)
+    data_base = sqlite3.connect(sqlite_database)
+    work_books = pd.ExcelFile(input_file)
 
-    """
-    data_loader(dataBase, WorkBooks, General_Entries_table, Guindind_Sheet, input_file)
+    data_loader(data_base, work_books, general_entries_table, guindind_sheet, input_file)
+    data_correjeitor(data_base.cursor())
+    data_base.commit()
+    data_base.close()
 
-    data_correjeitor(dataBase.cursor())
-    dataBase.commit()
-    dataBase.close()
+    create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
 
-    data_xPortator1(Sqlite_database, Work_dir, General_Entries_table + '.FULL', General_Entries_table)
-    """
+    create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table)
 
-    create_pivot_history_full(Sqlite_database, types_of_entries, General_Entries_table)
+    data_xPortator1(sqlite_database, work_dir, general_entries_table + '.FULL', general_entries_table)
 
-    create_pivot_history_anual()
+    data_xPortator2(sqlite_database, work_dir, output_name)
 
-    data_xPortator2(Sqlite_database, Work_dir, General_Entries_table + '.FULL', General_Entries_table)
+    print("Personal DataWare House processes ended")
+    print("===============================================")
 
 
 if __name__ == '__main__':

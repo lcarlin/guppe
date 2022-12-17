@@ -96,7 +96,7 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
 
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + 'xlsx'
-            message = f'   . .. ... Step: {k + 1 } :-> Exporting {file_full_path} to file(s) '
+            message = f'   . .. ... Step:-> {k + 1 } :-> Exporting {file_full_path} to file(s) '
             df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False)
 
         print(message)
@@ -160,7 +160,7 @@ def data_loader(data_base,  General_Entries_table, Guindind_Sheet, excel_File):
         isCleanable = infos.CLEANABLE
         isLoadeable = infos.LOADABLE
 
-        print(f'Step :->  {i + 1} ; Table (Sheet) :-> {table_to_load} ')
+        print(f'   . .. ... Step:->  {i + 1} ; Table (Sheet) :-> {table_to_load} ')
 
         if 'X' == isLoadeable:
             DataFrame = pd.read_excel(excel_File, sheet_name=table_to_load)

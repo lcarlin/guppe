@@ -41,6 +41,7 @@ def general_entries_CVS_exportator(dataBaseFile, dir_out, file_Out, table_Name):
     file_full_path = dir_out + file_Out + '.v2'
     print(f"Exporting {file_full_path} to file(s) ")
     sqlStatment = "SELECT substr (LG.DATA, 9,2 ) || '-' || substr (LG.DATA, 6,2 ) || '-' || substr(LG.DATA, 1,4)  AS Quando " \
+                  ", LG.DIA_SEMANA as 'Dia da Semana' " \
                   ", LG.Tipo as 'Tipo' " \
                   ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
                   ", replace (LG.Credito, '.', ',') as 'Credito' " \
@@ -73,6 +74,7 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
                             " where Data between date('now','-1 month')  and date('now') and debito > 0 group by tipo "\
                             " order by 2 desc;", "Ultimos30Dias"])
     lista_consultas.append(["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4)  AS Quando " \
+                  ", LG.DIA_SEMANA as 'Dia da Semana' " \
                   ", LG.Tipo as 'Tipo' " \
                   ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
                   ", replace (LG.Credito, '.', ',') as 'Credito' " \
@@ -89,12 +91,12 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
         excel_sheet = consulta[1]
         df_out = pd.read_sql(sql_statment, connection)
         if write_multiple_files:
-            message = f'Exporting Sheet {excel_sheet} to {file_full_path}'
+            message = f'   . .. ... Step: {k + 1 } :-> Exporting Sheet {excel_sheet} to {file_full_path}'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
 
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + 'xlsx'
-            message = f'Exporting {file_full_path} to file(s) '
+            message = f'   . .. ... Step: {k + 1 } :-> Exporting {file_full_path} to file(s) '
             df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False)
 
         print(message)
@@ -119,16 +121,27 @@ def data_correjeitor(conexao):
 
     lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'∴', '.''.')  ;")
     lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'ś', '''s')  ;")
-    # listaAcoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'', '''s')  ;")
+    lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'', '''s')  ;")
+    lista_acoes.append("UPDATE LANCAMENTOS_GERAIS " \
+                        "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
+                        "  when 0 then 'Domingo' " \
+                        "  when 1 then 'Segunda-Feira' " \
+                        "  when 2 then 'Terça-Feira' " \
+                        "  when 3 then 'Quarta-Feira' " \
+                        "  when 4 then 'Quinta-Feira' " \
+                        "  when 5 then 'Sexta-Feira' " \
+                        "  else 'Sábado' end " \
+                        "    where DIA_SEMANA IS NULL ; ")
 
     for i in range(0, len(lista_acoes)):
+        print(f'  . .. ... Step {i + 1}')
         cursor.execute(lista_acoes[i])
 
 
-def table_truncator(conexao, table_name):
+def table_droppator(conexao, table_name):
     cursor = conexao
     # Doping EMPLOYEE table if already exists
-    cursor.execute("DROP TABLE " + table_name)
+    cursor.execute("DROP TABLE IF EXISTS " + table_name)
     print(f"Table {table_name} dropped... ")
 
 
@@ -138,7 +151,7 @@ def data_loader(data_base,  General_Entries_table, Guindind_Sheet, excel_File):
     sheets_dataframe = work_books.parse(sheet_name=Guindind_Sheet)
     # print (sheets_dataframe)
     # Creating a cursor object using the cursor() method
-    table_truncator(conn.cursor(), General_Entries_table)
+    table_droppator(conn.cursor(), General_Entries_table)
 
     print("Running Loader of the Sheets into database Tables ... .. .  ")
     for i, infos in sheets_dataframe.iterrows():
@@ -160,10 +173,8 @@ def data_loader(data_base,  General_Entries_table, Guindind_Sheet, excel_File):
                 DataFrame['Data'].replace('', np.nan, inplace=True)
                 DataFrame.dropna(subset=['Data'], inplace=True)
 
-                # Faz Drop da ulimta coluna (Marcação, subtotal essas coisas
-                # DataFrame.drop(DataFrame.columns[5],  inplace=True, axis=1)
-
-                GeneralEntriesDF = DataFrame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
+                GeneralEntriesDF = DataFrame[["Data",  "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
+                GeneralEntriesDF.insert(1, 'DIA_SEMANA', np.nan)
                 GeneralEntriesDF['Mes'] = 'MM'
                 GeneralEntriesDF['Ano'] = 'YYYY'
                 GeneralEntriesDF['MesAno'] = 'MM/YYYY'

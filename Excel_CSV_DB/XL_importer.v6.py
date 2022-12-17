@@ -132,8 +132,10 @@ def table_truncator(conexao, table_name):
     print(f"Table {table_name} dropped... ")
 
 
-def data_loader(conn, WorkBooks, General_Entries_table, Guindind_Sheet, excel_File):
-    sheets_dataframe = WorkBooks.parse(sheet_name=Guindind_Sheet)
+def data_loader(data_base,  General_Entries_table, Guindind_Sheet, excel_File):
+    conn = sqlite3.connect(data_base)
+    work_books = pd.ExcelFile(excel_File)
+    sheets_dataframe = work_books.parse(sheet_name=Guindind_Sheet)
     # print (sheets_dataframe)
     # Creating a cursor object using the cursor() method
     table_truncator(conn.cursor(), General_Entries_table)
@@ -173,6 +175,10 @@ def data_loader(conn, WorkBooks, General_Entries_table, Guindind_Sheet, excel_Fi
             ## grava a tabela (UNITÁRIA) do DataFrame do BD
             DataFrame.to_sql(table_to_load, conn, index=False, if_exists="replace")
             conn.commit()
+
+    data_correjeitor(conn.cursor())
+    conn.commit()
+    conn.close()
 
 
 def create_pivot_history_anual(dataBaseFile, typesTable, EntriesTable):
@@ -276,13 +282,7 @@ def main():
     print("===============================================")
     print("Personal DataWare House Process Starting")
 
-    data_base = sqlite3.connect(sqlite_database)
-    work_books = pd.ExcelFile(input_file)
-
-    data_loader(data_base, work_books, general_entries_table, guindind_sheet, input_file)
-    data_correjeitor(data_base.cursor())
-    data_base.commit()
-    data_base.close()
+    data_loader(sqlite_database ,  general_entries_table, guindind_sheet,input_file )
 
     create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
 

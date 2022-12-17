@@ -19,7 +19,6 @@ pip install pyinstaller
 #
 ####################################################################################
 # Todo List
-# Pput Threads on Loader process
 # command line parameters ( directories, input file name)
 # GUI Interface
 ####################################################################################
@@ -30,7 +29,6 @@ import pandas as pd
 import datetime
 import numpy as np
 import threading
-
 
 
 def general_entries_CVS_exportator(dataBaseFile, dir_out, file_Out, table_Name):
@@ -55,32 +53,35 @@ def general_entries_CVS_exportator(dataBaseFile, dir_out, file_Out, table_Name):
     print(f'Excel export(s) for table "{table_Name}" has been created successfully!')
     connection.close()
 
+
 def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_files):
     print('Exporting Summarized data ... .. .  ')
     connection = sqlite3.connect(Sqlite_database)
     file_full_path = dir_out + file_name + '.v2.' + 'xlsx'
     lista_consultas = []
-    if write_multiple_files :
+    if write_multiple_files:
         xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='dd/mm/yyyy')
 
-    lista_consultas.append(["select * from Historicogeral where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
-                               ,"HistoricoGeral12Meses"])
+    lista_consultas.append([
+                               "select * from Historicogeral where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
+                               , "HistoricoGeral12Meses"])
     lista_consultas.append(["select * from HistoricoGeral;", "HistoricoGeral"])
     lista_consultas.append(["select * from HistoricoAnual;", "HistoricoAnual"])
     lista_consultas.append(["select tipo as Categoria , sum(debito) as Valor , count(1) as QTD from LANCAMENTOS_GERAIS" \
-                            " where Data between date('now','-1 month')  and date('now') and debito > 0 group by tipo "\
+                            " where Data between date('now','-1 month')  and date('now') and debito > 0 group by tipo " \
                             " order by 2 desc;", "Ultimos30Dias"])
-    lista_consultas.append(["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4)  AS Quando " \
-                  ", LG.DIA_SEMANA as 'Dia da Semana' " \
-                  ", LG.Tipo as 'Tipo' " \
-                  ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
-                  ", replace (LG.Credito, '.', ',') as 'Credito' " \
-                  ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
-                  ", ''''||cast (mes as text) as 'Mes' " \
-                  ", ''''||cast (ano as text) as 'Ano' " \
-                  ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
-                  ", LG.ORIGEM  as Origem " \
-                  " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; ", "LANCAMENTOS_GERAIS"])
+    lista_consultas.append(
+        ["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4)  AS Quando " \
+         ", LG.DIA_SEMANA as 'Dia da Semana' " \
+         ", LG.Tipo as 'Tipo' " \
+         ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
+         ", replace (LG.Credito, '.', ',') as 'Credito' " \
+         ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
+         ", ''''||cast (mes as text) as 'Mes' " \
+         ", ''''||cast (ano as text) as 'Ano' " \
+         ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
+         ", LG.ORIGEM  as Origem " \
+         " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; ", "LANCAMENTOS_GERAIS"])
 
     for k in range(0, len(lista_consultas)):
         consulta = lista_consultas[k]
@@ -88,12 +89,12 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
         excel_sheet = consulta[1]
         df_out = pd.read_sql(sql_statment, connection)
         if write_multiple_files:
-            message = f'   . .. ... Step: {k + 1 } :-> Exporting Sheet {excel_sheet} to {file_full_path}'
+            message = f'   . .. ... Step: {k + 1} :-> Exporting Sheet {excel_sheet} to {file_full_path}'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
 
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + 'xlsx'
-            message = f'   . .. ... Step:-> {k + 1 } :-> Exporting {file_full_path} to file(s) '
+            message = f'   . .. ... Step:-> {k + 1} :-> Exporting {file_full_path} to file(s) '
             df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False)
 
         print(message)
@@ -120,15 +121,15 @@ def data_correjeitor(conexao):
     lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'ś', '''s')  ;")
     lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'', '''s')  ;")
     lista_acoes.append("UPDATE LANCAMENTOS_GERAIS " \
-                        "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
-                        "  when 0 then 'Domingo' " \
-                        "  when 1 then 'Segunda-Feira' " \
-                        "  when 2 then 'Terça-Feira' " \
-                        "  when 3 then 'Quarta-Feira' " \
-                        "  when 4 then 'Quinta-Feira' " \
-                        "  when 5 then 'Sexta-Feira' " \
-                        "  else 'Sábado' end " \
-                        "    where DIA_SEMANA IS NULL ; ")
+                       "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
+                       "  when 0 then 'Domingo' " \
+                       "  when 1 then 'Segunda-Feira' " \
+                       "  when 2 then 'Terça-Feira' " \
+                       "  when 3 then 'Quarta-Feira' " \
+                       "  when 4 then 'Quinta-Feira' " \
+                       "  when 5 then 'Sexta-Feira' " \
+                       "  else 'Sábado' end " \
+                       "    where DIA_SEMANA IS NULL ; ")
 
     for i in range(0, len(lista_acoes)):
         print(f'  . .. ... Step {i + 1}')
@@ -142,7 +143,36 @@ def table_droppator(conexao, table_name):
     print(f"Table {table_name} dropped... ")
 
 
-def data_loader(data_base,  General_Entries_table, Guindind_Sheet, excel_File):
+def parallel_df(db_connection, xls_file, config_dict, general_out_table, index):
+    tmp_table_name = config_dict['table_to_load']
+    print(f'   . .. ... .... Begin of Thread Numer :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
+    DataFrame = pd.read_excel(xls_file, sheet_name=config_dict['table_to_load'])
+    if 'X' == config_dict['isAccounting'] and 'X' == config_dict['isCleanable']:
+        ## limpa registros com os Tipos Nulos
+        DataFrame['TIPO'].replace('', np.nan, inplace=True)
+        DataFrame.dropna(subset=['TIPO'], inplace=True)
+
+        ## limpa registros com as Datas Nulas
+        DataFrame['Data'].replace('', np.nan, inplace=True)
+        DataFrame.dropna(subset=['Data'], inplace=True)
+
+        general_entries_df = DataFrame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
+        general_entries_df.insert(1, 'DIA_SEMANA', np.nan)
+        general_entries_df['Mes'] = 'MM'
+        general_entries_df['Ano'] = 'YYYY'
+        general_entries_df['MesAno'] = 'MM/YYYY'
+        general_entries_df['Origem'] = config_dict['table_to_load']
+
+        # Ja joga os dados limpos na lançamentos gerais
+        general_entries_df.to_sql(general_out_table, db_connection, index=False, if_exists="append")
+
+    ## grava a tabela (UNITÁRIA) do DataFrame do BD
+    DataFrame.to_sql(config_dict['table_to_load'], db_connection, index=False, if_exists="replace")
+    db_connection.commit()
+    print(f'   . .. ... .... End of Thread Number :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
+
+
+def data_loader(data_base, General_Entries_table, Guindind_Sheet, excel_File):
     conn = sqlite3.connect(data_base)
     work_books = pd.ExcelFile(excel_File)
     sheets_dataframe = work_books.parse(sheet_name=Guindind_Sheet)
@@ -153,54 +183,22 @@ def data_loader(data_base,  General_Entries_table, Guindind_Sheet, excel_File):
 
     print("Running Loader of the Sheets into database Tables ... .. .  ")
     for i, infos in sheets_dataframe.iterrows():
-        table_to_load = infos.TABLE_NAME
-        isAccounting = infos.ACCOUNTING
-        isCleanable = infos.CLEANABLE
-        isLoadeable = infos.LOADABLE
+        dict_config = {'table_to_load': infos.TABLE_NAME,
+                       'isAccounting': infos.ACCOUNTING,
+                       'isCleanable': infos.CLEANABLE,
+                       'isLoadeable': infos.LOADABLE}
 
-        print(f'   . .. ... Step:->  {i + 1} ; Table (Sheet) :-> {table_to_load} ')
+        tmp_table_name = dict_config['table_to_load']
+        print(f'   . .. ... Step:->  {i + 1} ; Table (Sheet) :-> {tmp_table_name} ')
 
-        if 'X' == isLoadeable:
-            ## basicamente , daqui até a proxima marcação deeria ser inclçuido em uma unica função !
-            # THREAD BEGIN
-            # THREAD BEGIN
-            thread = threading.Thread( (target=lambda a:
-            DataFrame = pd.read_excel(excel_File, sheet_name=table_to_load)
-            if 'X' == isAccounting and 'X' == isCleanable:
-                ## limpa registros com os Tipos Nulos
-                DataFrame['TIPO'].replace('', np.nan, inplace=True)
-                DataFrame.dropna(subset=['TIPO'], inplace=True)
-
-                ## limpa registros com as Datas Nulas
-                DataFrame['Data'].replace('', np.nan, inplace=True)
-                DataFrame.dropna(subset=['Data'], inplace=True)
-
-                GeneralEntriesDF = DataFrame[["Data",  "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
-                GeneralEntriesDF.insert(1, 'DIA_SEMANA', np.nan)
-                GeneralEntriesDF['Mes'] = 'MM'
-                GeneralEntriesDF['Ano'] = 'YYYY'
-                GeneralEntriesDF['MesAno'] = 'MM/YYYY'
-                GeneralEntriesDF['Origem'] = table_to_load
-
-                # Ja joga os dados limpos na lançamentos gerais
-                GeneralEntriesDF.to_sql(General_Entries_table, conn, index=False, if_exists="append")
-
-            ## grava a tabela (UNITÁRIA) do DataFrame do BD
-            DataFrame.to_sql(table_to_load, conn, index=False, if_exists="replace")
-            conn.commit()
-            )
-            ## THREAD END
-
-
+        if 'X' == dict_config['isLoadeable']:
+            thread = threading.Thread(target=parallel_df(conn, excel_File, dict_config, General_Entries_table, i + 1))
             jobs.append(thread)
-
-        # Start the threads (i.e. calculate the random number lists)
-        for j in jobs:
-            j.start()
+            thread.start()
 
         # Ensure all of the threads have finished
-        for j in jobs:
-            j.join()
+        for t in jobs:
+            t.join()
 
     data_correjeitor(conn.cursor())
     conn.commit()
@@ -302,13 +300,13 @@ def main():
 
     # Debugging
     print("===============================================")
-    print(f'Excel Sheet  Input file :-> {input_file}' )
+    print(f'Excel Sheet  Input file :-> {input_file}')
     print(f'Output SQLite3 Database :-> {sqlite_database}')
     print(f'Guidind Excel Sheet     :-> {guindind_sheet}')
     print("===============================================")
     print("Personal DataWare House Process Starting")
 
-    data_loader(sqlite_database ,  general_entries_table, guindind_sheet,input_file )
+    data_loader(sqlite_database, general_entries_table, guindind_sheet, input_file)
 
     create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
 

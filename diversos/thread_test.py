@@ -15,7 +15,7 @@ def list_append(count, id, out_list):
 
 if __name__ == "__main__":
     size = 10000000   # Number of random numbers to add
-    threads = 2   # Number of threads to create
+    threads = 30   # Number of threads to create
 
     # Create a list of jobs and then iterate through
     # the number of threads appending each thread to

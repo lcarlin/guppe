@@ -52,7 +52,6 @@ def general_entries_CVS_exportator(dataBaseFile, dir_out, file_Out, table_Name):
                   ", LG.ORIGEM  as Origem " \
                   " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
-    # df_out.to_excel(file_full_path + '.xlsx', sheet_name=table_Name, index=False)
     df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='ansi')
 
     print(f'Excel export(s) for table "{table_Name}" has been created successfully!')
@@ -91,12 +90,12 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
         excel_sheet = consulta[1]
         df_out = pd.read_sql(sql_statment, connection)
         if write_multiple_files:
-            message = f'   . .. ... Step: {k+1:4} :-> Exporting Sheet {excel_sheet} to {file_full_path}'
+            message = f'   . .. ... Step: {k+1:04} :-> Exporting Sheet {excel_sheet} to {file_full_path}'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
 
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + 'xlsx'
-            message = f'   . .. ... Step:-> {k+1:4} :-> Exporting {file_full_path} to file(s) '
+            message = f'   . .. ... Step:-> {k+1:04} :-> Exporting {file_full_path} to file(s) '
             df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False)
 
         print(message)
@@ -134,7 +133,7 @@ def data_correjeitor(conexao):
                         "    where DIA_SEMANA IS NULL ; ")
 
     for i in range(0, len(lista_acoes)):
-        print(f'  . .. ... Step {i + 1:04}')
+        print(f'  . .. ... Step {i+1: 04}')
         cursor.execute(lista_acoes[i])
 
 
@@ -149,8 +148,6 @@ def data_loader(data_base,  General_Entries_table, Guindind_Sheet, excel_File):
     conn = sqlite3.connect(data_base)
     work_books = pd.ExcelFile(excel_File)
     sheets_dataframe = work_books.parse(sheet_name=Guindind_Sheet)
-    # print (sheets_dataframe)
-    # Creating a cursor object using the cursor() method
     table_droppator(conn.cursor(), General_Entries_table)
 
     print("Running Loader of the Sheets into database Tables ... .. .  ")
@@ -160,7 +157,7 @@ def data_loader(data_base,  General_Entries_table, Guindind_Sheet, excel_File):
         isCleanable = infos.CLEANABLE
         isLoadeable = infos.LOADABLE
 
-        print(f'   . .. ... Step:->  {i + 1:04} ; Table (Sheet) :-> {table_to_load} ')
+        print(f'   . .. ... Step:->  {i+1:04} ; Table (Sheet) :-> {table_to_load} ')
 
         if 'X' == isLoadeable:
             DataFrame = pd.read_excel(excel_File, sheet_name=table_to_load)
@@ -214,7 +211,6 @@ def create_pivot_history_anual(dataBaseFile, typesTable, EntriesTable):
     current_dict = dict_hist_base.copy()
 
     for j, Fetcher in df_summary.iterrows():
-        # print(f'Ano {Fetcher.Referencia} ; Tipo {Fetcher.TIPO}; Valor {Fetcher.DEBITOS}')
         if ref_anterior == Fetcher.Referencia:
             current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
         else:

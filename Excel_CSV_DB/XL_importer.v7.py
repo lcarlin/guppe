@@ -89,12 +89,12 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
         excel_sheet = consulta[1]
         df_out = pd.read_sql(sql_statment, connection)
         if write_multiple_files:
-            message = f'   . .. ... Step: {k+1:4} :-> Exporting Sheet {excel_sheet} to {file_full_path}'
+            message = f'   . .. ... Step: {k+1:04} :-> Exporting Sheet {excel_sheet} to {file_full_path}'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
 
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + 'xlsx'
-            message = f'   . .. ... Step:-> {k+1:4} :-> Exporting {file_full_path} to file(s) '
+            message = f'   . .. ... Step:-> {k+1:04} :-> Exporting {file_full_path} to file(s) '
             df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False)
 
         print(message)
@@ -132,7 +132,7 @@ def data_correjeitor(conexao):
                        "    where DIA_SEMANA IS NULL ; ")
 
     for i in range(0, len(lista_acoes)):
-        print(f'  . .. ... Step {i + 1:4}')
+        print(f'  . .. ... Step {i+1:04}')
         cursor.execute(lista_acoes[i])
 
 
@@ -194,7 +194,7 @@ def data_loader(data_base, General_Entries_table, Guindind_Sheet, excel_File):
                        'isLoadeable': infos.LOADABLE}
 
         tmp_table_name = dict_config['table_to_load']
-        print(f'   . .. ... Step:->  {i + 1:4} ; Table (Sheet) :-> {tmp_table_name} ')
+        print(f'   . .. ... Step:->  {i+1:04} ; Table (Sheet) :-> {tmp_table_name} ')
 
         if 'X' == dict_config['isLoadeable']:
             # thread = threading.Thread(target=parallel_df(conn, excel_File, dict_config, General_Entries_table, i + 1))

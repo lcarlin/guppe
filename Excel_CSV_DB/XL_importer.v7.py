@@ -89,12 +89,12 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
         excel_sheet = consulta[1]
         df_out = pd.read_sql(sql_statment, connection)
         if write_multiple_files:
-            message = f'   . .. ... Step: {k + 1} :-> Exporting Sheet {excel_sheet} to {file_full_path}'
+            message = f'   . .. ... Step: {k+1:4} :-> Exporting Sheet {excel_sheet} to {file_full_path}'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
 
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + 'xlsx'
-            message = f'   . .. ... Step:-> {k + 1} :-> Exporting {file_full_path} to file(s) '
+            message = f'   . .. ... Step:-> {k+1:4} :-> Exporting {file_full_path} to file(s) '
             df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False)
 
         print(message)
@@ -132,7 +132,7 @@ def data_correjeitor(conexao):
                        "    where DIA_SEMANA IS NULL ; ")
 
     for i in range(0, len(lista_acoes)):
-        print(f'  . .. ... Step {i + 1}')
+        print(f'  . .. ... Step {i + 1:4}')
         cursor.execute(lista_acoes[i])
 
 
@@ -143,9 +143,10 @@ def table_droppator(conexao, table_name):
     print(f"Table {table_name} dropped... ")
 
 
-def parallel_df(db_connection, xls_file, config_dict, general_out_table, index):
+def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
+    db_connection = sqlite3.connect(db_file)
     tmp_table_name = config_dict['table_to_load']
-    print(f'   . .. ... .... Begin of Thread Numer :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
+    print(f'   . .. ... .... Begin of Thread Number :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
     DataFrame = pd.read_excel(xls_file, sheet_name=config_dict['table_to_load'])
     if 'X' == config_dict['isAccounting'] and 'X' == config_dict['isCleanable']:
         ## limpa registros com os Tipos Nulos
@@ -169,6 +170,7 @@ def parallel_df(db_connection, xls_file, config_dict, general_out_table, index):
     ## grava a tabela (UNITÁRIA) do DataFrame do BD
     DataFrame.to_sql(config_dict['table_to_load'], db_connection, index=False, if_exists="replace")
     db_connection.commit()
+    db_connection.close()
     print(f'   . .. ... .... End of Thread Number :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
 
 
@@ -179,7 +181,10 @@ def data_loader(data_base, General_Entries_table, Guindind_Sheet, excel_File):
     # print (sheets_dataframe)
     # Creating a cursor object using the cursor() method
     table_droppator(conn.cursor(), General_Entries_table)
-    jobs = []
+    conn.commit()
+    conn.close()
+    #jobs = []
+    jobs = list ()
 
     print("Running Loader of the Sheets into database Tables ... .. .  ")
     for i, infos in sheets_dataframe.iterrows():
@@ -189,20 +194,26 @@ def data_loader(data_base, General_Entries_table, Guindind_Sheet, excel_File):
                        'isLoadeable': infos.LOADABLE}
 
         tmp_table_name = dict_config['table_to_load']
-        print(f'   . .. ... Step:->  {i + 1} ; Table (Sheet) :-> {tmp_table_name} ')
+        print(f'   . .. ... Step:->  {i + 1:4} ; Table (Sheet) :-> {tmp_table_name} ')
 
         if 'X' == dict_config['isLoadeable']:
-            thread = threading.Thread(target=parallel_df(conn, excel_File, dict_config, General_Entries_table, i + 1))
+            # thread = threading.Thread(target=parallel_df(conn, excel_File, dict_config, General_Entries_table, i + 1))
+            thread = threading.Thread(target=parallel_df, args=(data_base, excel_File, dict_config, General_Entries_table, i + 1))
             jobs.append(thread)
-            thread.start()
 
-        # Ensure all of the threads have finished
-        for t in jobs:
-            t.join()
+    print(f'   . .. ... Starting Multi-Threaging processing')
+    for m in jobs:
+        m.start()
 
+    print(f'   . .. ... Waiting for Threads to End ')
+    # Ensure all of the threads have finished
+    for index, tread in enumerate(jobs):
+        thread.join()
+
+    print(f'   . .. ... All threads has ended ')
     data_correjeitor(conn.cursor())
-    conn.commit()
-    conn.close()
+
+    print(f'   . .. ... Data-Loader Done !!! !! ! ')
 
 
 def create_pivot_history_anual(dataBaseFile, typesTable, EntriesTable):

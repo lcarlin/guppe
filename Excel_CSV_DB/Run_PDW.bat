@@ -1,5 +1,6 @@
 @echo off
-C:\Users\luizc\AppData\Local\Programs\Python\Python310\python.exe C:\Users\luizc\PycharmProjects\guppe\Excel_CSV_DB\XL_importer.v6.py 
+REM C:\Users\luizc\AppData\Local\Programs\Python\Python310\python.exe C:\Users\luizc\PycharmProjects\guppe\Excel_CSV_DB\XL_importer.v6.py 
+C:\Users\luizc\AppData\Local\Programs\Python\Python310\python.exe C:\Users\luizc\PycharmProjects\guppe\Excel_CSV_DB\XL_importer.v6.py
 echo ' '
 echo ' '
 echo ' '

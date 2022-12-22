@@ -56,7 +56,6 @@ def general_entries_CVS_exportator(dataBaseFile, dir_out, file_Out, table_Name):
     print(f'Excel export(s) for table "{table_Name}" has been created successfully!')
     connection.close()
 
-
 def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_files):
     print('Exporting Summarized data ... .. .  ')
 
@@ -64,7 +63,7 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
     file_full_path = dir_out + file_name + '.xlsx'
     lista_consultas = []
     if write_multiple_files:
-        xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='dd/mm/yyyy')
+        xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
 
     lista_consultas.append(["select * from Historicogeral where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
                                , "HistoricoGeral12Meses"])
@@ -74,7 +73,7 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
                             " where Data between date('now','-1 month')  and date('now') and debito > 0 group by tipo " \
                             " order by 2 desc;", "Ultimos30Dias"])
     lista_consultas.append(
-        ["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4)  AS Quando " \
+        ["SELECT substr (LG.DATA, 1,4 ) || '-' || substr (LG.DATA, 6,2 ) || '-' || substr(LG.DATA, 9,2) AS Quando " \
          ", LG.DIA_SEMANA as 'Dia da Semana' " \
          ", LG.Tipo as 'Tipo' " \
          ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
@@ -97,7 +96,7 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
 
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + 'xlsx'
-            message = f'   . .. ... Step:-> {k + 1:04} :-> Exporting {file_full_path} to file(s) '
+            message = f'   . .. ... Step: {k + 1:04} :-> Exporting {file_full_path} to file(s) '
             df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False)
 
         print(message)
@@ -105,7 +104,6 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
     connection.close()
     if write_multiple_files:
         xlsx_writer.save()
-
 
 def data_correjeitor(conexao):
     print(f'Normalizing data on LANCAMENTOS_GERAIS Table ...  ')
@@ -135,7 +133,7 @@ def data_correjeitor(conexao):
                        "    where DIA_SEMANA IS NULL ; ")
 
     for i in range(0, len(lista_acoes)):
-        print(f'   . .. ... Step :->  {i + 1:04}')
+        print(f'   . .. ... Step : {i + 1:04}')
         cursor.execute(lista_acoes[i])
 
 def table_droppator(conexao, table_name):
@@ -156,7 +154,7 @@ def data_loader(data_base, General_Entries_table, Guindind_Sheet, excel_File):
         isCleanable = infos.CLEANABLE
         isLoadeable = infos.LOADABLE
 
-        print(f'   . .. ... Step:->  {i + 1:04} ; Table (Sheet) :-> {table_to_load} ')
+        print(f'   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load} ')
 
         if 'X' == isLoadeable:
             DataFrame = pd.read_excel(excel_File, sheet_name=table_to_load)
@@ -281,7 +279,7 @@ def main():
         OUT_TYPE = config['FILE_TYPES']['TYPE_OUT']
         MULTITHREAD = config.getboolean('SETTINGS', 'MULTITHREADING')
         overwrite_db = config.getboolean('SETTINGS', 'OVERWRITE_DB')
-        run_loader = config.getboolean('SETTINGS', 'RUN_DATA_LOADR')
+        run_loader = config.getboolean('SETTINGS', 'RUN_DATA_LOADER')
         run_reports = config.getboolean('SETTINGS', 'RUN_REPORTS')
         multi_rept_file = config.getboolean('SETTINGS', 'RPT_SINGLE_FILE')
         output_name = config['SETTINGS']['OUT_RPT_FILE']

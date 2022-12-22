@@ -10,14 +10,11 @@ try:
 
     DIR_FILE_IN = config['DIRETORIOS']['entrada']
     DIR_FILE_OUT  = config['DIRETORIOS']['saida']
-
     SPLITTER = config.getint('settings','PARALLELS')
-
     IN_TYPE = config['TIPO_ARQUIVOS']['ENTRADA']
     OUT_TYPE = config['TIPO_ARQUIVOS']['SAIDA']
-
     NOVO01 = config.getboolean('settings','MULTITHREADING')
-    NOVO02 = config.getboolean('settings', 'SOBRESCREVER_DB')
+    NOVO02 = config.getboolean('settings', 'OVERWRITE_DB')
     #NOVO02 = config.getboolean('settings', 'SelfDestruction')
 
     print('================================================================')

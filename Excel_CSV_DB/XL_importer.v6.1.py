@@ -19,21 +19,20 @@ pip install pyinstaller
 #
 ####################################################################################
 # Todo List
-# Pput Threads on Loader process
-# FIX output messages
+# put Threads on Loader process
 # command line parameters ( directories, input file name)
 # GUI Interface
 # Configuratin file ?
 #
 #
 ####################################################################################
-
 """
 
 import sqlite3
 import pandas as pd
 import datetime
 import numpy as np
+import configparser
 
 
 def general_entries_CVS_exportator(dataBaseFile, dir_out, file_Out, table_Name):
@@ -62,7 +61,7 @@ def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_fi
     print('Exporting Summarized data ... .. .  ')
 
     connection = sqlite3.connect(Sqlite_database)
-    file_full_path = dir_out + file_name + '.v2.' + 'xlsx'
+    file_full_path = dir_out + file_name + '.xlsx'
     lista_consultas = []
     if write_multiple_files:
         xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='dd/mm/yyyy')
@@ -139,13 +138,10 @@ def data_correjeitor(conexao):
         print(f'   . .. ... Step :->  {i + 1:04}')
         cursor.execute(lista_acoes[i])
 
-
 def table_droppator(conexao, table_name):
     cursor = conexao
-    # Doping EMPLOYEE table if already exists
     cursor.execute("DROP TABLE IF EXISTS " + table_name)
     print(f"Table {table_name} dropped... ")
-
 
 def data_loader(data_base, General_Entries_table, Guindind_Sheet, excel_File):
     conn = sqlite3.connect(data_base)
@@ -191,7 +187,6 @@ def data_loader(data_base, General_Entries_table, Guindind_Sheet, excel_File):
     conn.commit()
     conn.close()
 
-
 def create_pivot_history_anual(dataBaseFile, typesTable, EntriesTable):
     print('Creating pivot Table for Anual summarized history ... .. . ')
     connection = sqlite3.connect(dataBaseFile)
@@ -214,31 +209,31 @@ def create_pivot_history_anual(dataBaseFile, typesTable, EntriesTable):
     current_dict = dict_hist_base.copy()
 
     for j, Fetcher in df_summary.iterrows():
-        if ref_anterior == Fetcher.Referencia:
-            current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
-        else:
-            if ref_anterior != '9999':
-                lista_full.append(current_dict)
+        if ref_anterior != Fetcher.Referencia:
+            lista_full.append(current_dict)
             ref_anterior = Fetcher.Referencia
             current_dict = dict_hist_base.copy()
             current_dict['Referencia'] = Fetcher.Referencia
 
-    lista_full.append(current_dict)
+        current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
+
+    lista_full.append(current_dict)  ##writes the last line into the list
+    dev_null = lista_full.pop(0)  ## remove the 1st reference
 
     data_to_write = pd.DataFrame(lista_full)
+
     data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
     connection.commit()
     connection.close()
 
-
 def create_pivot_history_full(dataBaseFile, typesTable, EntriesTable):
     print('Creating pivot Table for summarized history ... .. . ')
     connection = sqlite3.connect(dataBaseFile)
-    ref_anterior = '99/9999'
+    ref_anterior = 'MM/YYYY'
     out_table = 'HistoricoGeral'
     sql_statment_types = 'SELECT Código as COD, Descrição as DESC FROM TiposLancamentos ;'
     sql_statment_summary = 'select MesAno as Referencia, TIPO, sum(Debito) as DEBITOS FROM LANCAMENTOS_GERAIS GROUP BY MesAno, TIPO ' \
-                           'order by Ano , Mes ,  TIPO desc ;'
+                           'order by Ano, Mes, TIPO desc ;'
 
     df_types = pd.read_sql(sql_statment_types, connection)
     df_summary = pd.read_sql(sql_statment_summary, connection)
@@ -246,43 +241,71 @@ def create_pivot_history_full(dataBaseFile, typesTable, EntriesTable):
     lista_header = ['Referencia']
 
     for i, DADOS in df_types.iterrows():
-        dict_hist_base.update({DADOS.DESC:0})
+        dict_hist_base.update({DADOS.DESC: 0})
         lista_header.append(DADOS.DESC)
 
     lista_full = []
     current_dict = dict_hist_base.copy()
 
     for j, Fetcher in df_summary.iterrows():
-        if ref_anterior == Fetcher.Referencia:
-            current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
-        else:
-            if ref_anterior != '99/9999':
-                lista_full.append(current_dict)
-
+        if ref_anterior != Fetcher.Referencia:
+            lista_full.append(current_dict)
             ref_anterior = Fetcher.Referencia
             current_dict = dict_hist_base.copy()
             current_dict['Referencia'] = Fetcher.Referencia
-            current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
+
+        current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
 
     lista_full.append(current_dict)
+    dev_null = lista_full.pop(0)  ## remove the 1st reference
 
     data_to_write = pd.DataFrame(lista_full)
     data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
     connection.commit()
     connection.close()
 
-
 def main():
     # Environment / Variables
     # current date and time
+    config = configparser.ConfigParser()
+
+    try:
+        print('Reading configuration file ... .. .')
+        with open('config.ini') as cfg:
+            config.read_file(cfg)
+
+        DIR_FILE_IN = config['DIRECTORIES']['DIR_IN']
+        DIR_FILE_OUT = config['DIRECTORIES']['DIR_OUT']
+        SPLITTER = config.getint('SETTINGS', 'PARALLELS')
+        in_type = config['FILE_TYPES']['TYPE_IN']
+        OUT_TYPE = config['FILE_TYPES']['TYPE_OUT']
+        MULTITHREAD = config.getboolean('SETTINGS', 'MULTITHREADING')
+        overwrite_db = config.getboolean('SETTINGS', 'OVERWRITE_DB')
+        run_loader = config.getboolean('SETTINGS', 'RUN_DATA_LOADR')
+        run_reports = config.getboolean('SETTINGS', 'RUN_REPORTS')
+        multi_rept_file = config.getboolean('SETTINGS', 'RPT_SINGLE_FILE')
+        output_name = config['SETTINGS']['OUT_RPT_FILE']
+        # NOVO02 = config.getboolean('settings', 'SelfDestruction')
+
+    except FileNotFoundError:
+        print("Arquivo de configuracao nao encontrado!")
+    except configparser.Error as e:
+        print(e)
+        exit(1)
+    except Exception as e:
+        print(e)
+        exit(1)
+
     current_dt = datetime.datetime.now()
     now = current_dt.strftime("%Y%m%d.%H%M%S")
 
-    work_dir = 'G:/Meu Drive/PDW/'
-    input_file = work_dir + 'PDW.xls'
-    output_name = 'PDW_REPORTS'
-    sqlite_database = work_dir + 'PDW.' + now + '.db'
-    sqlite_database = work_dir + 'PDW.db'
+    input_file = DIR_FILE_IN + 'PDW.' + in_type
+
+    if overwrite_db:
+        sqlite_database = DIR_FILE_OUT + 'PDW.db'
+    else:
+        sqlite_database = DIR_FILE_OUT + 'PDW.' + now + '.db'
+
     guindind_sheet = 'GUIDING'
     types_of_entries = 'TiposLancamentos'
     general_entries_table = 'LANCAMENTOS_GERAIS'
@@ -295,15 +318,16 @@ def main():
     print("===============================================")
     print("Personal DataWare House Process Starting")
 
-    # data_loader(sqlite_database ,  general_entries_table, guindind_sheet,input_file )
+    if run_loader:
+        data_loader(sqlite_database, general_entries_table, guindind_sheet, input_file)
 
     create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
-
     create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table)
 
-    general_entries_CVS_exportator(sqlite_database, work_dir, general_entries_table + '.FULL', general_entries_table)
-
-    xlsx_report_generator(sqlite_database, work_dir, output_name, False)
+    if run_reports:
+        general_entries_CVS_exportator(sqlite_database, DIR_FILE_OUT, general_entries_table + '.FULL',
+                                       general_entries_table)
+        xlsx_report_generator(sqlite_database, DIR_FILE_OUT, output_name, multi_rept_file)
 
     print("Personal DataWare House processes ended")
     print("===============================================")

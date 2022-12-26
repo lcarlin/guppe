@@ -133,7 +133,7 @@ def data_correjeitor(conexao):
                        "    where DIA_SEMANA IS NULL ; ")
 
     for i in range(0, len(lista_acoes)):
-        print(f'   . .. ... Step : {i + 1:04}')
+        print(f'   . .. ... Step: {i + 1:04}')
         cursor.execute(lista_acoes[i])
 
 def table_droppator(conexao, table_name):

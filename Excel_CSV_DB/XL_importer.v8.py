@@ -418,7 +418,6 @@ def main():
     print("Personal DataWare House processes ended")
     print("===============================================")
 
-
 if __name__ == '__main__':
     main()
 

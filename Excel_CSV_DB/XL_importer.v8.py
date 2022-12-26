@@ -33,6 +33,8 @@ import pandas as pd
 import datetime
 import numpy as np
 import configparser
+import os
+import threading
 
 def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
     db_connection = sqlite3.connect(db_file)
@@ -74,7 +76,6 @@ def data_loader_parallel(data_base, General_Entries_table, Guindind_Sheet, excel
     table_droppator(conn.cursor(), General_Entries_table)
     conn.commit()
     conn.close()
-    #jobs = []
     jobs = list ()
 
     print("Running Loader of the Sheets into database Tables ... .. .  ")
@@ -359,6 +360,7 @@ def main():
 
     except FileNotFoundError:
         print("Arquivo de configuracao nao encontrado!")
+        exit(1)
     except configparser.Error as e:
         print(e)
         exit(1)
@@ -380,7 +382,18 @@ def main():
     types_of_entries = 'TiposLancamentos'
     general_entries_table = 'LANCAMENTOS_GERAIS'
 
-    # Debugging
+    if not os.path.exists(DIR_FILE_IN) : 
+        print(f'The Input Directory {DIR_FILE_IN} does not exists  !!! !! !')
+        exit(1)
+    
+    if not os.path.exists(DIR_FILE_OUT):
+        print(f'The Output Directory {DIR_FILE_OUT} does not exists ... .. .')
+        exit(1)
+
+    if not os.path.isfile(input_file):
+        print(f'The Input Load File {input_file} does not exists in the Input Directory {DIR_FILE_IN} ... .. .')
+        exit(1)
+
     print("===============================================")
     print(f'Excel Sheet  Input file :-> {input_file}')
     print(f'Output SQLite3 Database :-> {sqlite_database}')
@@ -393,7 +406,6 @@ def main():
             data_loader(sqlite_database, general_entries_table, guindind_sheet, input_file)
         else:
             data_loader_parallel(sqlite_database, general_entries_table, guindind_sheet, input_file)
-
 
     create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
     create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table)

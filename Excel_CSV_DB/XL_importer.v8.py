@@ -19,10 +19,9 @@ pip install pyinstaller
 # 2022-12-26 # Merge With Version 6.1 and 7 # Carlin, Luiz A. .'.
 ####################################################################################
 # Todo List
-# put Threads on Loader process
 # command line parameters ( directories, input file name)
 # GUI Interface
-# Configuratin file ?
+#
 #
 #
 ####################################################################################
@@ -45,18 +44,15 @@ def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
         ## limpa registros com os Tipos Nulos
         DataFrame['TIPO'].replace('', np.nan, inplace=True)
         DataFrame.dropna(subset=['TIPO'], inplace=True)
-
         ## limpa registros com as Datas Nulas
         DataFrame['Data'].replace('', np.nan, inplace=True)
         DataFrame.dropna(subset=['Data'], inplace=True)
-
         general_entries_df = DataFrame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
         general_entries_df.insert(1, 'DIA_SEMANA', np.nan)
         general_entries_df['Mes'] = 'MM'
         general_entries_df['Ano'] = 'YYYY'
         general_entries_df['MesAno'] = 'MM/YYYY'
         general_entries_df['Origem'] = config_dict['table_to_load']
-
         # Ja joga os dados limpos na lançamentos gerais
         general_entries_df.to_sql(general_out_table, db_connection, index=False, if_exists="append")
 
@@ -68,16 +64,12 @@ def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
 
 
 def data_loader_parallel(data_base, General_Entries_table, Guindind_Sheet, excel_File):
-    conn = sqlite3.connect(data_base)
+    conn = sqlite3.connect(data_base, check_same_thread=False)
     work_books = pd.ExcelFile(excel_File)
     sheets_dataframe = work_books.parse(sheet_name=Guindind_Sheet)
-    # print (sheets_dataframe)
-    # Creating a cursor object using the cursor() method
     table_droppator(conn.cursor(), General_Entries_table)
     conn.commit()
-    conn.close()
     jobs = list ()
-
     print("Running Loader of the Sheets into database Tables ... .. .  ")
     for i, infos in sheets_dataframe.iterrows():
         dict_config = {'table_to_load': infos.TABLE_NAME,
@@ -87,7 +79,6 @@ def data_loader_parallel(data_base, General_Entries_table, Guindind_Sheet, excel
 
         tmp_table_name = dict_config['table_to_load']
         print(f'   . .. ... Step:->  {i+1:04} ; Table (Sheet) :-> {tmp_table_name} ')
-
         if 'X' == dict_config['isLoadeable']:
             # thread = threading.Thread(target=parallel_df(conn, excel_File, dict_config, General_Entries_table, i + 1))
             thread = threading.Thread(target=parallel_df, args=(data_base, excel_File, dict_config, General_Entries_table, i + 1))
@@ -104,9 +95,9 @@ def data_loader_parallel(data_base, General_Entries_table, Guindind_Sheet, excel
 
     print(f'   . .. ... All threads has ended ')
     data_correjeitor(conn.cursor())
-
     print(f'   . .. ... Data-Loader Done !!! !! ! ')
-
+    conn.commit()
+    conn.close()
 
 def general_entries_CVS_exportator(dataBaseFile, dir_out, file_Out, table_Name):
     connection = sqlite3.connect(dataBaseFile)
@@ -125,13 +116,11 @@ def general_entries_CVS_exportator(dataBaseFile, dir_out, file_Out, table_Name):
                   " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
     df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='ansi')
-
     print(f'Excel export(s) for table "{table_Name}" has been created successfully!')
     connection.close()
 
 def xlsx_report_generator(Sqlite_database, dir_out, file_name, write_multiple_files):
     print('Exporting Summarized data ... .. .  ')
-
     connection = sqlite3.connect(Sqlite_database)
     file_full_path = dir_out + file_name + '.xlsx'
     lista_consultas = []
@@ -186,11 +175,9 @@ def data_correjeitor(conexao):
        set Mes = strftime ('%m',data )  \
        , Ano = strftime ('%Y',data )  \
        , mesAno = strftime ('%m',data ) ||'/'||strftime ('%Y',data ); ")
-
     lista_acoes.append("update LANCAMENTOS_GERAIS set credito = 0 where credito is null; ")
     lista_acoes.append("update LANCAMENTOS_GERAIS set debito = 0 where debito is null ;")
     lista_acoes.append("Delete from TiposLancamentos WHERE ( Código IS NULL or Descrição IS NULL) ;")
-
     lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'∴', '.''.')  ;")
     lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'ś', '''s')  ;")
     lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'', '''s')  ;")
@@ -219,34 +206,28 @@ def data_loader(data_base, General_Entries_table, Guindind_Sheet, excel_File):
     work_books = pd.ExcelFile(excel_File)
     sheets_dataframe = work_books.parse(sheet_name=Guindind_Sheet)
     table_droppator(conn.cursor(), General_Entries_table)
-
     print("Running Loader of the Sheets into database Tables ... .. .  ")
     for i, infos in sheets_dataframe.iterrows():
         table_to_load = infos.TABLE_NAME
         isAccounting = infos.ACCOUNTING
         isCleanable = infos.CLEANABLE
         isLoadeable = infos.LOADABLE
-
         print(f'   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load} ')
-
         if 'X' == isLoadeable:
             DataFrame = pd.read_excel(excel_File, sheet_name=table_to_load)
             if 'X' == isAccounting and 'X' == isCleanable:
                 ## limpa registros com os Tipos Nulos
                 DataFrame['TIPO'].replace('', np.nan, inplace=True)
                 DataFrame.dropna(subset=['TIPO'], inplace=True)
-
                 ## limpa registros com as Datas Nulas
                 DataFrame['Data'].replace('', np.nan, inplace=True)
                 DataFrame.dropna(subset=['Data'], inplace=True)
-
                 GeneralEntriesDF = DataFrame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
                 GeneralEntriesDF.insert(1, 'DIA_SEMANA', np.nan)
                 GeneralEntriesDF['Mes'] = 'MM'
                 GeneralEntriesDF['Ano'] = 'YYYY'
                 GeneralEntriesDF['MesAno'] = 'MM/YYYY'
                 GeneralEntriesDF['Origem'] = table_to_load
-
                 # Ja joga os dados limpos na lançamentos gerais
                 GeneralEntriesDF.to_sql(General_Entries_table, conn, index=False, if_exists="append")
 
@@ -266,19 +247,16 @@ def create_pivot_history_anual(dataBaseFile, typesTable, EntriesTable):
     sqlStatmentTypes = 'SELECT Código as COD, Descrição as DESC FROM TiposLancamentos ;'
     sqlStatmentSummary = 'select Ano as Referencia, TIPO, sum(Debito) as DEBITOS FROM LANCAMENTOS_GERAIS GROUP BY Ano, TIPO ' \
                          'order by Ano ;'
-
     df_types = pd.read_sql(sqlStatmentTypes, connection)
     df_summary = pd.read_sql(sqlStatmentSummary, connection)
     dict_hist_base = {'Referencia': '9999'}
     lista_header = ['Referencia']
-
     for i, DADOS in df_types.iterrows():
         dict_hist_base.update({DADOS.DESC: 0.00})
         lista_header.append(DADOS.DESC)
 
     lista_full = []
     current_dict = dict_hist_base.copy()
-
     for j, Fetcher in df_summary.iterrows():
         if ref_anterior != Fetcher.Referencia:
             lista_full.append(current_dict)
@@ -290,9 +268,7 @@ def create_pivot_history_anual(dataBaseFile, typesTable, EntriesTable):
 
     lista_full.append(current_dict)  ##writes the last line into the list
     dev_null = lista_full.pop(0)  ## remove the 1st reference
-
     data_to_write = pd.DataFrame(lista_full)
-
     data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
     connection.commit()
     connection.close()
@@ -305,19 +281,16 @@ def create_pivot_history_full(dataBaseFile, typesTable, EntriesTable):
     sql_statment_types = 'SELECT Código as COD, Descrição as DESC FROM TiposLancamentos ;'
     sql_statment_summary = 'select MesAno as Referencia, TIPO, sum(Debito) as DEBITOS FROM LANCAMENTOS_GERAIS GROUP BY MesAno, TIPO ' \
                            'order by Ano, Mes, TIPO desc ;'
-
     df_types = pd.read_sql(sql_statment_types, connection)
     df_summary = pd.read_sql(sql_statment_summary, connection)
     dict_hist_base = {'Referencia': '99/9999'}
     lista_header = ['Referencia']
-
     for i, DADOS in df_types.iterrows():
         dict_hist_base.update({DADOS.DESC: 0})
         lista_header.append(DADOS.DESC)
 
     lista_full = []
     current_dict = dict_hist_base.copy()
-
     for j, Fetcher in df_summary.iterrows():
         if ref_anterior != Fetcher.Referencia:
             lista_full.append(current_dict)
@@ -329,7 +302,6 @@ def create_pivot_history_full(dataBaseFile, typesTable, EntriesTable):
 
     lista_full.append(current_dict)
     dev_null = lista_full.pop(0)  ## remove the 1st reference
-
     data_to_write = pd.DataFrame(lista_full)
     data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
     connection.commit()
@@ -339,7 +311,6 @@ def main():
     # Environment / Variables
     # current date and time
     config = configparser.ConfigParser()
-
     try:
         print('Reading configuration file ... .. .')
         with open('config.ini') as cfg:
@@ -357,7 +328,6 @@ def main():
         multi_rept_file = config.getboolean('SETTINGS', 'RPT_SINGLE_FILE')
         output_name = config['SETTINGS']['OUT_RPT_FILE']
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
-
     except FileNotFoundError:
         print("Arquivo de configuracao nao encontrado!")
         exit(1)
@@ -370,9 +340,7 @@ def main():
 
     current_dt = datetime.datetime.now()
     now = current_dt.strftime("%Y%m%d.%H%M%S")
-
     input_file = DIR_FILE_IN + 'PDW.' + in_type
-
     if overwrite_db:
         sqlite_database = DIR_FILE_OUT + 'PDW.db'
     else:
@@ -381,7 +349,6 @@ def main():
     guindind_sheet = 'GUIDING'
     types_of_entries = 'TiposLancamentos'
     general_entries_table = 'LANCAMENTOS_GERAIS'
-
     if not os.path.exists(DIR_FILE_IN) : 
         print(f'The Input Directory {DIR_FILE_IN} does not exists  !!! !! !')
         exit(1)
@@ -409,7 +376,6 @@ def main():
 
     create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
     create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table)
-
     if run_reports:
         general_entries_CVS_exportator(sqlite_database, DIR_FILE_OUT, general_entries_table + '.FULL',
                                        general_entries_table)

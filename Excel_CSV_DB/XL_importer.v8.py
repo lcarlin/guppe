@@ -124,10 +124,10 @@ def general_entries_cvs_exportator(data_base_file, dir_out, file_out, table_name
     connection.close()
 
 
-def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files):
+def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension):
     print('Exporting Summarized data ... .. .  ')
     connection = sqlite3.connect(sqlite_database)
-    file_full_path = dir_out + file_name + '.xlsx'
+    file_full_path = dir_out + file_name + '.' + out_extension
     lista_consultas = []
     if write_multiple_files:
         xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
@@ -163,7 +163,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
 
         else:
-            file_full_path = dir_out + excel_sheet + '.v2.' + 'xlsx'
+            file_full_path = dir_out + excel_sheet + '.v2.' + out_extension
             message = f'   . .. ... Step: {k + 1:04} :-> Exporting {file_full_path} to file(s) '
             df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False)
 
@@ -395,7 +395,7 @@ def main():
     if run_reports:
         general_entries_cvs_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                        general_entries_table)
-        xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file)
+        xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type)
 
     print("Personal DataWare House processes ended")
     print("===============================================")

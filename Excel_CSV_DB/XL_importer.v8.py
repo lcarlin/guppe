@@ -357,13 +357,12 @@ def main():
         print(e)
         exit(1)
 
-    current_dt = datetime.datetime.now()
     started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     input_file = dir_file_in + in_file + '.' + in_type
     if overwrite_db:
         sqlite_database = dir_file_out + out_db + '.' + db_file_type
     else:
-        sqlite_database = dir_file_out + out_db + '.' + current_dt.strftime("%Y%m%d.%H%M%S") + '.' + db_file_type
+        sqlite_database = dir_file_out + out_db + '.' + datetime.datetime.now().strftime("%Y%m%d.%H%M%S") + '.' + db_file_type
 
     if not os.path.exists(dir_file_in):
         print(f'The Input Directory {dir_file_in} does not exists  !!! !! !')

@@ -19,7 +19,8 @@ pip install pyinstaller
 # 2022-12-26 # Merge With Version 6.1 and 7 # Carlin, Luiz A. .'.
 ####################################################################################
 # Todo List
-# command line parameters ( directories, input file name)
+# LOG file
+# Last Run date from Log File
 # GUI Interface
 #
 #
@@ -346,6 +347,7 @@ def main():
         types_of_entries = config['SETTINGS']['TYPES_OF_ENTRIES']
         general_entries_table = config['SETTINGS']['GENERAL_ENTRIES_TABLE']
         db_file_type = config['FILE_TYPES']['DB_FILE_TYPE']
+        log_file_cfg = dir_file_out + config['SETTINGS']['LOG_FILE']
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
     except FileNotFoundError:
         print("Arquivo de configuracao nao encontrado!")
@@ -377,7 +379,28 @@ def main():
         print(f'The Input Load File {input_file} does not exists in the Input Directory {dir_file_in} ... .. .')
         exit(1)
 
+    # begin of log block
+    last_run_date = 'none'
+    is_log_empty = False
+    exist_log = False
+    if os.path.isfile(log_file_cfg) :
+        exist_log = True
+        if os.path.getsize(log_file_cfg) == 0:
+            is_log_empty = True
+            print(f'Log File {log_file_cfg} is Empty ')
+    else:
+        print(f'Log File {log_file_cfg} does Not Exists yet ')
+
+    log_file = open(log_file_cfg,'w+')
+    if not is_log_empty and exist_log:
+       last_line = log_file.readlines()[-1].split('|')
+       last_run_date = last_line[0]
+
+    # end of LOG block
+
     print("===============================================")
+    print(f'Last RUN Date           :-> {last_run_date}')
+    print(f'LOG File                :-> {log_file_cfg} ')
     print(f'Excel Sheet  Input file :-> {input_file}')
     print(f'Output SQLite3 Database :-> {sqlite_database}')
     print(f'Guidind Excel Sheet     :-> {guiding_table}')
@@ -396,6 +419,9 @@ def main():
         general_entries_cvs_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                        general_entries_table)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type)
+
+    log_line = now + '| Started|' + datetime.datetime.now().strftime("%Y%m%d.%H%M%S")+'| Ended'
+    log_file.write(log_line)
 
     print("Personal DataWare House processes ended")
     print("===============================================")

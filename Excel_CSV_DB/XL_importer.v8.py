@@ -19,8 +19,6 @@ pip install pyinstaller
 # 2022-12-26 # Merge With Version 6.1 and 7 # Carlin, Luiz A. .'.
 ####################################################################################
 # Todo List
-# LOG file
-# Last Run date from Log File
 # GUI Interface
 #
 #
@@ -360,12 +358,12 @@ def main():
         exit(1)
 
     current_dt = datetime.datetime.now()
-    now = current_dt.strftime("%Y%m%d.%H%M%S")
+    started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     input_file = dir_file_in + in_file + '.' + in_type
     if overwrite_db:
         sqlite_database = dir_file_out + out_db + '.' + db_file_type
     else:
-        sqlite_database = dir_file_out + out_db + '.' + now + '.' + db_file_type
+        sqlite_database = dir_file_out + out_db + '.' + current_dt.strftime("%Y%m%d.%H%M%S") + '.' + db_file_type
 
     if not os.path.exists(dir_file_in):
         print(f'The Input Directory {dir_file_in} does not exists  !!! !! !')
@@ -381,21 +379,23 @@ def main():
 
     # begin of log block
     last_run_date = 'none'
+    log_file_exists = os.path.isfile(log_file_cfg)
     is_log_empty = False
-    exist_log = False
-    if os.path.isfile(log_file_cfg) :
-        exist_log = True
-        if os.path.getsize(log_file_cfg) == 0:
-            is_log_empty = True
+    if log_file_exists:
+        is_log_empty = os.stat(log_file_cfg).st_size == 0
+        if is_log_empty:
             print(f'Log File {log_file_cfg} is Empty ')
     else:
         print(f'Log File {log_file_cfg} does Not Exists yet ')
+        new_log_file = open(log_file_cfg,'w')
+        new_log_file.write('New LOG created at :-> '+ datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") +'\n')
+        new_log_file.close()
 
-    log_file = open(log_file_cfg,'w+')
-    if not is_log_empty and exist_log:
-       last_line = log_file.readlines()[-1].split('|')
-       last_run_date = last_line[0]
-
+    log_file = open(log_file_cfg,'r+')
+    if not is_log_empty and log_file_exists:
+       last_line = log_file.readlines()[-1]
+       last_record = last_line.split('|')
+       last_run_date = last_record[0]
     # end of LOG block
 
     print("===============================================")
@@ -420,8 +420,9 @@ def main():
                                        general_entries_table)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type)
 
-    log_line = now + '| Started|' + datetime.datetime.now().strftime("%Y%m%d.%H%M%S")+'| Ended'
+    log_line = started + '| Started|' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")+'| Ended'
     log_file.write(log_line)
+    log_file.write('\n')
 
     print("Personal DataWare House processes ended")
     print("===============================================")

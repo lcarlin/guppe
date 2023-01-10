@@ -137,8 +137,8 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
     lista_consultas.append(["select * from HistoricoGeral;", "HistoricoGeral"])
     lista_consultas.append(["select * from HistoricoAnual;", "HistoricoAnual"])
     lista_consultas.append(["select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from LANCAMENTOS_GERAIS" \
-                            " where Data between date('now','-1 month') and date('now') and debito > 0 group by tipo " \
-                            " order by 2 desc;", "Ultimos30Dias"])
+                            " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 " \ 
+                            " group by tipo order by 2 desc;", "Ultimos30Dias"])
     lista_consultas.append(
         ["SELECT substr (LG.DATA, 1,4 ) || '-' || substr (LG.DATA, 6,2 ) || '-' || substr(LG.DATA, 9,2) AS Quando " \
          ", LG.DIA_SEMANA as 'Dia da Semana' " \

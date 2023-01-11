@@ -151,6 +151,10 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
          ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
          ", LG.ORIGEM  as Origem " \
          " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; ", "LANCAMENTOS_GERAIS"])
+    
+    lista_consultas.append(["select Ano || ' - ' || Mes as 'Referência', count(1) as Iterações " \
+                            " from LANCAMENTOS_GERAIS group by  Ano || ' - ' || Mes " 
+                            " order by  Ano || ' - ' || Mes desc ;", "Iterações_Mensais"])
 
     for k in range(0, len(lista_consultas)):
         consulta = lista_consultas[k]

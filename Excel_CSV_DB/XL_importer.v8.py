@@ -359,6 +359,8 @@ def main():
         types_of_entries = config['SETTINGS']['TYPES_OF_ENTRIES']
         general_entries_table = config['SETTINGS']['GENERAL_ENTRIES_TABLE']
         create_pivot = general_entries_table = config['SETTINGS']['CREATE_PIVOT']
+        save_discarted_data = config['SETTINGS']['SAVE_DISCARTED_DATA']
+        discarted_data_table = config['SETTINGS']['DISCARTED_DATA_TABLE']
 
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
     except FileNotFoundError:

@@ -203,11 +203,12 @@ def data_correjeitor(conexao):
                        "  when 3 then 'Quarta-Feira' " \
                        "  when 4 then 'Quinta-Feira' " \
                        "  when 5 then 'Sexta-Feira' " \
-                       "  else 'Sábado' end " \
+                        " when 6 then 'Sábado' " \
+                       "  else 'INVALIDO' end " \
                        "    where DIA_SEMANA IS NULL ; ")
 
     for i in range(0, len(lista_acoes)):
-        print(f'   . .. ... Step : {i + 1:04}')
+        print(f'   . .. ... Step: {i + 1:04}')
         cursor.execute(lista_acoes[i])
 
 
@@ -231,13 +232,15 @@ def data_loader(data_base, general_entries_table, guindind_sheet, excel_file):
         print(f'   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load} ')
         if 'X' == is_loadeable:
             data_frame = pd.read_excel(excel_file, sheet_name=table_to_load)
-            if 'X' == is_accounting and 'X' == is_cleanable:
-                # limpa registros com os Tipos Nulos
+            if 'X' == is_accounting:
                 data_frame['TIPO'].replace('', np.nan, inplace=True)
-                data_frame.dropna(subset=['TIPO'], inplace=True)
-                # limpa registros com as Datas Nulas
                 data_frame['Data'].replace('', np.nan, inplace=True)
-                data_frame.dropna(subset=['Data'], inplace=True)
+                if  'X' == is_cleanable:  ## ATENÇÃO A ISSO AQUI 
+                    # limpa registros com os Tipos Nulos
+                    data_frame.dropna(subset=['TIPO'], inplace=True)
+                    # limpa registros com as Datas Nulas
+                    data_frame.dropna(subset=['Data'], inplace=True)
+                    
                 general_entries_df = data_frame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
                 general_entries_df.insert(1, 'DIA_SEMANA', np.nan)
                 general_entries_df['Mes'] = 'MM'
@@ -336,23 +339,27 @@ def main():
             config.read_file(cfg)
 
         dir_file_in = config['DIRECTORIES']['DIR_IN']
-        in_file = config['SETTINGS']['INPUT_FILE']
         dir_file_out = config['DIRECTORIES']['DIR_OUT']
-        splitter = config.getint('SETTINGS', 'PARALLELS')
+
+        in_file = config['FILE_TYPES']['INPUT_FILE']
         in_type = config['FILE_TYPES']['TYPE_IN']
         out_type = config['FILE_TYPES']['TYPE_OUT']
-        out_db = config['SETTINGS']['OUT_DB_FILE']
+        out_db = config['FILE_TYPES']['OUT_DB_FILE']
+        output_name = config['FILE_TYPES']['OUT_RPT_FILE']
+        db_file_type = config['FILE_TYPES']['DB_FILE_TYPE']
+        log_file_cfg = dir_file_out + config['FILE_TYPES']['LOG_FILE']
+        
+        splitter = config.getint('SETTINGS', 'PARALLELS')
         multithread = config.getboolean('SETTINGS', 'MULTITHREADING')
         overwrite_db = config.getboolean('SETTINGS', 'OVERWRITE_DB')
         run_loader = config.getboolean('SETTINGS', 'RUN_DATA_LOADER')
         run_reports = config.getboolean('SETTINGS', 'RUN_REPORTS')
         multi_rept_file = config.getboolean('SETTINGS', 'RPT_SINGLE_FILE')
-        output_name = config['SETTINGS']['OUT_RPT_FILE']
         guiding_table = config['SETTINGS']['GUIDING_TABLE']
         types_of_entries = config['SETTINGS']['TYPES_OF_ENTRIES']
         general_entries_table = config['SETTINGS']['GENERAL_ENTRIES_TABLE']
-        db_file_type = config['FILE_TYPES']['DB_FILE_TYPE']
-        log_file_cfg = dir_file_out + config['SETTINGS']['LOG_FILE']
+        create_pivot = general_entries_table = config['SETTINGS']['CREATE_PIVOT']
+
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
     except FileNotFoundError:
         print("Arquivo de configuracao nao encontrado!")
@@ -419,8 +426,10 @@ def main():
         else:
             data_loader_parallel(sqlite_database, general_entries_table, guiding_table, input_file)
 
-    create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
-    create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table)
+    if create_pivot:
+        create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
+        create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table)
+    
     if run_reports:
         general_entries_cvs_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                        general_entries_table)

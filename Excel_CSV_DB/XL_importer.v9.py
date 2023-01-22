@@ -24,6 +24,7 @@ pip install openpyxl
 pip install sqlalchemy
 pip install numpy
 pip install pyinstaller
+
 pip install lxml
 pip install tabulate
 pip install tables
@@ -107,7 +108,7 @@ def data_loader_parallel(data_base, general_entries_table, guindind_sheet, excel
     conn.close()
 
 
-def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name):
+def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name ):
     connection = sqlite3.connect(data_base_file)
     file_full_path = dir_out + file_out + '.v2'
     print(f"Exporting {file_full_path} to file(s) ")
@@ -121,7 +122,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
                   ", ''''||cast (ano as text) as 'Ano' " \
                   ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
                   ", LG.ORIGEM  as Origem " \
-                  " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; "
+                  f" FROM {table_name} LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
     df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='ansi')
     # df_out.to_json(file_full_path + '.json',orient='records')
@@ -132,7 +133,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
     connection.close()
 
 
-def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension):
+def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension,entries_table):
     print('Exporting Summarized data ... .. .  ')
     connection = sqlite3.connect(sqlite_database)
     file_full_path = dir_out + file_name + '.' + out_extension
@@ -145,7 +146,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         , "HistoricoGeral12Meses"])
     lista_consultas.append(["select * from HistoricoGeral;", "HistoricoGeral"])
     lista_consultas.append(["select * from HistoricoAnual;", "HistoricoAnual"])
-    lista_consultas.append(["select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from LANCAMENTOS_GERAIS" \
+    lista_consultas.append([f"select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from {entries_table}" \
                             " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 " \
                             " group by tipo order by 2 desc;", "Ultimos30Dias"])
     lista_consultas.append(
@@ -159,13 +160,13 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
          ", ''''||cast (ano as text) as 'Ano' " \
          ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
          ", LG.ORIGEM  as Origem " \
-         " FROM LANCAMENTOS_GERAIS LG ORDER  BY DATA DESC ; ", "LANCAMENTOS_GERAIS"])
+         f" FROM {entries_table} LG ORDER  BY DATA DESC ; ", entries_table ])
     lista_consultas.append(["select Ano || ' - ' || Mes as 'Referência', count(1) as 'Total' " \
                             ", round( cast (count(1) as float)  / ( case Mes when '01' then 31" \
                             " when '02' then 28 when '03' then 31 when '04' then 30 when '05' then 31" \
                             " when '06' then 30 when '07' then 31 when '08' then 31 when '09' then 30" \
                             " when '10' then 31 when '11' then 30 when '12' then 31 end ),2) as 'Por Dia'" \
-                            " from LANCAMENTOS_GERAIS group by  Ano || ' - ' || Mes " \
+                            f" from {entries_table} group by  Ano || ' - ' || Mes " \
                             " order by  Ano || ' - ' || Mes desc ;", "Iterações_Mensais"])
 
     for k in range(0, len(lista_consultas)):
@@ -190,27 +191,27 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         xlsx_writer.close()
 
 
-def data_correjeitor(conexao, save_useless, useless_table):
-    print(f'Normalizing data on LANCAMENTOS_GERAIS Table ...')
+def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_table):
+    print(f'Normalizing data on {entries_table} Table ...')
     cursor = conexao
     lista_acoes = []
     if save_useless:
         print(f'   . .. ... Saving discated Data')
         table_droppator(cursor, useless_table)
-        lista_acoes.append(f"create table {useless_table} as select * from LANCAMENTOS_GERAIS where (data is null or tipo is null); ")
-        lista_acoes.append("delete from LANCAMENTOS_GERAIS where (data is null or tipo is null);")
+        lista_acoes.append(f"create table {useless_table} as select * from {entries_table} where (data is null or tipo is null); ")
+        lista_acoes.append(f"delete from {entries_table} where (data is null or tipo is null);")
 
-    lista_acoes.append("Update LANCAMENTOS_GERAIS \
+    lista_acoes.append(f"Update {entries_table} \
        set Mes = strftime ('%m',data )  \
        , Ano = strftime ('%Y',data )  \
        , mesAno = strftime ('%m',data ) ||'/'||strftime ('%Y',data ); ")
-    lista_acoes.append("update LANCAMENTOS_GERAIS set credito = 0 where credito is null; ")
-    lista_acoes.append("update LANCAMENTOS_GERAIS set debito = 0 where debito is null ;")
-    lista_acoes.append("Delete from TiposLancamentos WHERE ( Código IS NULL or Descrição IS NULL) ;")
-    lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'∴', '.''.')  ;")
-    lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'ś', '''s')  ;")
-    lista_acoes.append("update LANCAMENTOS_GERAIS set descricao = replace (descricao,'', '''s')  ;")
-    lista_acoes.append("UPDATE LANCAMENTOS_GERAIS " \
+    lista_acoes.append(f"update {entries_table} set credito = 0 where credito is null; ")
+    lista_acoes.append(f"update {entries_table} set debito = 0 where debito is null ;")
+    lista_acoes.append(f"Delete from {types_sheet} WHERE ( Código IS NULL or Descrição IS NULL) ;")
+    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'∴', '.''.')  ;")
+    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'ś', '''s')  ;")
+    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'', '''s')  ;")
+    lista_acoes.append(f"UPDATE {entries_table} " \
                        "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
                        "  when 0 then 'Domingo' " \
                        "  when 1 then 'Segunda-Feira' " \
@@ -233,7 +234,7 @@ def table_droppator(conexao, table_name):
     print(f"Table {table_name} dropped... ")
 
 
-def data_loader(data_base, general_entries_table, guindind_sheet, excel_file, save_useless, udt ):
+def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt ):
     conn = sqlite3.connect(data_base)
     work_books = pd.ExcelFile(excel_file)
     sheets_dataframe = work_books.parse(sheet_name=guindind_sheet)
@@ -270,7 +271,7 @@ def data_loader(data_base, general_entries_table, guindind_sheet, excel_file, sa
             data_frame.to_sql(table_to_load, conn, index=False, if_exists="replace")
             conn.commit()
 
-    data_correjeitor(conn.cursor(), save_useless, udt)
+    data_correjeitor(conn.cursor(),types_sheet, general_entries_table, save_useless, udt)
     conn.commit()
     conn.close()
 
@@ -280,8 +281,8 @@ def create_pivot_history_anual(data_base_file, types_table, entries_table):
     connection = sqlite3.connect(data_base_file)
     ref_anterior = 'MM/YYYY'
     out_table = 'HistoricoAnual'
-    sql_statment_types = 'SELECT Código as COD, Descrição as DESC FROM TiposLancamentos ;'
-    sql_statment_summary = 'select Ano as Referencia, TIPO, sum(Debito) as DEBITOS FROM LANCAMENTOS_GERAIS ' \
+    sql_statment_types = f'SELECT Código as COD, Descrição as DESC FROM {types_table} ;'
+    sql_statment_summary = f'select Ano as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
                            ' GROUP BY Ano, TIPO order by Ano ;'
     df_types = pd.read_sql(sql_statment_types, connection)
     df_summary = pd.read_sql(sql_statment_summary, connection)
@@ -315,8 +316,8 @@ def create_pivot_history_full(data_base_file, types_table, entries_table):
     connection = sqlite3.connect(data_base_file)
     ref_anterior = 'MM/YYYY'
     out_table = 'HistoricoGeral'
-    sql_statment_types = 'SELECT Código as COD, Descrição as DESC FROM TiposLancamentos ;'
-    sql_statment_summary = 'select MesAno as Referencia, TIPO, sum(Debito) as DEBITOS FROM LANCAMENTOS_GERAIS ' \
+    sql_statment_types = f'SELECT Código as COD, Descrição as DESC FROM {types_table} ;'
+    sql_statment_summary = f'select MesAno as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
                            ' GROUP BY MesAno, TIPO order by Ano, Mes, TIPO desc ;'
     df_types = pd.read_sql(sql_statment_types, connection)
     df_summary = pd.read_sql(sql_statment_summary, connection)
@@ -440,7 +441,7 @@ def main():
 
     if run_loader:
         if not multithread:
-            data_loader(sqlite_database, general_entries_table, guiding_table, input_file, save_discarted_data, discarted_data_table)
+            data_loader(sqlite_database, types_of_entries, general_entries_table, guiding_table, input_file, save_discarted_data, discarted_data_table)
         else:
             print(f'Bad, Bad Server. Not donuts for you')
             print(f'Threads are evil. Avoid them.')
@@ -467,7 +468,7 @@ def main():
     if run_reports:
         general_entries_file_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                        general_entries_table)
-        xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type)
+        xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type, general_entries_table)
 
     log_line = started + '| Started|' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")+'| Ended'
     log_file.write(log_line)

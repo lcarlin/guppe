@@ -226,6 +226,7 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     for i in range(0, len(lista_acoes)):
         print(f'   . .. ... Step: {i + 1:04}')
         cursor.execute(lista_acoes[i])
+        print(f'            . .. ... Lines Affected: {cursor.rowcount:05}')
 
 
 def table_droppator(conexao, table_name):

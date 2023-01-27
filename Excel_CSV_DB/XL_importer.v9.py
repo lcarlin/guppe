@@ -124,12 +124,13 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
                   ", LG.ORIGEM  as Origem " \
                   f" FROM {table_name} LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
+    row_count = len(df_out.index)
     df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='ansi')
     # df_out.to_json(file_full_path + '.json',orient='records')
     # df_out.to_html(file_full_path + '.html')
     # df_out.to_xml(file_full_path + '.xml', parser = 'lxml', pretty_print=True, xml_declaration=True)
     
-    print(f'File(s) export(s) for table "{table_name}" has been created successfully!')
+    print(f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
     connection.close()
 
 
@@ -226,9 +227,9 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
                        "    where DIA_SEMANA IS NULL ;")
 
     for i in range(0, len(lista_acoes)):
-        print(f'   . .. ... Step: {i + 1:04}')
+        print(f'   . .. ... Step: {i + 1:04}', end = ' ')
         cursor.execute(lista_acoes[i])
-        print(f'            . .. ... Lines Affected: {cursor.rowcount:05}')
+        print(f';  Lines Affected: {cursor.rowcount:05}')
 
 
 def table_droppator(conexao, table_name):
@@ -248,7 +249,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
         is_accounting = infos.ACCOUNTING
         is_cleanable = infos.CLEANABLE
         is_loadeable = infos.LOADABLE
-        print(f'   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load} ')
+        print(f'   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load.strip()} ', end = ' ')
         if 'X' == is_loadeable:
             data_frame = pd.read_excel(excel_file, sheet_name=table_to_load)
             if 'X' == is_accounting:
@@ -271,7 +272,8 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
                 general_entries_df.to_sql(general_entries_table, conn, index=False, if_exists="append")
 
             # grava a tabela (UNITÁRIA) do DataFrame do BD
-            data_frame.to_sql(table_to_load, conn, index=False, if_exists="replace")
+            number_lines = data_frame.to_sql(table_to_load, conn, index=False, if_exists="replace")
+            print(f'; Lines Created :-> {number_lines} ')
             conn.commit()
 
     data_correjeitor(conn.cursor(),types_sheet, general_entries_table, save_useless, udt)

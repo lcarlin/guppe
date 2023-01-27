@@ -211,6 +211,8 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'∴', '.''.')  ;")
     lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'ś', '''s')  ;")
     lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'', '''s')  ;")
+    lista_acoes.append(f"update {entries_table} set credito  = round(credito,2) where credito > 0  ;")
+    lista_acoes.append(f"update {entries_table} set debito  = round(debito,2) where debito > 0  ;")
     lista_acoes.append(f"UPDATE {entries_table} " \
                        "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
                        "  when 0 then 'Domingo' " \

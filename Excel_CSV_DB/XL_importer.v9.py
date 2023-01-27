@@ -204,13 +204,15 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     lista_acoes.append(f"Update {entries_table} \
        set Mes = strftime ('%m',data )  \
        , Ano = strftime ('%Y',data )  \
-       , mesAno = strftime ('%m',data ) ||'/'||strftime ('%Y',data ); ")
-    lista_acoes.append(f"update {entries_table} set credito = 0 where credito is null; ")
+       , mesAno = strftime ('%m',data ) ||'/'||strftime ('%Y',data ) ;")
+    lista_acoes.append(f"update {entries_table} set credito = 0 where credito is null ;")
     lista_acoes.append(f"update {entries_table} set debito = 0 where debito is null ;")
     lista_acoes.append(f"Delete from {types_sheet} WHERE ( Código IS NULL or Descrição IS NULL) ;")
-    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'∴', '.''.')  ;")
-    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'ś', '''s')  ;")
-    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'', '''s')  ;")
+    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'∴', '.''.') ;")
+    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'ś', '''s') ;")
+    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'', '''s') ;")
+    lista_acoes.append(f"update {entries_table} set debito = round(debito,2) where debito > 0 ;")
+    lista_acoes.append(f"update {entries_table} set credito = round(credito,2) where credito > 0 ;")
     lista_acoes.append(f"UPDATE {entries_table} " \
                        "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
                        "  when 0 then 'Domingo' " \
@@ -221,7 +223,7 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
                        "  when 5 then 'Sexta-Feira' " \
                         " when 6 then 'Sábado' " \
                        "  else 'INVALIDO' end " \
-                       "    where DIA_SEMANA IS NULL ; ")
+                       "    where DIA_SEMANA IS NULL ;")
 
     for i in range(0, len(lista_acoes)):
         print(f'   . .. ... Step: {i + 1:04}')

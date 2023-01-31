@@ -28,6 +28,8 @@ pip install pyinstaller
 pip install lxml
 pip install tabulate
 pip install tables
+pyinstaller -F -i "G:\Meu Drive\PDW\DataWareHouse02.ico" .\XL_importer.v9.py
+
 """
 
 import sqlite3

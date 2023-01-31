@@ -436,7 +436,7 @@ def main():
     log_file = open(log_file_cfg, 'r+')
     if not is_log_empty and log_file_exists:
         last_run_date = log_file.readlines()[-1].split('|')[0]
-    # end of LOG block
+    # end of LOG block 
 
     print("===============================================")
     print(f'Last RUN Date           :-> {last_run_date}')

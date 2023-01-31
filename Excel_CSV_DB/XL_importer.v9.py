@@ -37,9 +37,11 @@ import numpy as np
 import configparser
 import os
 import threading
-#from lxml import etree et
-#import tabulate
-#import tables
+
+
+# from lxml import etree et
+# import tabulate
+# import tables
 
 def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
     db_connection = sqlite3.connect(db_file)
@@ -108,7 +110,7 @@ def data_loader_parallel(data_base, general_entries_table, guindind_sheet, excel
     conn.close()
 
 
-def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name ):
+def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name):
     connection = sqlite3.connect(data_base_file)
     file_full_path = dir_out + file_out + '.v2'
     print(f"Exporting {file_full_path} to file(s) ")
@@ -129,12 +131,13 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
     # df_out.to_json(file_full_path + '.json',orient='records')
     # df_out.to_html(file_full_path + '.html')
     # df_out.to_xml(file_full_path + '.xml', parser = 'lxml', pretty_print=True, xml_declaration=True)
-    
-    print(f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
+
+    print(
+        f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
     connection.close()
 
 
-def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension,entries_table):
+def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table):
     print('Exporting Summarized data ... .. .  ')
     connection = sqlite3.connect(sqlite_database)
     file_full_path = dir_out + file_name + '.' + out_extension
@@ -161,7 +164,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
          ", ''''||cast (ano as text) as 'Ano' " \
          ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
          ", LG.ORIGEM  as Origem " \
-         f" FROM {entries_table} LG ORDER  BY DATA DESC ; ", entries_table ])
+         f" FROM {entries_table} LG ORDER  BY DATA DESC ; ", entries_table])
     lista_consultas.append(["select Ano || ' - ' || Mes as 'Referência', count(1) as 'Total' " \
                             ", round( cast (count(1) as float)  / ( case Mes when '01' then 31" \
                             " when '02' then 28 when '03' then 31 when '04' then 30 when '05' then 31" \
@@ -199,7 +202,8 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     if save_useless:
         print(f'   . .. ... Saving discated Data')
         table_droppator(cursor, useless_table)
-        lista_acoes.append(f"create table {useless_table} as select * from {entries_table} where (data is null or tipo is null); ")
+        lista_acoes.append(
+            f"create table {useless_table} as select * from {entries_table} where (data is null or tipo is null); ")
         lista_acoes.append(f"delete from {entries_table} where (data is null or tipo is null);")
 
     lista_acoes.append(f"Update {entries_table} \
@@ -222,12 +226,12 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
                        "  when 3 then 'Quarta-Feira' " \
                        "  when 4 then 'Quinta-Feira' " \
                        "  when 5 then 'Sexta-Feira' " \
-                        " when 6 then 'Sábado' " \
+                       " when 6 then 'Sábado' " \
                        "  else 'INVALIDO' end " \
                        "    where DIA_SEMANA IS NULL ;")
 
     for i in range(0, len(lista_acoes)):
-        print(f'   . .. ... Step: {i + 1:04}', end = ' ')
+        print(f'   . .. ... Step: {i + 1:04}', end=' ')
         cursor.execute(lista_acoes[i])
         print(f';  Lines Affected: {str(cursor.rowcount).rjust(5)}')
 
@@ -238,7 +242,7 @@ def table_droppator(conexao, table_name):
     print(f"Table {table_name} dropped... ")
 
 
-def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt ):
+def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
     conn = sqlite3.connect(data_base)
     work_books = pd.ExcelFile(excel_file)
     sheets_dataframe = work_books.parse(sheet_name=guindind_sheet)
@@ -249,19 +253,19 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
         is_accounting = infos.ACCOUNTING
         is_cleanable = infos.CLEANABLE
         is_loadeable = infos.LOADABLE
-        print(f'   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load.strip()} ', end = ' ')
+        print(f'   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load.strip()}', end=' ')
         if 'X' == is_loadeable:
             data_frame = pd.read_excel(excel_file, sheet_name=table_to_load)
             if 'X' == is_accounting:
                 data_frame['TIPO'].replace('', np.nan, inplace=True)
                 data_frame['Data'].replace('', np.nan, inplace=True)
 
-                if  'X' == is_cleanable and not save_useless:  ## ATENÇÃO A ISSO AQUI 
+                if 'X' == is_cleanable and not save_useless:  ## ATENÇÃO A ISSO AQUI
                     # limpa registros com os Tipos Nulos
                     data_frame.dropna(subset=['TIPO'], inplace=True)
                     # limpa registros com as Datas Nulas
                     data_frame.dropna(subset=['Data'], inplace=True)
-                    
+
                 general_entries_df = data_frame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
                 general_entries_df.insert(1, 'DIA_SEMANA', np.nan)
                 general_entries_df['Mes'] = 'MM'
@@ -276,7 +280,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
             print(f'; Lines Created :-> {number_lines} ')
             conn.commit()
 
-    data_correjeitor(conn.cursor(),types_sheet, general_entries_table, save_useless, udt)
+    data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)
     conn.commit()
     conn.close()
 
@@ -370,7 +374,7 @@ def main():
         output_name = config['FILE_TYPES']['OUT_RPT_FILE']
         db_file_type = config['FILE_TYPES']['DB_FILE_TYPE']
         log_file_cfg = dir_file_out + config['FILE_TYPES']['LOG_FILE']
-        
+
         splitter = config.getint('SETTINGS', 'PARALLELS')
         multithread = config.getboolean('SETTINGS', 'MULTITHREADING')
         overwrite_db = config.getboolean('SETTINGS', 'OVERWRITE_DB')
@@ -380,8 +384,8 @@ def main():
         guiding_table = config['SETTINGS']['GUIDING_TABLE']
         types_of_entries = config['SETTINGS']['TYPES_OF_ENTRIES']
         general_entries_table = config['SETTINGS']['GENERAL_ENTRIES_TABLE']
-        create_pivot = config.getboolean('SETTINGS','CREATE_PIVOT')
-        save_discarted_data = config.getboolean('SETTINGS','SAVE_DISCARTED_DATA')
+        create_pivot = config.getboolean('SETTINGS', 'CREATE_PIVOT')
+        save_discarted_data = config.getboolean('SETTINGS', 'SAVE_DISCARTED_DATA')
         discarted_data_table = config['SETTINGS']['DISCARTED_DATA_TABLE']
 
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
@@ -400,7 +404,8 @@ def main():
     if overwrite_db:
         sqlite_database = dir_file_out + out_db + '.' + db_file_type
     else:
-        sqlite_database = dir_file_out + out_db + '.' + datetime.datetime.now().strftime("%Y%m%d.%H%M%S") + '.' + db_file_type
+        sqlite_database = dir_file_out + out_db + '.' + datetime.datetime.now().strftime(
+            "%Y%m%d.%H%M%S") + '.' + db_file_type
 
     if not os.path.exists(dir_file_in):
         print(f'The Input Directory {dir_file_in} does not exists  !!! !! !')
@@ -424,15 +429,13 @@ def main():
             print(f'Log File {log_file_cfg} is Empty ')
     else:
         print(f'Log File {log_file_cfg} does Not Exists yet ')
-        new_log_file = open(log_file_cfg,'w')
-        new_log_file.write('New LOG created at :-> '+ datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") +'\n')
+        new_log_file = open(log_file_cfg, 'w')
+        new_log_file.write('New LOG created at :-> ' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '\n')
         new_log_file.close()
 
-    log_file = open(log_file_cfg,'r+')
+    log_file = open(log_file_cfg, 'r+')
     if not is_log_empty and log_file_exists:
-       last_line = log_file.readlines()[-1]
-       last_record = last_line.split('|')
-       last_run_date = last_record[0]
+        last_run_date = log_file.readlines()[-1].split('|')[0]
     # end of LOG block
 
     print("===============================================")
@@ -446,7 +449,8 @@ def main():
 
     if run_loader:
         if not multithread:
-            data_loader(sqlite_database, types_of_entries, general_entries_table, guiding_table, input_file, save_discarted_data, discarted_data_table)
+            data_loader(sqlite_database, types_of_entries, general_entries_table, guiding_table, input_file,
+                        save_discarted_data, discarted_data_table)
         else:
             print(f'Bad, Bad Server. Not donuts for you')
             print(f'Threads are evil. Avoid them.')
@@ -469,15 +473,16 @@ def main():
     if create_pivot:
         create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
         create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table)
-    
+
     if run_reports:
         general_entries_file_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
-                                       general_entries_table)
-        xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type, general_entries_table)
+                                        general_entries_table)
+        xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
+                              general_entries_table)
 
-    log_line = started + '| Started|' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")+'| Ended'
+    log_line = started + '| Started|' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '| Ended' + '\n'
     log_file.write(log_line)
-    log_file.write('\n')
+    log_file.close()
 
     print("Personal DataWare House processes ended")
     print("===============================================")

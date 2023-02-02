@@ -215,11 +215,13 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     lista_acoes.append(f"update {entries_table} set credito = 0 where credito is null ;")
     lista_acoes.append(f"update {entries_table} set debito = 0 where debito is null ;")
     lista_acoes.append(f"Delete from {types_sheet} WHERE ( Código IS NULL or Descrição IS NULL) ;")
-    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'∴', '.''.')  ;")
-    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'ś', '''s')  ;")
-    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'', '''s')  ;")
+    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'∴', '.''.') where descricao like '%∴%' ;")
+    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'ś', '''s') where descricao like '%ś%' ;")
+    # lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'', '''s')  ;")
     lista_acoes.append(f"update {entries_table} set credito  = round(credito,2) where credito > 0  ;")
     lista_acoes.append(f"update {entries_table} set debito  = round(debito,2) where debito > 0  ;")
+    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,',', '/') where descricao like '%,%' ;")
+    lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,';', '/') where descricao like '%;%' ;")
     lista_acoes.append(f"UPDATE {entries_table} " \
                        "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
                        "  when 0 then 'Domingo' " \
@@ -361,9 +363,10 @@ def main():
     # Environment / Variables
     # current date and time
     config = configparser.ConfigParser()
+    config_file = 'PersonalDataWareHouse.cfg'
     try:
         print('Reading configuration file ... .. .')
-        with open('config.ini') as cfg:
+        with open(config_file) as cfg:
             config.read_file(cfg)
 
         dir_file_in = config['DIRECTORIES']['DIR_IN']
@@ -442,6 +445,7 @@ def main():
 
     print("===============================================")
     print(f'Last RUN Date           :-> {last_run_date}')
+    print(f'Config/INI File         :-> {config_file}')
     print(f'LOG File                :-> {log_file_cfg} ')
     print(f'Excel Sheet  Input file :-> {input_file}')
     print(f'Output SQLite3 Database :-> {sqlite_database}')

@@ -88,7 +88,7 @@ def data_loader_parallel(data_base, general_entries_table, guindind_sheet, excel
                        'isLoadeable': infos.LOADABLE}
 
         tmp_table_name = dict_config['table_to_load']
-        print(f'   . .. ... Step:->  {i + 1:04} ; Table (Sheet) :-> {tmp_table_name} ')
+        print(f'   . .. ... Step:->  {i + 1:04} ; Table (Sheet) :-> "{tmp_table_name}"')
         if 'X' == dict_config['isLoadeable']:
             # thread = threading.Thread(target=parallel_df(conn, excel_File, dict_config, General_Entries_table, i + 1))
             thread = threading.Thread(target=parallel_df,
@@ -181,7 +181,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         excel_sheet = consulta[1]
         df_out = pd.read_sql(sql_statment, connection)
         if write_multiple_files:
-            message = f'   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet} to {file_full_path}'
+            message = f'   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
 
         else:
@@ -257,7 +257,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
         is_accounting = infos.ACCOUNTING
         is_cleanable = infos.CLEANABLE
         is_loadeable = infos.LOADABLE
-        print(f'   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load.strip()}', end=' ')
+        print(f'   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load.strip().ljust(25)} ;', end=' ')
         if 'X' == is_loadeable:
             data_frame = pd.read_excel(excel_file, sheet_name=table_to_load)
             if 'X' == is_accounting:
@@ -281,7 +281,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
 
             # grava a tabela (UNITÁRIA) do DataFrame do BD
             number_lines = data_frame.to_sql(table_to_load, conn, index=False, if_exists="replace")
-            print(f'; Lines Created :-> {number_lines} ')
+            print(f'Lines Created :-> {str(number_lines).rjust(6)} ')
             conn.commit()
 
     data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)

@@ -1,5 +1,8 @@
 # https://www.hostinger.com/tutorials/mysql/how-create-mysql-user-and-grant-permissions-command-line
 # https://pynative.com/python-mysql-database-connection/
+# pip uninstall  mysql.connector
+# pip install mysql-connector-python
+
 import mysql.connector
 from mysql.connector import Error
 
@@ -7,7 +10,9 @@ try:
     connection = mysql.connector.connect(host='localhost',
                                          database='Electronics',
                                          user='pynative',
-                                         password='pynative@#29', connection_timeout=180)
+                                         password='pynative@#29',
+                                         connection_timeout=180,
+                                         auth_plugin='mysql_native_password')
 
     if connection.is_connected():
         db_Info = connection.get_server_info()

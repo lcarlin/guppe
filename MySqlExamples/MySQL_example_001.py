@@ -1,5 +1,7 @@
 # https://www.hostinger.com/tutorials/mysql/how-create-mysql-user-and-grant-permissions-command-line
 # https://pynative.com/python-mysql-database-connection/
+# pip uninstall  mysql.connector
+# pip install mysql-connector-python
 
 import mysql.connector
 from mysql.connector import Error

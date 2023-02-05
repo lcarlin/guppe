@@ -1,13 +1,18 @@
-# -*- coding: ansi -*-
+# -*- coding: utf-8 -*-
 # import sqlite3
+# pip uninstall  mysql.connector
+# pip install mysql-connector-python
+from typing import Any
+
 import pandas as pd
 import mysql.connector
+from pandas import DataFrame
 
 # cbanco de dados.
 #con = sqlite3.connect('Lancamentos_Gerais.FULL.db')
 
 # entrada - data Frame
-df = pd.read_csv('Lancamentos_Gerais.FULL.csv')
+df = pd.read_csv('LANCAMENTOS_GERAIS.FULL.v2.csv')
 # print(df)
 
 try:

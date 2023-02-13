@@ -443,15 +443,15 @@ def main():
         last_run_date = log_file.readlines()[-1].split('|')[0]
     # end of LOG block 
 
-    print("===============================================")
+    print("===============================================================")
     print(f'Last RUN Date           :-> {last_run_date}')
     print(f'Config/INI File         :-> {config_file}')
     print(f'LOG File                :-> {log_file_cfg} ')
     print(f'Excel Sheet  Input file :-> {input_file}')
     print(f'Output SQLite3 Database :-> {sqlite_database}')
     print(f'Guidind Excel Sheet     :-> {guiding_table}')
-    print("===============================================")
-    print("Personal DataWare House Process Starting")
+    print("===============================================================")
+    print("Personal DataWare House Processes are Starting")
 
     if run_loader:
         if not multithread:
@@ -491,7 +491,7 @@ def main():
     log_file.close()
 
     print("Personal DataWare House processes ended")
-    print("===============================================")
+    print("===============================================================")
 
 
 if __name__ == '__main__':

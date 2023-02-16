@@ -233,7 +233,7 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
                        " when 6 then 'Sábado' " \
                        "  else 'INVALIDO' end " \
                        "    where DIA_SEMANA IS NULL ;")
-
+    lista_acoes.append('DELETE FROM Parcelamentos WHERE 1 = 1 AND (DATA IS NULL OR "Tipo Lançamento" is null) ;')
     for i in range(0, len(lista_acoes)):
         print(f'   . .. ... Step: {i + 1:04}', end=' ')
         cursor.execute(lista_acoes[i])

@@ -39,6 +39,7 @@ import numpy as np
 import configparser
 import os
 import threading
+import time
 
 
 # from lxml import etree et
@@ -362,6 +363,8 @@ def create_pivot_history_full(data_base_file, types_table, entries_table):
 def main():
     # Environment / Variables
     # current date and time
+    started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    start = time.time()
     config = configparser.ConfigParser()
     config_file = 'PersonalDataWareHouse.cfg'
     try:
@@ -404,7 +407,7 @@ def main():
         print(e)
         exit(1)
 
-    started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
     input_file = dir_file_in + in_file + '.' + in_type
     if overwrite_db:
         sqlite_database = dir_file_out + out_db + '.' + db_file_type
@@ -486,7 +489,8 @@ def main():
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
                               general_entries_table)
 
-    log_line = started + '| Started|' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '| Ended' + '\n'
+    end = time.time()
+    log_line = started + '| Started|' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + f'| Ended| {end-start:.2f} TotalSecs' + '\n'
     log_file.write(log_line)
     log_file.close()
 

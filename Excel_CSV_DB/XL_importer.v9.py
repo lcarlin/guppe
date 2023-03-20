@@ -175,6 +175,11 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             " when '10' then 31 when '11' then 30 when '12' then 31 end ),2) as 'Por Dia'" \
                             f" from {entries_table} group by  Ano || ' - ' || Mes " \
                             " order by  Ano || ' - ' || Mes desc ;", "Iterações_Mensais"])
+    lista_consultas.append(["SELECT DIA_SEMANA, COUNT(1) AS TOTAL " \
+                             f" FROM {entries_table} LG " \
+                             " WHERE Data >= date('now','-13 month') " \
+                             " GROUP BY DIA_SEMANA " \
+                             " ORDER BY 2 DESC ;","Iterações_Semanais_12M"])
 
     for k in range(0, len(lista_consultas)):
         consulta = lista_consultas[k]

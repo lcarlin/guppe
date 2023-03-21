@@ -5,8 +5,10 @@
 import os
 import sys
 import py7zr
+import time
 
-walk_dir = sys.argv[1]
+#walk_dir = sys.argv[1]
+walk_dir = 'F:\\PS2_Games'
 
 print('walk_dir = ' + walk_dir)
 
@@ -31,10 +33,15 @@ for root, subdirs, files in os.walk(walk_dir):
             print('\t- file %s (full path: %s)' % (filename, file_path))
             if filename.endswith('.7z'):
                 # Cria um objeto Py7zr para descompactar o arquivo
-                print (f' File Name {filename}')
-                print (f' File Path {file_path}')
+                print (f'\t-   File Name :-> {filename}')
+                print (f'\t-   File Path :-> {file_path}')
 
-                with py7zr.SevenZipFile(os.path.join(file_path, filename), 'r') as zip_file:
+                #with py7zr.SevenZipFile(os.path.join(file_path, filename), 'r') as zip_file:
+                with py7zr.SevenZipFile(file_path, 'r') as zip_file:
                     # Extrai todos os arquivos do arquivo 7z
-                    print(filename)
-                    # zip_file.extractall()
+
+                    print(f'\t-   Stating Uncompressing File {file_path} ')
+                    start = time.time()
+                    zip_file.extractall()
+                    end = time.time()
+                    print(f'\t-     It took :-> {end - start:.2f} TotalSecs')

@@ -495,12 +495,14 @@ def main():
                               general_entries_table)
 
     end = time.time()
-    log_line = started + '| Started|' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + f'| Ended| {end-start:.2f} TotalSecs' + '\n'
+    total_running_time: str = f"{end-start:.2f}"
+    log_line = started + '| Started|' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + f'| Ended| {total_running_time} TotalSecs' + '\n'
     log_file.write(log_line)
     log_file.close()
 
-    print("Personal DataWare House processes ended")
-    print("===============================================================")
+    print('\n\n' + "====================================================================================")
+    print(f"All Personal DataWare House processes has ended; Total Running Time : {total_running_time} Seconds")
+    print("====================================================================================")
 
 
 if __name__ == '__main__':

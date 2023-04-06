@@ -3,18 +3,24 @@
 # Author  : Carlin, Luiz A. .'. 
 # e-mail  : luiz.carlin@gmail.com
 # Date    : 13-DEC-2022 
-# purpose :  Import Sheets from Excel Workbook into SQlite3 Tables
+# purpose :  Import Sheets from Excel Workbook into SQLite3 Tables
 #
 ####################################################################################
 # Version control
 # Date       #    What                      #   Who
 # 2022-12-26 # Merge With Version 6.1 and 7 # Carlin, Luiz A. .'.
 ####################################################################################
+# Current Version : 9.0.0
+####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters?
 # TODO: read encrypted excel file ?
-# TODO: Write encrypted Excel file
-#
+# TODO: Write encrypted Excel file ?
+# TODO: Remove parallel items ?
+# TODO: be able to use another databases ?
+# TODO: Refactor code to be able to use another types od database
+# TODO: Version Number in main module
+# TODO: Hostname + version in log
 #
 ####################################################################################
 Dependencies: 
@@ -29,7 +35,7 @@ pip install pyinstaller
 pip install lxml
 pip install tabulate
 pip install tables
-pyinstaller -F -i "G:\Meu Drive\PDW\DataWareHouse02.ico" .\XL_importer.v9.py
+pyinstaller -F -i "G:\\Meu Drive\\PDW\\DataWareHouse02.ico" .\\XL_importer.v9.py
 
 """
 
@@ -38,7 +44,7 @@ import pandas as pd
 import datetime
 import numpy as np
 import configparser
-import os
+import os, platform
 import threading
 import time
 
@@ -53,10 +59,10 @@ def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
     print(f'   . .. ... .... Begin of Thread Number :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
     data_frame = pd.read_excel(xls_file, sheet_name=config_dict['table_to_load'])
     if 'X' == config_dict['isAccounting'] and 'X' == config_dict['isCleanable']:
-        # limpa registros com os Tipos Nulos
+        # delete records with null 'TIPO'
         data_frame['TIPO'].replace('', np.nan, inplace=True)
         data_frame.dropna(subset=['TIPO'], inplace=True)
-        # limpa registros com as Datas Nulas
+        # delete records with null DATA column
         data_frame['Data'].replace('', np.nan, inplace=True)
         data_frame.dropna(subset=['Data'], inplace=True)
         general_entries_df = data_frame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
@@ -75,7 +81,8 @@ def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
     print(f'   . .. ... .... End of Thread Number :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
 
 
-def data_loader_parallel(data_base, general_entries_table, guindind_sheet, excel_file):
+#def data_loader_parallel(data_base, general_entries_table, guindind_sheet, excel_file):
+def data_loader_parallel(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
     conn = sqlite3.connect(data_base, check_same_thread=False)
     work_books = pd.ExcelFile(excel_file)
     sheets_dataframe = work_books.parse(sheet_name=guindind_sheet)
@@ -102,13 +109,13 @@ def data_loader_parallel(data_base, general_entries_table, guindind_sheet, excel
         m.start()
 
     print(f'   . .. ... Waiting for Threads to End ')
-    # Ensure all of the threads have finished
+    # Ensure all  the threads have finished
     for index, tread in enumerate(jobs):
         print(f'   ... .. . Index Of :-> {index}')
         thread.join()
 
     print(f'   . .. ... All threads has ended ')
-    data_correjeitor(conn.cursor())
+    data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)
     print(f'   . .. ... Data-Loader Done !!! !! ! ')
     conn.commit()
     conn.close()
@@ -370,6 +377,15 @@ def main():
     # Environment / Variables
     # current date and time
     started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    current_version = "9.0.0"
+    # if the system is windows then use the below
+    # command to check for the hostname
+    if platform.system() == "Windows":
+        hotname = platform.uname().node
+    else:
+        # otherwise use the below command
+        hotname = os.uname()[1]
+
     start = time.time()
     config = configparser.ConfigParser()
     config_file = 'PersonalDataWareHouse.cfg'
@@ -453,6 +469,7 @@ def main():
     # end of LOG block 
 
     print("===============================================================")
+    print(f'Current Version         :-> {current_version}')
     print(f'Last RUN Date           :-> {last_run_date}')
     print(f'Config/INI File         :-> {config_file}')
     print(f'LOG File                :-> {log_file_cfg} ')
@@ -483,7 +500,8 @@ def main():
             print('Under Unix, you should not carry an open SQLite database across a fork() system call into the child process. ')
             print('See the threading mode documentation for additional information. ')
             print(' ')
-            # data_loader_parallel(sqlite_database, general_entries_table, guiding_table, input_file)
+            # data_loader_parallel(sqlite_database, types_of_entries, general_entries_table, guiding_table, input_file,
+            #                         save_discarted_data, discarted_data_table)
 
     if create_pivot:
         create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
@@ -497,7 +515,7 @@ def main():
 
     end = time.time()
     total_running_time: str = f"{end-start:.2f}"
-    log_line = started + '| Started|' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + f'| Ended| {total_running_time} TotalSecs' + '\n'
+    log_line = started + '| Started|' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + f'| Ended| {total_running_time} TotalSecs | Version {current_version} | Hostname {hotname}'  + '\n'
     log_file.write(log_line)
     log_file.close()
 

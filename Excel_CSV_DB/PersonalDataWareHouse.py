@@ -10,9 +10,10 @@
 # Date       #    What                      #   Who
 # 2022-12-26 # Merge With Version 6.1 and 7 # Carlin, Luiz A. .'.
 ####################################################################################
-# Todo List
-# GUI Interface
-#
+# TODO: GUI Interface
+# TODO: Use config file as parameters?
+# TODO: read encrypted excel file ?
+# TODO: Write encrypted Excel file
 #
 #
 ####################################################################################

@@ -7,10 +7,11 @@
 #
 ####################################################################################
 # Version control
-# Date       #    What                      #   Who
-# 2022-12-26 # Merge With Version 6.1 and 7 # Carlin, Luiz A. .'.
+# Date       # Version #    What                      #   Who
+# 2022-12-26 # 8       # Merge With Version 6.1 and 7 # Carlin, Luiz A. .'.
+# 2023-04-12 # 9.0.4   # Export date in several formats in LANCAMENTOS_GERAIS # # Carlin, Luiz A. .'.
 ####################################################################################
-# Current Version : 9.0.3
+# Current Version : 9.0.4
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -310,7 +311,11 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
          ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
          ", replace (LG.Credito, '.', ',') as 'Credito' " \
          ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
+         ", ''''|| substr(LG.DATA, 9,2) as Dia" \
          ", ''''||cast (mes as text) as 'Mes' " \
+         ", case Mes when '01' then 'Jan' when '02' then 'Fev' when '03' then 'Mar' when '04' then 'Abr' " \
+         " when '05' then 'Mai' when '06' then 'Jun' when '07' then 'Jul' when '08' then 'Ago' when '09' " \
+         " then 'Set' when '10' then 'Out' when '11' then 'Nov' when '12' then 'Dez' end as Mes_ext " \
          ", ''''||cast (ano as text) as 'Ano' " \
          ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
          ", LG.ORIGEM  as Origem " \

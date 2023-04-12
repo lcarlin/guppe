@@ -56,8 +56,10 @@ import time
 def main(param_file):
     # Environment / Variables
     # current date and time
+    start = time.time()
     started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     current_version = "9.0.3"
+
     # if the system is windows then use the below
     # command to check for the hostname
     if platform.system() == "Windows":
@@ -66,7 +68,6 @@ def main(param_file):
         # otherwise use the below command
         hostname = os.uname()[1]
 
-    start = time.time()
     config = configparser.ConfigParser()
     config_file = 'PersonalDataWareHouse.cfg'
 
@@ -179,20 +180,15 @@ def main(param_file):
             print('')
             print('https://www2.eecs.berkeley.edu/Pubs/TechRpts/2006/EECS-2006-1.pdf')
             print('')
-            print(
-                '    SQLite is threadsafe. We make this concession since many users choose to ignore the advice given in the previous paragraph. ')
-            print(
-                'But in order to be thread-safe, SQLite must be compiled with the SQLITE_THREADSAFE preprocessor macro set to 1.  ')
+            print('    SQLite is threadsafe. We make this concession since many users choose to ignore the advice given in the previous paragraph. ')
+            print('But in order to be thread-safe, SQLite must be compiled with the SQLITE_THREADSAFE preprocessor macro set to 1.  ')
             print('Both the Windows and Linux precompiled binaries in the distribution are compiled this way.  ')
-            print(
-                'If you are unsure if the SQLite library you are linking against is compiled to be threadsafe you can call the sqlite3_threadsafe() interface to find out. ')
+            print('If you are unsure if the SQLite library you are linking against is compiled to be threadsafe you can call the sqlite3_threadsafe() interface to find out. ')
             print(' ')
             print('    SQLite is threadsafe because it uses mutexes to serialize access to common data structures.  ')
             print('However, the work of acquiring and releasing these mutexes will slow SQLite down slightly.  ')
-            print(
-                'Hence, if you do not need SQLite to be threadsafe, you should disable the mutexes for maximum performance.  ')
-            print(
-                'Under Unix, you should not carry an open SQLite database across a fork() system call into the child process. ')
+            print('Hence, if you do not need SQLite to be threadsafe, you should disable the mutexes for maximum performance.  ')
+            print('Under Unix, you should not carry an open SQLite database across a fork() system call into the child process. ')
             print('See the threading mode documentation for additional information. ')
             print(' ')
             exit(1)
@@ -308,7 +304,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 " \
                             " group by tipo order by 2 desc;", "Ultimos30Dias"])
     lista_consultas.append(
-        ["SELECT substr (LG.DATA, 1,4 ) || '-' || substr (LG.DATA, 6,2 ) || '-' || substr(LG.DATA, 9,2) AS Quando " \
+        ["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4) AS Quando " \
          ", LG.DIA_SEMANA as 'Dia da Semana' " \
          ", LG.Tipo as 'Tipo' " \
          ", LG.DESCRICAO  as 'Descricao/Lancamento' " \

@@ -9,9 +9,10 @@
 # Version control
 # Date       # Version #    What                      #   Who
 # 2022-12-26 # 8       # Merge With Version 6.1 and 7 # Carlin, Luiz A. .'.
-# 2023-04-12 # 9.0.4   # Export date in several formats in LANCAMENTOS_GERAIS # # Carlin, Luiz A. .'.
+# 2023-04-12 # 9.0.4   # Export date in several formats in LANCAMENTOS_GERAIS # Carlin, Luiz A. .'.
+# 2023-04-20 # 9.1.0   #Run dinamic reports based on anual info # Carlin, Luiz A. .'.
 ####################################################################################
-# Current Version : 9.0.4
+# Current Version : 9.1.0
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -22,6 +23,10 @@
 # TODO: Refactor code to be able to use another types od database
 # TODO: Version Number in main module (done)
 # TODO: Hostname + version in log (done)
+# TODO: Put HistoricoGeral table name in Pamameter file
+# TODO: Put HistoricoAnual table name in Pamameter file
+#
+#
 #
 ####################################################################################
 Dependencies:
@@ -59,7 +64,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    current_version = "9.0.4"
+    current_version = "9.1.0"
 
     # if the system is windows then use the below
     # command to check for the hostname
@@ -110,6 +115,8 @@ def main(param_file):
         create_pivot = config.getboolean('SETTINGS', 'CREATE_PIVOT')
         save_discarted_data = config.getboolean('SETTINGS', 'SAVE_DISCARTED_DATA')
         discarted_data_table = config['SETTINGS']['DISCARTED_DATA_TABLE']
+        dinamic_reports = config.getboolean('SETTINGS', 'RUN_DINAMIC_REPORT')
+        din_report_guinding = config['SETTINGS']['DIN_REPORT_GUIDING']
 
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
     except FileNotFoundError:
@@ -199,12 +206,15 @@ def main(param_file):
     if create_pivot:
         create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
         create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table)
+        if dinamic_reports:
+            create_dinamic_reports(sqlite_database, input_file, din_report_guinding)
+
 
     if run_reports:
         general_entries_file_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                         general_entries_table)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
-                              general_entries_table)
+                              general_entries_table, dinamic_reports)
 
     end = time.time()
     total_running_time: str = f"{end - start:.2f}"
@@ -260,6 +270,50 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
     conn.commit()
     conn.close()
 
+# def data_loader(, , general_entries_table, guindind_sheet, , save_useless, udt):
+def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding):
+    # todo: put some Fancy  output Message
+    print('Creating Dinamics Reports for summarized history ... .. . ')
+    conn = sqlite3.connect(sqlite_database)
+    # with the name of the din_report_guinding , reads the Sheets do be loaded
+    data_frame = pd.read_excel(excel_file, sheet_name=din_report_guinding)
+    # We have to write this dataframe on db to use the tables further
+    number_lines = data_frame.to_sql(din_report_guinding, conn, index=False, if_exists="replace")
+    print(f'Dynamic Reports Table Created! Total of Dynamic Reports :-> {str(number_lines).rjust(6)} ')
+    # Now we have to create Single tables of each din report , based on the names of the sheets
+    for i , linhas in data_frame.iterrows():
+        # now for each din report, we have to read the correspondig excel sheet
+        report_name = linhas.REPORT_NAME
+        report_table = linhas.SHEETY
+        print(f'                Creating Dynamic Report Table:-> "{report_name}" ')
+        columns_of_report = pd.read_excel(excel_file, sheet_name=report_table)
+
+        # finally, create the table to be used in the future
+        # number_lines = columns_of_report.to_sql(report_table, conn, index=False, if_exists="replace")
+        # print(f'                                        Dynamic Reports :-> {report_name} ')
+        # Now, for each dynamic report, read the corresponding Sheet
+        df_single_sheet = pd.read_excel(excel_file, sheet_name=report_table)
+        # here we have to Build de Dynamic table
+        base_sql_string = "SELECT "
+        sum_tables = " ("
+        for j in df_single_sheet.index:
+            column_name = df_single_sheet['COLUMN_NAME'][j]
+            base_sql_string += "HG.'"+column_name + "',"
+            if j > 0:
+                sum_tables += "HG.'"+column_name + "'+"
+
+        # At the end of the Loop, fix the Strings
+        sum_tables = sum_tables[:-1] + ")"
+        base_sql_string = base_sql_string + sum_tables + ' as "Valor Total" FROM HistoricoGeral HG; '
+        # Now, run the SQL Query to build the Data-frame
+        df = pd.read_sql_query(base_sql_string, conn)
+        # writes the data-frame into a table on SQLite
+        df.to_sql(report_name, conn, if_exists='replace', index=False)
+
+    # Here is the end of the First Loop
+    conn.close()
+    pass
+
 
 def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name):
     connection = sqlite3.connect(data_base_file)
@@ -288,7 +342,8 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
     connection.close()
 
 
-def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table):
+def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table, dynamic_reports):
+    # TODO: put the Dynamic Reports statments . How? IDK
     print('Exporting Summarized data ... .. .  ')
     connection = sqlite3.connect(sqlite_database)
     file_full_path = dir_out + file_name + '.' + out_extension
@@ -332,6 +387,10 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             " WHERE Data >= date('now','-13 month') " \
                             " GROUP BY DIA_SEMANA " \
                             " ORDER BY 2 DESC ;", "Iterações_Semanais_12M"])
+    if dynamic_reports:
+        # adicionar aqui as queries dinamicas
+        pass
+
 
     for k in range(0, len(lista_consultas)):
         consulta = lista_consultas[k]

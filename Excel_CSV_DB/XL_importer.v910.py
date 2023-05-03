@@ -7,10 +7,12 @@
 #
 ####################################################################################
 # Version control
-# Date       # Version #    What                      #   Who
-# 2022-12-26 # 8       # Merge With Version 6.1 and 7 # Carlin, Luiz A. .'.
-# 2023-04-12 # 9.0.4   # Export date in several formats in LANCAMENTOS_GERAIS # Carlin, Luiz A. .'.
-# 2023-04-20 # 9.1.0   #Run dinamic reports based on anual info # Carlin, Luiz A. .'.
+# Date       # Version #    What                            #   Who
+# 2022-12-26 # 8       # Merge With Version 6.1 and 7       # Carlin, Luiz A. .'.
+# 2023-04-12 # 9.0.4   # Export date in several formats in  #
+#                      # LANCAMENTOS_GERAIS                 # Carlin, Luiz A. .'.
+# 2023-04-20 # 9.1.0   # Run dinamic reports based on anual #
+#                      # info                               # Carlin, Luiz A. .'.
 ####################################################################################
 # Current Version : 9.1.0
 ####################################################################################
@@ -25,9 +27,6 @@
 # TODO: Hostname + version in log (done)
 # TODO: Put HistoricoGeral table name in Parameter file (done)
 # TODO: Put HistoricoAnual table name in Parameter file (done)
-#
-#
-#
 ####################################################################################
 Dependencies:
 pip install pandas
@@ -53,11 +52,6 @@ import configparser
 import os, platform, sys
 import threading
 import time
-
-
-# from lxml import etree et
-# import tabulate
-# import tables
 
 def main(param_file):
     # Environment / Variables
@@ -212,7 +206,6 @@ def main(param_file):
         if dinamic_reports:
             create_dinamic_reports(sqlite_database, input_file, din_report_guinding)
 
-
     if run_reports:
         general_entries_file_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                         general_entries_table)
@@ -273,7 +266,6 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
     conn.commit()
     conn.close()
 
-# def data_loader(, , general_entries_table, guindind_sheet, , save_useless, udt):
 def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding):
     # todo: put some Fancy  output Message
     print('Creating Dinamics Reports for summarized history ... .. . ')
@@ -316,8 +308,6 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding):
 
     # Here is the end of the First Loop
     conn.close()
-    pass
-
 
 def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name):
     connection = sqlite3.connect(data_base_file)
@@ -345,7 +335,6 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
         f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
     connection.close()
 
-
 def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table, dynamic_reports, dyn_rep_tab, anual_hist, full_hist):
     # TODO: put the Dynamic Reports statments . How? IDK
     print('Exporting Summarized data ... .. .  ')
@@ -356,8 +345,8 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
 
     lista_consultas.append([
-        "select * from Historicogeral where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
-        , "HistoricoGeral12Meses"])
+         f"select * from {full_hist} where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
+        , full_hist + "12Meses"])
     lista_consultas.append([f"select * from {full_hist};", f"{full_hist}"])
     lista_consultas.append([f"select * from {anual_hist};", f"{anual_hist}"])
     lista_consultas.append([f"select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from {entries_table}" \
@@ -392,13 +381,9 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             " GROUP BY DIA_SEMANA " \
                             " ORDER BY 2 DESC ;", "Iterações_Semanais_12M"])
     if dynamic_reports:
-        # adicionar aqui as queries dinamicas
-        # 1) criar um data-frame com General_din_reports
-        # ler o nome d
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)
         for i, linhas in df_dyn.iterrows():
              lista_consultas.append([f"SELECT * FROM {linhas.DEST_TABLE} ;", f"{linhas.REPORT_NAME}"])
-
 
     for k in range(0, len(lista_consultas)):
         consulta = lista_consultas[k]
@@ -408,7 +393,6 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         if write_multiple_files:
             message = f'   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
-
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + out_extension
             message = f'   . .. ... Step: {k + 1:04} :-> Exporting {file_full_path} to file(s) '
@@ -418,7 +402,6 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
 
     connection.close()
     if write_multiple_files:
-        # xlsx_writer.save()
         xlsx_writer.close()
 
 
@@ -448,9 +431,9 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     lista_acoes.append(f"update {entries_table} set credito  = round(credito,2) where credito > 0  ;")
     lista_acoes.append(f"update {entries_table} set debito  = round(debito,2) where debito > 0  ;")
     lista_acoes.append(
-        f"update {entries_table} set descricao = replace (descricao,',', '/') where descricao like '%,%' ;")
+        f"update {entries_table} set descricao = replace (descricao,',', '|') where descricao like '%,%' ;")
     lista_acoes.append(
-        f"update {entries_table} set descricao = replace (descricao,';', '/') where descricao like '%;%' ;")
+        f"update {entries_table} set descricao = replace (descricao,';', '|') where descricao like '%;%' ;")
     lista_acoes.append(f"UPDATE {entries_table} " \
                        "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
                        "  when 0 then 'Domingo' " \
@@ -468,12 +451,10 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
         cursor.execute(lista_acoes[i])
         print(f';  Lines Affected: {str(cursor.rowcount).rjust(5)}')
 
-
 def table_droppator(conexao, table_name):
     cursor = conexao
     cursor.execute("DROP TABLE IF EXISTS " + table_name)
     print(f"Table {table_name} dropped... ")
-
 
 def create_pivot_history_anual(data_base_file, types_table, entries_table, out_table):
     print('Creating pivot Table for Anual summarized history ... .. . ')

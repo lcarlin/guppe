@@ -7,11 +7,14 @@
 #
 ####################################################################################
 # Version control
-# Date       # Version #    What                      #   Who
-# 2022-12-26 # 8       # Merge With Version 6.1 and 7 # Carlin, Luiz A. .'.
-# 2023-04-12 # 9.0.4   # Export date in several formats in LANCAMENTOS_GERAIS # # Carlin, Luiz A. .'.
+# Date       # Version #    What                            #   Who
+# 2022-12-26 # 8       # Merge With Version 6.1 and 7       # Carlin, Luiz A. .'.
+# 2023-04-12 # 9.0.4   # Export date in several formats in  #
+#                      # LANCAMENTOS_GERAIS                 # Carlin, Luiz A. .'.
+# 2023-04-20 # 9.1.0   # Run dinamic reports based on anual #
+#                      # info                               # Carlin, Luiz A. .'.
 ####################################################################################
-# Current Version : 9.0.4
+# Current Version : 9.1.0
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -22,7 +25,8 @@
 # TODO: Refactor code to be able to use another types od database
 # TODO: Version Number in main module (done)
 # TODO: Hostname + version in log (done)
-#
+# TODO: Put HistoricoGeral table name in Parameter file (done)
+# TODO: Put HistoricoAnual table name in Parameter file (done)
 ####################################################################################
 Dependencies:
 pip install pandas
@@ -49,17 +53,12 @@ import os, platform, sys
 import threading
 import time
 
-
-# from lxml import etree et
-# import tabulate
-# import tables
-
 def main(param_file):
     # Environment / Variables
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    current_version = "9.0.4"
+    current_version = "9.1.0"
 
     # if the system is windows then use the below
     # command to check for the hostname
@@ -110,6 +109,11 @@ def main(param_file):
         create_pivot = config.getboolean('SETTINGS', 'CREATE_PIVOT')
         save_discarted_data = config.getboolean('SETTINGS', 'SAVE_DISCARTED_DATA')
         discarted_data_table = config['SETTINGS']['DISCARTED_DATA_TABLE']
+        full_hist_table = config['SETTINGS']['FULL_PIVOT_TABLE']
+        anual_hist_table = config['SETTINGS']['ANUAL_PIVOT_TABLE']
+
+        dinamic_reports = config.getboolean('SETTINGS', 'RUN_DINAMIC_REPORT')
+        din_report_guinding = config['SETTINGS']['DIN_REPORT_GUIDING']
 
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
     except FileNotFoundError:
@@ -197,14 +201,16 @@ def main(param_file):
             #                         save_discarted_data, discarted_data_table)
 
     if create_pivot:
-        create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table)
-        create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table)
+        create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table, full_hist_table)
+        create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table, anual_hist_table)
+        if dinamic_reports:
+            create_dinamic_reports(sqlite_database, input_file, din_report_guinding)
 
     if run_reports:
         general_entries_file_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                         general_entries_table)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
-                              general_entries_table)
+                              general_entries_table, dinamic_reports, din_report_guinding,anual_hist_table ,full_hist_table )
 
     end = time.time()
     total_running_time: str = f"{end - start:.2f}"
@@ -260,6 +266,48 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
     conn.commit()
     conn.close()
 
+def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding):
+    # todo: put some Fancy  output Message
+    print('Creating Dinamics Reports for summarized history ... .. . ')
+    conn = sqlite3.connect(sqlite_database)
+    # with the name of the din_report_guinding , reads the Sheets do be loaded
+    data_frame = pd.read_excel(excel_file, sheet_name=din_report_guinding)
+    # We have to write this dataframe on db to use the tables further
+    number_lines = data_frame.to_sql(din_report_guinding, conn, index=False, if_exists="replace")
+    print(f'Dynamic Reports Table Created! Total of Dynamic Reports :-> {str(number_lines).rjust(6)} ')
+    # Now we have to create Single tables of each din report , based on the names of the sheets
+    for i , linhas in data_frame.iterrows():
+        # now for each din report, we have to read the correspondig excel sheet
+        report_table = linhas.DEST_TABLE
+        report_xl_sheet = linhas.SHEETY
+        report_description = linhas.REPORT_NAME
+        print(f'                Creating Dynamic Report Table:-> "{report_description}" ')
+        columns_of_report = pd.read_excel(excel_file, sheet_name=report_xl_sheet)
+
+        # finally, create the table to be used in the future
+        # number_lines = columns_of_report.to_sql(report_xl_sheet, conn, index=False, if_exists="replace")
+        # print(f'                                        Dynamic Reports :-> {report_table} ')
+        # Now, for each dynamic report, read the corresponding Sheet
+        df_single_sheet = pd.read_excel(excel_file, sheet_name=report_xl_sheet)
+        # here we have to Build de Dynamic table
+        base_sql_string = "SELECT "
+        sum_tables = " ("
+        for j in df_single_sheet.index:
+            column_name = df_single_sheet['COLUMN_NAME'][j]
+            base_sql_string += "HG.'"+column_name + "',"
+            if j > 0:
+                sum_tables += "HG.'"+column_name + "'+"
+
+        # At the end of the Loop, fix the Strings
+        sum_tables = sum_tables[:-1] + ")"
+        base_sql_string = base_sql_string + sum_tables + ' as "Valor Total" FROM HistoricoGeral HG; '
+        # Now, run the SQL Query to build the Data-frame
+        df = pd.read_sql_query(base_sql_string, conn)
+        # writes the data-frame into a table on SQLite
+        df.to_sql(report_table, conn, if_exists='replace', index=False)
+
+    # Here is the end of the First Loop
+    conn.close()
 
 def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name):
     connection = sqlite3.connect(data_base_file)
@@ -287,8 +335,8 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
         f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
     connection.close()
 
-
-def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table):
+def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table, dynamic_reports, dyn_rep_tab, anual_hist, full_hist):
+    # TODO: put the Dynamic Reports statments . How? IDK
     print('Exporting Summarized data ... .. .  ')
     connection = sqlite3.connect(sqlite_database)
     file_full_path = dir_out + file_name + '.' + out_extension
@@ -297,10 +345,10 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
 
     lista_consultas.append([
-        "select * from Historicogeral where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
-        , "HistoricoGeral12Meses"])
-    lista_consultas.append(["select * from HistoricoGeral;", "HistoricoGeral"])
-    lista_consultas.append(["select * from HistoricoAnual;", "HistoricoAnual"])
+         f"select * from {full_hist} where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
+        , full_hist + "12Meses"])
+    lista_consultas.append([f"select * from {full_hist};", f"{full_hist}"])
+    lista_consultas.append([f"select * from {anual_hist};", f"{anual_hist}"])
     lista_consultas.append([f"select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from {entries_table}" \
                             " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 " \
                             " group by tipo order by 2 desc;", "Ultimos30Dias"])
@@ -332,6 +380,10 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             " WHERE Data >= date('now','-13 month') " \
                             " GROUP BY DIA_SEMANA " \
                             " ORDER BY 2 DESC ;", "Iterações_Semanais_12M"])
+    if dynamic_reports:
+        df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)
+        for i, linhas in df_dyn.iterrows():
+             lista_consultas.append([f"SELECT * FROM {linhas.DEST_TABLE} ;", f"{linhas.REPORT_NAME}"])
 
     for k in range(0, len(lista_consultas)):
         consulta = lista_consultas[k]
@@ -341,7 +393,6 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         if write_multiple_files:
             message = f'   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
-
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + out_extension
             message = f'   . .. ... Step: {k + 1:04} :-> Exporting {file_full_path} to file(s) '
@@ -351,7 +402,6 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
 
     connection.close()
     if write_multiple_files:
-        # xlsx_writer.save()
         xlsx_writer.close()
 
 
@@ -381,9 +431,9 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     lista_acoes.append(f"update {entries_table} set credito  = round(credito,2) where credito > 0  ;")
     lista_acoes.append(f"update {entries_table} set debito  = round(debito,2) where debito > 0  ;")
     lista_acoes.append(
-        f"update {entries_table} set descricao = replace (descricao,',', '/') where descricao like '%,%' ;")
+        f"update {entries_table} set descricao = replace (descricao,',', '|') where descricao like '%,%' ;")
     lista_acoes.append(
-        f"update {entries_table} set descricao = replace (descricao,';', '/') where descricao like '%;%' ;")
+        f"update {entries_table} set descricao = replace (descricao,';', '|') where descricao like '%;%' ;")
     lista_acoes.append(f"UPDATE {entries_table} " \
                        "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
                        "  when 0 then 'Domingo' " \
@@ -401,18 +451,15 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
         cursor.execute(lista_acoes[i])
         print(f';  Lines Affected: {str(cursor.rowcount).rjust(5)}')
 
-
 def table_droppator(conexao, table_name):
     cursor = conexao
     cursor.execute("DROP TABLE IF EXISTS " + table_name)
     print(f"Table {table_name} dropped... ")
 
-
-def create_pivot_history_anual(data_base_file, types_table, entries_table):
+def create_pivot_history_anual(data_base_file, types_table, entries_table, out_table):
     print('Creating pivot Table for Anual summarized history ... .. . ')
     connection = sqlite3.connect(data_base_file)
     ref_anterior = 'MM/YYYY'
-    out_table = 'HistoricoAnual'
     sql_statment_types = f'SELECT Código as COD, Descrição as DESC FROM {types_table} ;'
     sql_statment_summary = f'select Ano as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
                            ' GROUP BY Ano, TIPO order by Ano ;'
@@ -443,11 +490,10 @@ def create_pivot_history_anual(data_base_file, types_table, entries_table):
     connection.close()
 
 
-def create_pivot_history_full(data_base_file, types_table, entries_table):
+def create_pivot_history_full(data_base_file, types_table, entries_table, out_table):
     print('Creating pivot Table for summarized history ... .. . ')
     connection = sqlite3.connect(data_base_file)
     ref_anterior = 'MM/YYYY'
-    out_table = 'HistoricoGeral'
     sql_statment_types = f'SELECT Código as COD, Descrição as DESC FROM {types_table} ;'
     sql_statment_summary = f'select MesAno as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
                            ' GROUP BY MesAno, TIPO order by Ano, Mes, TIPO desc ;'
@@ -543,7 +589,7 @@ def data_loader_parallel(data_base, types_sheet, general_entries_table, guindind
     print(f'   . .. ... Data-Loader Done !!! !! ! ')
     conn.commit()
     conn.close()
-    connection.close()
+    # connection.close()
 
 
 if __name__ == '__main__':

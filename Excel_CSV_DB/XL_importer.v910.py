@@ -44,14 +44,18 @@ pyinstaller -F -i "G:\\Meu Drive\\PDW\\DataWareHouse02.ico" .\\XL_importer.v9.py
 
 """
 
-import sqlite3
-import pandas as pd
-import datetime
-import numpy as np
 import configparser
-import os, platform, sys
+import datetime
+import os
+import platform
+import sqlite3
+import sys
 import threading
 import time
+
+import numpy as np
+import pandas as pd
+
 
 def main(param_file):
     # Environment / Variables
@@ -210,7 +214,7 @@ def main(param_file):
         general_entries_file_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                         general_entries_table)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
-                              general_entries_table, dinamic_reports, din_report_guinding,anual_hist_table ,full_hist_table )
+                              general_entries_table, dinamic_reports, din_report_guinding, anual_hist_table, full_hist_table)
 
     end = time.time()
     total_running_time: str = f"{end - start:.2f}"
@@ -242,7 +246,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
                 data_frame['TIPO'].replace('', np.nan, inplace=True)
                 data_frame['Data'].replace('', np.nan, inplace=True)
 
-                if 'X' == is_cleanable and not save_useless:  ## ATENÇÃO A ISSO AQUI
+                if 'X' == is_cleanable and not save_useless:  # ATENÇÃO A ISSO AQUI
                     # limpa registros com os Tipos Nulos
                     data_frame.dropna(subset=['TIPO'], inplace=True)
                     # limpa registros com as Datas Nulas
@@ -266,6 +270,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
     conn.commit()
     conn.close()
 
+
 def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding):
     # todo: put some Fancy  output Message
     print('Creating Dinamics Reports for summarized history ... .. . ')
@@ -276,13 +281,12 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding):
     number_lines = data_frame.to_sql(din_report_guinding, conn, index=False, if_exists="replace")
     print(f'Dynamic Reports Table Created! Total of Dynamic Reports :-> {str(number_lines).rjust(6)} ')
     # Now we have to create Single tables of each din report , based on the names of the sheets
-    for i , linhas in data_frame.iterrows():
+    for i, linhas in data_frame.iterrows():
         # now for each din report, we have to read the correspondig excel sheet
         report_table = linhas.DEST_TABLE
         report_xl_sheet = linhas.SHEETY
         report_description = linhas.REPORT_NAME
         print(f'                Creating Dynamic Report Table:-> "{report_description}" ')
-        columns_of_report = pd.read_excel(excel_file, sheet_name=report_xl_sheet)
 
         # finally, create the table to be used in the future
         # number_lines = columns_of_report.to_sql(report_xl_sheet, conn, index=False, if_exists="replace")
@@ -308,6 +312,7 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding):
 
     # Here is the end of the First Loop
     conn.close()
+
 
 def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name):
     connection = sqlite3.connect(data_base_file)
@@ -335,6 +340,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
         f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
     connection.close()
 
+
 def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table, dynamic_reports, dyn_rep_tab, anual_hist, full_hist):
     # TODO: put the Dynamic Reports statments . How? IDK
     print('Exporting Summarized data ... .. .  ')
@@ -345,45 +351,45 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
 
     lista_consultas.append([
-         f"select * from {full_hist} where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
-        , full_hist + "12Meses"])
+          f"select * from {full_hist} where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');"
+          , full_hist + "12Meses"])
     lista_consultas.append([f"select * from {full_hist};", f"{full_hist}"])
     lista_consultas.append([f"select * from {anual_hist};", f"{anual_hist}"])
-    lista_consultas.append([f"select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from {entries_table}" \
-                            " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 " \
+    lista_consultas.append([f"select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from {entries_table}"
+                            " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 "
                             " group by tipo order by 2 desc;", "Ultimos30Dias"])
     lista_consultas.append(
-        ["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4) AS Quando " \
-         ", LG.DIA_SEMANA as 'Dia da Semana' " \
-         ", LG.Tipo as 'Tipo' " \
-         ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
-         ", replace (LG.Credito, '.', ',') as 'Credito' " \
-         ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
-         ", ''''|| substr(LG.DATA, 9,2) as Dia" \
-         ", ''''||cast (mes as text) as 'Mes' " \
-         ", case Mes when '01' then 'Jan' when '02' then 'Fev' when '03' then 'Mar' when '04' then 'Abr' " \
-         " when '05' then 'Mai' when '06' then 'Jun' when '07' then 'Jul' when '08' then 'Ago' when '09' " \
-         " then 'Set' when '10' then 'Out' when '11' then 'Nov' when '12' then 'Dez' end as Mes_ext " \
-         ", ''''||cast (ano as text) as 'Ano' " \
-         ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
-         ", LG.ORIGEM  as Origem " \
+        ["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4) AS Quando " 
+         ", LG.DIA_SEMANA as 'Dia da Semana' " 
+         ", LG.Tipo as 'Tipo' "
+         ", LG.DESCRICAO  as 'Descricao/Lancamento' "
+         ", replace (LG.Credito, '.', ',') as 'Credito' "
+         ", replace (LG.DEBITO, '.', ',') as 'Debito' "
+         ", ''''|| substr(LG.DATA, 9,2) as Dia"
+         ", ''''||cast (mes as text) as 'Mes' "
+         ", case Mes when '01' then 'Jan' when '02' then 'Fev' when '03' then 'Mar' when '04' then 'Abr' "
+         " when '05' then 'Mai' when '06' then 'Jun' when '07' then 'Jul' when '08' then 'Ago' when '09' "
+         " then 'Set' when '10' then 'Out' when '11' then 'Nov' when '12' then 'Dez' end as Mes_ext "
+         ", ''''||cast (ano as text) as 'Ano' "
+         ", ''''||cast (mesAno as text )  as 'Mes/Ano' "
+         ", LG.ORIGEM  as Origem "
          f" FROM {entries_table} LG ORDER  BY DATA DESC ; ", entries_table])
-    lista_consultas.append(["select Ano || ' - ' || Mes as 'Referência', count(1) as 'Total' " \
-                            ", round( cast (count(1) as float)  / ( case Mes when '01' then 31" \
-                            " when '02' then 28 when '03' then 31 when '04' then 30 when '05' then 31" \
-                            " when '06' then 30 when '07' then 31 when '08' then 31 when '09' then 30" \
-                            " when '10' then 31 when '11' then 30 when '12' then 31 end ),2) as 'Por Dia'" \
-                            f" from {entries_table} group by  Ano || ' - ' || Mes " \
+    lista_consultas.append(["select Ano || ' - ' || Mes as 'Referência', count(1) as 'Total' "
+                            ", round( cast (count(1) as float)  / ( case Mes when '01' then 31"
+                            " when '02' then 28 when '03' then 31 when '04' then 30 when '05' then 31"
+                            " when '06' then 30 when '07' then 31 when '08' then 31 when '09' then 30"
+                            " when '10' then 31 when '11' then 30 when '12' then 31 end ),2) as 'Por Dia'"
+                            f" from {entries_table} group by  Ano || ' - ' || Mes "
                             " order by  Ano || ' - ' || Mes desc ;", "Iterações_Mensais"])
-    lista_consultas.append(["SELECT DIA_SEMANA, COUNT(1) AS TOTAL " \
-                            f" FROM {entries_table} LG " \
-                            " WHERE Data >= date('now','-13 month') " \
-                            " GROUP BY DIA_SEMANA " \
+    lista_consultas.append(["SELECT DIA_SEMANA, COUNT(1) AS TOTAL "
+                            f" FROM {entries_table} LG "
+                            " WHERE Data >= date('now','-13 month') "
+                            " GROUP BY DIA_SEMANA "
                             " ORDER BY 2 DESC ;", "Iterações_Semanais_12M"])
     if dynamic_reports:
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)
         for i, linhas in df_dyn.iterrows():
-             lista_consultas.append([f"SELECT * FROM {linhas.DEST_TABLE} ;", f"{linhas.REPORT_NAME}"])
+            lista_consultas.append([f"SELECT * FROM {linhas.DEST_TABLE} ;", f"{linhas.REPORT_NAME}"])
 
     for k in range(0, len(lista_consultas)):
         consulta = lista_consultas[k]
@@ -434,16 +440,16 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
         f"update {entries_table} set descricao = replace (descricao,',', '|') where descricao like '%,%' ;")
     lista_acoes.append(
         f"update {entries_table} set descricao = replace (descricao,';', '|') where descricao like '%;%' ;")
-    lista_acoes.append(f"UPDATE {entries_table} " \
-                       "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
-                       "  when 0 then 'Domingo' " \
-                       "  when 1 then 'Segunda-Feira' " \
-                       "  when 2 then 'Terça-Feira' " \
-                       "  when 3 then 'Quarta-Feira' " \
-                       "  when 4 then 'Quinta-Feira' " \
-                       "  when 5 then 'Sexta-Feira' " \
-                       " when 6 then 'Sábado' " \
-                       "  else 'INVALIDO' end " \
+    lista_acoes.append(f"UPDATE {entries_table} "
+                       "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) "
+                       "  when 0 then 'Domingo' "
+                       "  when 1 then 'Segunda-Feira' "
+                       "  when 2 then 'Terça-Feira' "
+                       "  when 3 then 'Quarta-Feira' "
+                       "  when 4 then 'Quinta-Feira' "
+                       "  when 5 then 'Sexta-Feira' "
+                       " when 6 then 'Sábado' "
+                       "  else 'INVALIDO' end "
                        "    where DIA_SEMANA IS NULL ;")
     lista_acoes.append('DELETE FROM Parcelamentos WHERE 1 = 1 AND (DATA IS NULL OR "Tipo Lançamento" is null) ;')
     for i in range(0, len(lista_acoes)):
@@ -451,10 +457,12 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
         cursor.execute(lista_acoes[i])
         print(f';  Lines Affected: {str(cursor.rowcount).rjust(5)}')
 
+
 def table_droppator(conexao, table_name):
     cursor = conexao
     cursor.execute("DROP TABLE IF EXISTS " + table_name)
     print(f"Table {table_name} dropped... ")
+
 
 def create_pivot_history_anual(data_base_file, types_table, entries_table, out_table):
     print('Creating pivot Table for Anual summarized history ... .. . ')

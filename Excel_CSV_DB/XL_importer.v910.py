@@ -282,7 +282,7 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding):
     print(f'Dynamic Reports Table Created! Total of Dynamic Reports :-> {str(number_lines).rjust(6)} ')
     # Now we have to create Single tables of each din report , based on the names of the sheets
     for i, linhas in data_frame.iterrows():
-        # now for each din report, we have to read the correspondig excel sheet
+        # now for each din report, we have to read the correspondig Excel sheet
         report_table = linhas.DEST_TABLE
         report_xl_sheet = linhas.SHEETY
         report_description = linhas.REPORT_NAME

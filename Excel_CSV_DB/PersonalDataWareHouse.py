@@ -380,8 +380,9 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             " WHERE Data >= date('now','-13 month') " \
                             " GROUP BY DIA_SEMANA " \
                             " ORDER BY 2 DESC ;", "Iterações_Semanais_12M"])
-    lista_consultas.append([f"SELECT MesAno, sum (lg.Debito) as debitos FROM {entries_table} LG where " \
-                             "LG.TIPO != 'cartões de Crédito' GROUP BY MesAno order by Ano desc, mes DESC;"
+    lista_consultas.append(["SELECT MesAno, sum (lg.Credito) as Creditos , sum (lg.Debito) as debitos " \
+                            f" FROM {entries_table} LG where LG.TIPO not in( 'cartões de Crédito', 'Transf. Bco', 'Transf. Poupanca') " \
+                            " GROUP BY  MesAno order by Ano desc, mes DESC;"
                             ,"Debitos Mensais"])
 
     if dynamic_reports:

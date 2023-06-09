@@ -597,7 +597,7 @@ def data_loader_parallel(data_base, types_sheet, general_entries_table, guindind
     print(f'   . .. ... Data-Loader Done !!! !! ! ')
     conn.commit()
     conn.close()
-    # connection.close()
+
 
 
 if __name__ == '__main__':

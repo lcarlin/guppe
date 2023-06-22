@@ -367,7 +367,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
          ", ''''||cast (ano as text) as 'Ano' " \
          ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
          ", LG.ORIGEM  as Origem " \
-         f" FROM {entries_table} LG ORDER  BY DATA DESC ; ", entries_table])
+        f" FROM {entries_table} LG ORDER  BY DATA DESC ; ", entries_table])
     lista_consultas.append(["select Ano || ' - ' || Mes as 'Referência', count(1) as 'Total' " \
                             ", round( cast (count(1) as float)  / ( case Mes when '01' then 31" \
                             " when '02' then 28 when '03' then 31 when '04' then 30 when '05' then 31" \
@@ -376,13 +376,15 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             f" from {entries_table} group by  Ano || ' - ' || Mes " \
                             " order by  Ano || ' - ' || Mes desc ;", "Iterações_Mensais"])
     lista_consultas.append(["SELECT DIA_SEMANA, COUNT(1) AS TOTAL " \
-                            f" FROM {entries_table} LG " \
+                           f" FROM {entries_table} LG " \
                             " WHERE Data >= date('now','-13 month') " \
                             " GROUP BY DIA_SEMANA " \
                             " ORDER BY 2 DESC ;", "Iterações_Semanais_12M"])
-    lista_consultas.append(["SELECT MesAno, sum (lg.Credito) as Creditos , sum (lg.Debito) as debitos " \
-                            f" FROM {entries_table} LG where LG.TIPO not in( 'cartões de Crédito', 'Transf. Bco', 'Transf. Poupanca') " \
-                            " GROUP BY  MesAno order by Ano desc, mes DESC;"
+    lista_consultas.append(["select dois.MesAno as Referencia , round(dois.debitos,2) as Débito ," \
+                            " round(dois.creditos,2) as Créditos , round(dois.creditos - dois.debitos,2 ) " \
+                            " as ""Posição"" from ( SELECT MesAno , sum (lg.Debito) as debitos , Sum (lg.Credito) " \
+                           f" as Creditos FROM {entries_table} LG where LG.TIPO not in " \
+                            " ('cartões de Crédito','Transf. Bco') GROUP BY MesAno order by Ano desc, mes DESC ) dois ;"
                             ,"Debitos Mensais"])
 
     if dynamic_reports:

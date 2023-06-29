@@ -173,7 +173,7 @@ def main(param_file):
     print(f'Output SQLite3 Database :-> {sqlite_database}')
     print(f'Guidind Excel Sheet     :-> {guiding_table}')
     print("===============================================================")
-    print("Personal DataWare House Processes are Starting")
+    print("Personal Data WareHouse Processes are Starting")
 
     if run_loader:
         if not multithread:
@@ -219,9 +219,11 @@ def main(param_file):
     log_file.write(log_line)
     log_file.close()
 
-    print('\n\n' + "====================================================================================")
-    print(f"All Personal DataWare House processes has ended; Total Running Time : {total_running_time} Seconds")
-    print("====================================================================================")
+    out_line = ">" + ("=" * 115) + "<"
+    print(out_line)
+    print("All Personal Data WareHouse processes has ended! ")
+    print(log_line[:-1] )
+    print(out_line)
 
 
 def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):

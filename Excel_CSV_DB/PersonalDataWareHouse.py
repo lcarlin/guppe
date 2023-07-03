@@ -163,8 +163,8 @@ def main(param_file):
     if not is_log_empty and log_file_exists:
         last_run_date = log_file.readlines()[-1].split('|')[0]
     # end of LOG block
-
-    print("===============================================================")
+    out_line = ">" + ("=" * 115) + "<"
+    print(out_line)
     print(f'Current Version         :-> {current_version}')
     print(f'Last RUN Date           :-> {last_run_date}')
     print(f'Config/INI File         :-> {config_file}')
@@ -172,10 +172,11 @@ def main(param_file):
     print(f'Excel Sheet  Input file :-> {input_file}')
     print(f'Output SQLite3 Database :-> {sqlite_database}')
     print(f'Guidind Excel Sheet     :-> {guiding_table}')
-    print("===============================================================")
+    print(out_line)
     print("Personal Data WareHouse Processes are Starting")
-
+    
     if run_loader:
+        print(out_line)
         if not multithread:
             data_loader(sqlite_database, types_of_entries, general_entries_table, guiding_table, input_file,
                         save_discarted_data, discarted_data_table)
@@ -201,14 +202,19 @@ def main(param_file):
             #                         save_discarted_data, discarted_data_table)
 
     if create_pivot:
+        print(out_line)
         create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table, full_hist_table)
+        print(out_line)
         create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table, anual_hist_table)
         if dinamic_reports:
+            print(out_line)
             create_dinamic_reports(sqlite_database, input_file, din_report_guinding)
 
     if run_reports:
+        print(out_line)
         general_entries_file_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                         general_entries_table)
+        print(out_line)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
                               general_entries_table, dinamic_reports, din_report_guinding,anual_hist_table ,full_hist_table )
 
@@ -219,7 +225,7 @@ def main(param_file):
     log_file.write(log_line)
     log_file.close()
 
-    out_line = ">" + ("=" * 115) + "<"
+    
     print(out_line)
     print("All Personal Data WareHouse processes has ended! ")
     print(log_line[:-1] )

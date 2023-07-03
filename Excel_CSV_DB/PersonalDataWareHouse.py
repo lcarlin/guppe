@@ -208,7 +208,7 @@ def main(param_file):
         create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table, anual_hist_table)
         if dinamic_reports:
             print(out_line)
-            create_dinamic_reports(sqlite_database, input_file, din_report_guinding)
+            create_dinamic_reports(sqlite_database, input_file, din_report_guinding, full_hist_table)
 
     if run_reports:
         print(out_line)
@@ -274,7 +274,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
     conn.commit()
     conn.close()
 
-def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding):
+def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, full_pivot):
     # todo: put some Fancy  output Message
     print('Creating Dinamics Reports for summarized history ... .. . ')
     conn = sqlite3.connect(sqlite_database)
@@ -308,7 +308,7 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding):
 
         # At the end of the Loop, fix the Strings
         sum_tables = sum_tables[:-1] + ")"
-        base_sql_string = base_sql_string + sum_tables + ' as "Valor Total" FROM HistoricoGeral HG; '
+        base_sql_string = base_sql_string + sum_tables + f' as "Valor Total" FROM {full_pivot} HG; '
         # Now, run the SQL Query to build the Data-frame
         df = pd.read_sql_query(base_sql_string, conn)
         # writes the data-frame into a table on SQLite

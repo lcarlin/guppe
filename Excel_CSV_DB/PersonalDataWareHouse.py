@@ -171,7 +171,7 @@ def main(param_file):
     print(f'LOG File                :-> {log_file_cfg} ')
     print(f'Excel Sheet  Input file :-> {input_file}')
     print(f'Output SQLite3 Database :-> {sqlite_database}')
-    print(f'Guidind Excel Sheet     :-> {guiding_table}')
+    print(f'Guiding Excel Sheet     :-> {guiding_table}')
     print(out_line)
     print("Personal Data WareHouse Processes are Starting")
     

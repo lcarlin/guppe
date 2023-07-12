@@ -411,7 +411,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + out_extension
             message = f'   . .. ... Step: {k + 1:04} :-> Exporting {file_full_path} to file(s) '
-            df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False)
+            df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False, date_format='DD/MM/YYYY')
 
         print(message)
 

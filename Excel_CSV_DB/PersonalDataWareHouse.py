@@ -264,12 +264,15 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
                 general_entries_df['Origem'] = table_to_load
                 # Ja joga os dados limpos na lançamentos gerais
                 general_entries_df.to_sql(general_entries_table, conn, index=False, if_exists="append")
+                number_lines = len(data_frame)
+            else:
+                # Writes only the tables that aren´t Accounting, because it was already loaded on table general_entries_table
+                number_lines = data_frame.to_sql(table_to_load, conn, index=False, if_exists="replace")
 
-            # grava a tabela (UNITÁRIA) do DataFrame do BD
-            number_lines = data_frame.to_sql(table_to_load, conn, index=False, if_exists="replace")
             print(f'Lines Created :-> {str(number_lines).rjust(6)} ')
-            conn.commit()
 
+    # Just one commit to Save time. This commit is BEFORE the data_correjeitor
+    conn.commit()
     data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)
     conn.commit()
     conn.close()

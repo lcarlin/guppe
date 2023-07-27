@@ -216,7 +216,8 @@ def main(param_file):
                                         general_entries_table)
         print(out_line)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
-                              general_entries_table, dinamic_reports, din_report_guinding,anual_hist_table ,full_hist_table )
+                              general_entries_table, dinamic_reports, din_report_guinding, create_pivot,
+                              anual_hist_table ,full_hist_table )
 
     end = time.time()
     total_running_time: str = f"{end - start:.2f}"
@@ -346,7 +347,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
         f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
     connection.close()
 
-def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table, dynamic_reports, dyn_rep_tab, anual_hist, full_hist):
+def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table, dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist):
     # TODO: put the Dynamic Reports statments . How? IDK
     print('Exporting Summarized data ... .. .  ')
     connection = sqlite3.connect(sqlite_database)
@@ -355,14 +356,17 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
     if write_multiple_files:
         xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
 
-    lista_consultas.append([
-         f"select * from {full_hist} where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
-        , full_hist + "12Meses"])
-    lista_consultas.append([f"select * from {full_hist};", f"{full_hist}"])
-    lista_consultas.append([f"select * from {anual_hist};", f"{anual_hist}"])
+    if gera_hist:
+        lista_consultas.append([
+             f"select * from {full_hist} where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
+            , full_hist + "12Meses"])
+        lista_consultas.append([f"select * from {full_hist};", f"{full_hist}"])
+        lista_consultas.append([f"select * from {anual_hist};", f"{anual_hist}"])
+
+
     lista_consultas.append([f"select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from {entries_table}" \
-                            " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 " \
-                            " group by tipo order by 2 desc;", "Ultimos30Dias"])
+                          " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 " \
+                          " group by tipo order by 2 desc;", "Ultimos30Dias"])
     lista_consultas.append(
         ["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4) AS Quando " \
          ", LG.DIA_SEMANA as 'Dia da Semana' " \
@@ -398,7 +402,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             " ('cartões de Crédito','Transf. Bco') GROUP BY MesAno order by Ano desc, mes DESC ) dois ;"
                             ,"Debitos Mensais"])
 
-    if dynamic_reports:
+    if gera_hist and dynamic_reports:
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)
         for i, linhas in df_dyn.iterrows():
              lista_consultas.append([f"SELECT * FROM {linhas.DEST_TABLE} ;", f"{linhas.REPORT_NAME}"])

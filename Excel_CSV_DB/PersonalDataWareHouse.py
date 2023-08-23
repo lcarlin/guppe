@@ -259,9 +259,11 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
 
                 general_entries_df = data_frame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
                 general_entries_df.insert(1, 'DIA_SEMANA', np.nan)
+                #general_entries_df.insert(8, 'MES_EXTENSO', np.nan)
                 general_entries_df['Mes'] = 'MM'
                 general_entries_df['Ano'] = 'YYYY'
-                general_entries_df['MesAno'] = 'MM/YYYY'
+                general_entries_df['MES_EXTENSO'] = np.nan
+                general_entries_df['mesAno'] = 'MM/YYYY'
                 general_entries_df['Origem'] = table_to_load
                 # Ja joga os dados limpos na lançamentos gerais
                 general_entries_df.to_sql(general_entries_table, conn, index=False, if_exists="append")
@@ -376,9 +378,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
          ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
          ", ''''|| substr(LG.DATA, 9,2) as Dia" \
          ", ''''||cast (mes as text) as 'Mes' " \
-         ", case Mes when '01' then 'Jan' when '02' then 'Fev' when '03' then 'Mar' when '04' then 'Abr' " \
-         " when '05' then 'Mai' when '06' then 'Jun' when '07' then 'Jul' when '08' then 'Ago' when '09' " \
-         " then 'Set' when '10' then 'Out' when '11' then 'Nov' when '12' then 'Dez' end as Mes_ext " \
+         ", LG.MES_EXTENSO as 'Mes Por Extenso' "\
          ", ''''||cast (ano as text) as 'Ano' " \
          ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
          ", LG.ORIGEM  as Origem " \
@@ -411,7 +411,9 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         consulta = lista_consultas[k]
         sql_statment = consulta[0]
         excel_sheet = consulta[1]
+        # print(sql_statment)
         df_out = pd.read_sql(sql_statment, connection)
+
         if write_multiple_files:
             message = f'   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
@@ -457,16 +459,33 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     lista_acoes.append(
         f"update {entries_table} set descricao = replace (descricao,';', '|') where descricao like '%;%' ;")
     lista_acoes.append(f"UPDATE {entries_table} " \
-                       "  SET DIA_SEMANA =   case cast (strftime('%w', Data ) as integer) " \
+                       "  SET DIA_SEMANA = case cast (strftime('%w', Data ) as integer) " \
                        "  when 0 then 'Domingo' " \
                        "  when 1 then 'Segunda-Feira' " \
                        "  when 2 then 'Terça-Feira' " \
                        "  when 3 then 'Quarta-Feira' " \
                        "  when 4 then 'Quinta-Feira' " \
                        "  when 5 then 'Sexta-Feira' " \
-                       " when 6 then 'Sábado' " \
-                       "  else 'INVALIDO' end " \
+                       "  when 6 then 'Sábado' " \
+                       "  else 'UNDEFINED' end " \
                        "    where DIA_SEMANA IS NULL ;")
+    lista_acoes.append(f"UPDATE {entries_table} " \
+                       "    SET MES_EXTENSO = ( case MES WHEN '01' THEN '01-Janeiro' " \
+                       "        WHEN '02' THEN '02-Fevereiro' " \
+                       "         WHEN '03' THEN '03-Março' " \
+                       "         WHEN '04' THEN '04-Abril' " \
+                       "         WHEN '05' THEN '05-Mail' " \
+                       "         WHEN '06' THEN '06-Junho' " \
+                       "         WHEN '07' THEN '07-Julho' " \
+                       "         WHEN '08' THEN '08-Agosto' " \
+                       "         WHEN '09' THEN '09-Setembro' " \
+                       "         WHEN '10' THEN '10-Outubro' " \
+                       "         WHEN '11' THEN '11-Novembro' " \
+                       "         WHEN '12' THEN '12-Dezembro' " \
+                       "         ELSE 'UNDEFINED' " \
+                       "         END ) " \
+                       "   WHERE MES_EXTENSO IS NULL ;" )
+
     lista_acoes.append('DELETE FROM Parcelamentos WHERE 1 = 1 AND (DATA IS NULL OR "Tipo Lançamento" is null) ;')
     for i in range(0, len(lista_acoes)):
         print(f'   . .. ... Step: {i + 1:04}', end=' ')

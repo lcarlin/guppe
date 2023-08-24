@@ -3,8 +3,8 @@
 # Author  : Carlin, Luiz A. .'.
 # e-mail  : luiz.carlin@gmail.com
 # Date    : 13-DEC-2022
-# purpose :  Import Sheets from Excel Workbook into SQLite3 Tables
-#
+# purpose : Import Sheets from Excel Workbook into SQLite3 Tables
+#           ET&L -> Extract, Transform & Loader
 ####################################################################################
 # Version control
 # Date       # Version #    What                            #   Who
@@ -13,6 +13,12 @@
 #                      # LANCAMENTOS_GERAIS                 # Carlin, Luiz A. .'.
 # 2023-04-20 # 9.1.0   # Run dinamic reports based on anual #
 #                      # info                               # Carlin, Luiz A. .'.
+# 2023-08-23 # 9.1.5   # create Index Main table            # Carlin, Luiz A. .'.
+#                      # Do not create intermediate tables  #
+#                      #  Anymore for Accounting Sheets     #
+#                      # Now the export function            #
+#                      #   Just Export data                 #
+#                      # New Coluumns on the main Table     #
 ####################################################################################
 # Current Version : 9.1.0
 ####################################################################################
@@ -58,7 +64,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    current_version = "9.1.0"
+    current_version = "9.1.5"
 
     # if the system is windows then use the below
     # command to check for the hostname
@@ -173,7 +179,7 @@ def main(param_file):
     print(f'Output SQLite3 Database :-> {sqlite_database}')
     print(f'Guiding Excel Sheet     :-> {guiding_table}')
     print(out_line)
-    print("Personal Data WareHouse Processes are Starting")
+    print("Personal Data WareHouse Processes are Starting | ET&L -> Extract, Transform & Loader !")
     
     if run_loader:
         print(out_line)
@@ -487,6 +493,7 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
                        "   WHERE MES_EXTENSO IS NULL ;" )
 
     lista_acoes.append('DELETE FROM Parcelamentos WHERE 1 = 1 AND (DATA IS NULL OR "Tipo Lançamento" is null) ;')
+    lista_acoes.append(f'create index SHAWASKA on {entries_table}  (DATA, TIPO, DESCRICAO) ')
     for i in range(0, len(lista_acoes)):
         print(f'   . .. ... Step: {i + 1:04}', end=' ')
         cursor.execute(lista_acoes[i])

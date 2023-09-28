@@ -5,6 +5,7 @@
 
 $dirPDW = "C:\Users\luizc\OneDrive\Documentos\PDW\"
 $dirScript = "C:\Users\luizc\PyCharm\guppe\Excel_CSV_DB\"
+$lineOut = ">===================================================================================================================<"
 $pdwDB = $dirPDW + "PDW.db"
 $pdwExcel = $dirPDW + "PDW.xlsx"
 if ( -not (Test-Path $pdwExcel )) {
@@ -12,15 +13,15 @@ if ( -not (Test-Path $pdwExcel )) {
 }
 $dataCriacaopdwDB = (Get-Item $pdwDB).LastWriteTime
 $dataCriacaopdwExcel = (Get-Item $pdwExcel).LastWriteTime
-Write-Host "========================================================="
+Write-Host $lineOut
 Write-Host "Banco-de-dados :-> "
 Write-Host $pdwDB
 Write-Host $dataCriacaopdwDB 
-Write-Host "========================================================="
+Write-Host $lineOut
 Write-Host "Planilha"
 Write-Host $pdwExcel
 Write-Host $dataCriacaopdwExcel
-Write-Host "========================================================="
+Write-Host $lineOut
 # Comparar as datas de criação
 if ($dataCriacaopdwExcel -gt $dataCriacaopdwDB) {
     $pythonExe = "C:\Users\luizc\AppData\Local\Programs\Python\Python311\python.exe"

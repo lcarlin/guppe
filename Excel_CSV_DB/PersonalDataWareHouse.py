@@ -339,9 +339,10 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
                   ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
                   ", replace (LG.Credito, '.', ',') as 'Credito' " \
                   ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
-                  ", ''''||cast (mes as text) as 'Mes' " \
-                  ", ''''||cast (ano as text) as 'Ano' " \
-                  ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
+                  ", char(39)||cast (mes as text) as 'Mes' " \
+                  ", char(39)||cast (ano as text) as 'Ano' " \
+                  ", char(39)||MES_EXTENSO as 'Mes(Por Extenso)' " \
+                  ", char(39)||cast (mesAno as text )  as 'Mes/Ano' " \
                   ", LG.ORIGEM  as Origem " \
                   f" FROM {table_name} LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
@@ -382,11 +383,11 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
          ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
          ", replace (LG.Credito, '.', ',') as 'Credito' " \
          ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
-         ", ''''|| substr(LG.DATA, 9,2) as Dia" \
-         ", ''''||cast (mes as text) as 'Mes' " \
+         ", char(39)|| substr(LG.DATA, 9,2) as Dia" \
+         ", char(39)||cast (mes as text) as 'Mes' " \
          ", LG.MES_EXTENSO as 'Mes Por Extenso' "\
-         ", ''''||cast (ano as text) as 'Ano' " \
-         ", ''''||cast (mesAno as text )  as 'Mes/Ano' " \
+         ", char(39)||cast (ano as text) as 'Ano' " \
+         ", char(39)||cast (mesAno as text )  as 'Mes/Ano' " \
          ", LG.ORIGEM  as Origem " \
         f" FROM {entries_table} LG ORDER  BY DATA DESC ; ", entries_table])
     lista_consultas.append(["select Ano || ' - ' || Mes as 'Referência', count(1) as 'Total' " \

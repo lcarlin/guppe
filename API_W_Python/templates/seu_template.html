@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formulário de Inserção</title>
+</head>
+<body>
+    <h1>Inserir Lançamento</h1>
+
+    <!-- Formulário para inserção de dados -->
+    <form action="/inserirLancamento" method="post">
+        <label for="data">Data:</label>
+        <input type="date" id="data" name="data" required><br>
+
+        <label for="tipo">Tipo:</label>
+        <select name="tipo" required>
+            {% for tipo in tipos %}
+            <option value="{{ tipo }}">{{ tipo }}</option>
+            {% endfor %}
+        </select><br>
+
+        <label for="descricao">Descrição:</label>
+        <input type="text" name="descricao" required><br>
+
+        <label for="credito">Crédito:</label>
+        <input type="number"  name="credito" step="0.01" value="0.00" required><br>
+
+        <label for="debito">Débito:</label>
+        <input type="number"  name="debito" step="0.01" value="0.00" required><br>
+
+        <label for="origem">Origem:</label>
+        <select name="origem" required>
+            {% for origem in origens %}
+            <option value="{{ origem }}">{{ origem }}</option>
+            {% endfor %}
+        </select><br>
+
+        <input type="submit" value="Inserir Lançamento">
+    </form>
+    <script>
+          document.getElementById('valor').addEventListener('input', function() {
+            this.value = parseFloat(this.value).toFixed(2);
+          });
+    </script>
+
+    <br>
+
+    <!-- Link para acessar o formulário de inserção -->
+    <a href="/formulario">Acessar Formulário</a>
+</body>
+</html>

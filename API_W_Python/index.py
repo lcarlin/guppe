@@ -30,8 +30,8 @@ import numpy as np
 import datetime
 import configparser
 
-app = Flask(__name__)
 
+app = Flask(__name__)
 # Rota para inserir um lançamento
 @app.route('/inserirLancamento', methods=['POST'])
 def inserir_lancamento():
@@ -42,7 +42,6 @@ def inserir_lancamento():
         credito = float(request.form['credito'])
         debito = float(request.form['debito'])
         origem = request.form['origem']
-
         # Criar um DataFrame com os dados do lançamento
         df = pd.DataFrame({'data': [data],
                            'tipo': [tipo],
@@ -53,7 +52,6 @@ def inserir_lancamento():
                            'CREATION_DATE': datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
                            'EXPORT_DATE':  np.nan
         })
-
         # Conectar ao banco de dados SQLite3
         conn = sqlite3.connect(sqlite_database)
         print(out_line)
@@ -61,35 +59,29 @@ def inserir_lancamento():
 
         # Inserir o DataFrame no banco de dados
         df.to_sql(transient_data_table, conn, if_exists='append', index=False)
-
-
-
         conn.close()
-
         return jsonify({"message": "Lançamento inserido com sucesso!"}), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+
 @app.route('/formulario', methods=['GET'])
 def form():
     conn = sqlite3.connect(sqlite_database)
     cursor = conn.cursor()
-
     # Busque os valores da tabela "Tipos"
     cursor.execute(f"SELECT Descrição as nome FROM {types_of_entries}")
     tipos = [row[0] for row in cursor.fetchall()]
-
     # Busque os valores da tabela "Origens"
     cursor.execute("SELECT nome FROM Origens")
     origens = [row[0] for row in cursor.fetchall()]
-
     conn.close()
-
     return render_template('seu_template.html', tipos=tipos, origens=origens)
 
 
 
-
+#############################################################################################
 current_version = "9.2.0"
 config = configparser.ConfigParser()
 config_file = '..\\Excel_CSV_DB\\PersonalDataWareHouse.cfg'
@@ -136,3 +128,6 @@ print(out_line)
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+#############################################################################################

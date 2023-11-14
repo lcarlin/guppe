@@ -8,7 +8,7 @@ $dirPDW = "C:\Users\luizc\OneDrive\Documentos\PDW\"
 $dirScript = "C:\Users\luizc\PyCharm\guppe\Excel_CSV_DB\"
 
 # Caminho para o executável do Python que você deseja executar
-$pythonExe = "C:\Users\luizc\AppData\Local\Programs\Python\Python311\python.exe"
+$pythonExe = "C:\Users\luizc\AppData\Local\Programs\Python\Python312\python.exe"
 
 $outLiner = ">===================================================================================================================<"
 

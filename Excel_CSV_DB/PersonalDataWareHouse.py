@@ -271,7 +271,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
         is_accounting = infos.ACCOUNTING
         is_cleanable = infos.CLEANABLE
         is_loadeable = infos.LOADABLE
-        print(f'   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load.strip().ljust(25)} ;', end=' ')
+        print(f'\033[34m   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load.strip().ljust(25)} ;\033[0m', end=' ')
         if 'X' == is_loadeable:
             data_frame = pd.read_excel(excel_file, sheet_name=table_to_load)
             if 'X' == is_accounting:
@@ -299,7 +299,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
                 # Writes only the tables that aren´t Accounting, because it was already loaded on table general_entries_table
                 number_lines = data_frame.to_sql(table_to_load, conn, index=False, if_exists="replace")
 
-            print(f'Lines Created :-> {str(number_lines).rjust(6)} ')
+            print(f'\033[32mLines Created :-> {str(number_lines).rjust(6)} \033[0m')
 
     # Just one commit to Save time. This commit is BEFORE the data_correjeitor
     conn.commit()
@@ -316,14 +316,14 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, ful
     data_frame = pd.read_excel(excel_file, sheet_name=din_report_guinding)
     # We have to write this dataframe on db to use the tables further
     number_lines = data_frame.to_sql(din_report_guinding, conn, index=False, if_exists="replace")
-    print(f'Dynamic Reports Table Created! Total of Dynamic Reports :-> {str(number_lines).rjust(6)} ')
+    print(f'Dynamic Reports Table Created! Total of Dynamic Reports :-> \033[31m{str(number_lines).rjust(6)}\033[0m ')
     # Now we have to create Single tables of each din report , based on the names of the sheets
     for i, linhas in data_frame.iterrows():
         # now for each din report, we have to read the correspondig excel sheet
         report_table = linhas.DEST_TABLE
         report_xl_sheet = linhas.SHEETY
         report_description = linhas.REPORT_NAME
-        print(f'                Creating Dynamic Report Table:-> "{report_description}" ')
+        print(f'                \033[34mCreating Dynamic Report Table\033[0m:-> \033[33m"{report_description}"\033[0m ')
         columns_of_report = pd.read_excel(excel_file, sheet_name=report_xl_sheet)
 
         # finally, create the table to be used in the future
@@ -469,7 +469,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         df_out = pd.read_sql(sql_statment, connection)
 
         if write_multiple_files:
-            message = f'   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
+            message = f'\033[34m   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} \033[33mto {file_full_path}\033[0m'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + out_extension
@@ -546,9 +546,9 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     lista_acoes.append(f"create view Origens as select TABLE_NAME as nome from GUIDING gd where gd.LOADABLE = 'X' AND GD.ACCOUNTING = 'X';")
 
     for i in range(0, len(lista_acoes)):
-        print(f'   . .. ... Step: {i + 1:04}', end=' ')
+        print(f'\033[34m   . .. ... Step: {i + 1:04}\033[0m', end=' ')
         cursor.execute(lista_acoes[i])
-        print(f';  Lines Affected: {str(cursor.rowcount).rjust(5)}')
+        print(f';  \033[31mLines Affected: {str(cursor.rowcount).rjust(5)}\033[0m')
 
 
 def table_droppator(conexao, table_name):

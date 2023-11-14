@@ -2,12 +2,21 @@
 <html>
 <head>
     <title>Formulário de Inserção</title>
+    <script type="text/javascript">
+        // Função para redirecionar após 5 segundos
+        function redirecionarParaFormulario() {
+            setTimeout(function() {
+                window.location.href = "/formulario";  // Redireciona para a página inicial
+                document.getElementById("myForm").reset(); // Limpa o formulário
+            }, 5000); // 5000 milissegundos = 5 segundos
+        }
+    </script>
 </head>
 <body>
     <h1>Inserir Lançamento</h1>
 
     <!-- Formulário para inserção de dados -->
-    <form action="/inserirLancamento" method="post">
+    <form action="/inserirLancamento" method="post" onsubmit="redirecionarParaFormulario()" id="myForm">
         <label for="data">Data:</label>
         <input type="date" id="data" name="data" required><br>
 
@@ -34,16 +43,14 @@
             {% endfor %}
         </select><br>
 
-        <input type="submit" value="Inserir Lançamento">
+        <input type="submit" value="Inserir Lançamento" ">
     </form>
     <script>
           document.getElementById('valor').addEventListener('input', function() {
             this.value = parseFloat(this.value).toFixed(2);
           });
     </script>
-
     <br>
-
     <!-- Link para acessar o formulário de inserção -->
     <a href="/formulario">Acessar Formulário</a>
 </body>

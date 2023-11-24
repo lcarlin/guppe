@@ -51,7 +51,7 @@ pip install pyinstaller
 
 pip install lxml
 pip install tabulate
-pip install tables
+pip install tables0
 pyinstaller -F -i "G:\\Meu Drive\\PDW\\DataWareHouse02.ico" .\\XL_importer.v9.py
 
 """
@@ -323,7 +323,7 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, ful
         report_table = linhas.DEST_TABLE
         report_xl_sheet = linhas.SHEETY
         report_description = linhas.REPORT_NAME
-        print(f'                \033[34mCreating Dynamic Report Table\033[0m:-> \033[33m"{report_description}"\033[0m ')
+        print(f'\033[34m   . .. ... Step: {i + 1:04} : Creating Dynamic Report Table\033[0m :-> \033[33m"{report_description}"\033[0m ')
         columns_of_report = pd.read_excel(excel_file, sheet_name=report_xl_sheet)
 
         # finally, create the table to be used in the future
@@ -546,9 +546,9 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     lista_acoes.append(f"create view Origens as select TABLE_NAME as nome from GUIDING gd where gd.LOADABLE = 'X' AND GD.ACCOUNTING = 'X';")
 
     for i in range(0, len(lista_acoes)):
-        print(f'\033[34m   . .. ... Step: {i + 1:04}\033[0m', end=' ')
+        print(f'\033[34m   . .. ... Step: {i + 1:04} ; \033[0m', end=' ')
         cursor.execute(lista_acoes[i])
-        print(f';  \033[31mLines Affected: {str(cursor.rowcount).rjust(5)}\033[0m')
+        print(f'\033[31mLines Affected: {str(cursor.rowcount).rjust(5)}\033[0m')
 
 
 def table_droppator(conexao, table_name):

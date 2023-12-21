@@ -20,8 +20,10 @@
 #                      #   Just Export data                 #
 #                      # New Columns on the main Table      #
 # 2023-10-05 # 9.2.0   # Export Transient data from API Tab.# Carlin, Luiz A. .'.
+# 2023-12-20 # 9.3.0   # Data Validator: verify if tehe is  # Carlin, Luiz A. .'.
+#                      #  Any invalid data on main fields   #
 ####################################################################################
-# Current Version : 9.2.0
+# Current Version : 9.3.0
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -64,7 +66,7 @@ import configparser
 import os, platform, sys
 import threading
 import time
-
+import re
 
 def main(param_file):
     # Environment / Variables
@@ -303,6 +305,11 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
 
     # Just one commit to Save time. This commit is BEFORE the data_correjeitor
     conn.commit()
+    ## Data Validator
+    # if there is any inconsistent data, the program break and it is shown
+    if not data_verificator (general_entries_table, conn ) :
+       exit()
+
     data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)
     conn.commit()
     conn.close()
@@ -482,6 +489,42 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
     if write_multiple_files:
         xlsx_writer.close()
 
+
+def data_verificator(general_entries_table, conexao ):
+    print(f'Verifying the Integrity and quality of data loaded into {general_entries_table} ... .. .')
+    conta_erro = 0
+    lista_acoes = []
+    lista_acoes.append(['Data','Validação de datas', '[a-z][A-Z]' ])
+    lista_acoes.append(['Debito','Validação de Campo "Debitos"', '[a-z][A-Z]'])
+    lista_acoes.append(['Credito', 'Validação de Campo "Creditos"', '[a-z][A-Z]'])
+    main_df = pd.read_sql(f'select * from {general_entries_table}', conexao)
+    return True
+
+    for i in range(0, len(lista_acoes)):
+        field = lista_acoes[i][0]
+        action = lista_acoes[i][1] # Action
+        regex = lista_acoes[i][2]
+        # print('------------ THIS IS A DEBUG  ')
+        # print(f'field  -> {field}')
+        # print(f'action -> {action}')
+        # print(f'regex  -> {regex}')
+
+        # print('------------ THIS IS A DEBUG  ')
+        print(f'\033[34m   . .. ... Step: {i + 1:04} : {action} : \033[0m', end=' ')
+        net_df = main_df[~main_df[f"{field}"].str.contains(regex, regex=True, na=True)]
+        if len (net_df) > 0:
+            conta_erro+=1
+            print(f'\033[31m FAIL - ERROR :\033[0m')
+            print('=======================================================================================')
+            print(net_df)
+            print('=======================================================================================')
+        else:
+            print(f'\033[32m OK - SUCCESS; \033[0m')
+
+    if conta_erro == 0:
+        return True
+    else:
+        return False
 
 def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_table):
     print(f'Normalizing data on {entries_table} Table ...')

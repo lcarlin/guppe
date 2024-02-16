@@ -4,11 +4,11 @@
 # Caminho dos arquivos A e B
 
 # Atenção: adequar as 03 variaveis abaixo com base em Vosso Ambiente de Execução, talkey ?
-$dirPDW = "G:\PDW\"
-$dirScript = "C:\Users\F169352\python\guppe\Excel_CSV_DB\"
+$dirPDW = "C:\Users\luizc\OneDrive\Documentos\PDW\"
+$dirScript = "C:\Users\luizc\PyCharm\guppe\Excel_CSV_DB"
 
 # Caminho para o executável do Python que você deseja executar
-$pythonExe = "C:\Users\f169352\AppData\Local\Programs\Python\Python311\python.exe"
+$pythonExe = "C:\Users\luizc\AppData\Local\Programs\Python\Python312\python.exe"
 
 $outLiner = ">===================================================================================================================<"
 

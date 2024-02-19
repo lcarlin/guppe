@@ -134,7 +134,7 @@ def main(param_file):
         transient_data_table = config['SETTINGS']['TRANSIENT_DATA_TABLE']
         transient_data_file = config['FILE_TYPES']['TRANSIENT_DATA_FILE']
         origem_dados = config['SETTINGS']['TRANSIENT_DATA_COLUMN']
-        other_file_types = config.getboolean['SETTINGS']['EXPORT_OTHER_TYPES']
+        other_file_types = config.getboolean('SETTINGS', 'EXPORT_OTHER_TYPES') 
 
         dinamic_reports = config.getboolean('SETTINGS', 'RUN_DINAMIC_REPORT')
         din_report_guinding = config['SETTINGS']['DIN_REPORT_GUIDING']

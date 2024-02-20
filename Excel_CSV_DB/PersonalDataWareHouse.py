@@ -69,6 +69,8 @@ import time
 import re
 import xml.etree.ElementTree as ET
 import xml.sax.saxutils as saxutils
+import xml.etree.ElementTree as ET
+import xml.sax.saxutils as saxutils
 
 def main(param_file):
     # Environment / Variables
@@ -334,6 +336,7 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, ful
         report_xl_sheet = linhas.SHEETY
         report_description = linhas.REPORT_NAME
         print(f'\033[34m   . .. ... Step: {i + 1:04} : Creating Dynamic Report Table\033[0m  :-> \033[33m"{report_description}"\033[0m ')
+        print(f'\033[34m   . .. ... Step: {i + 1:04} : Creating Dynamic Report Table\033[0m  :-> \033[33m"{report_description}"\033[0m ')
         columns_of_report = pd.read_excel(excel_file, sheet_name=report_xl_sheet)
 
         # finally, create the table to be used in the future
@@ -362,6 +365,7 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, ful
     conn.close()
 
 
+def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name, other_types):
 def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name, other_types):
     connection = sqlite3.connect(data_base_file)
     file_full_path = dir_out + file_out + '.v2'
@@ -394,6 +398,64 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
         f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
     connection.close()
 
+def escape_special_chars(text):
+    return saxutils.escape(text, entities={
+        "'": "&apos;",
+        '"': "&quot;",
+        '>': "&gt;",
+        '<': "&lt;",
+        '&': "&amp;",
+        'á': "&aacute;",
+        'à': "&agrave;",
+        'ã': "&atilde;",
+        'â': "&acirc;",
+        'é': "&eacute;",
+        'è': "&egrave;",
+        'ê': "&ecirc;",
+        'í': "&iacute;",
+        'ì': "&igrave;",
+        'ó': "&oacute;",
+        'ò': "&ograve;",
+        'õ': "&otilde;",
+        'ô': "&ocirc;",
+        'ú': "&uacute;",
+        'ù': "&ugrave;",
+        'û': "&ucirc;",
+        'ç': "&ccedil;",
+        'Á': "&Aacute;",
+        'À': "&Agrave;",
+        'Ã': "&Atilde;",
+        'Â': "&Acirc;",
+        'É': "&Eacute;",
+        'È': "&Egrave;",
+        'Ê': "&Ecirc;",
+        'Í': "&Iacute;",
+        'Ì': "&Igrave;",
+        'Ó': "&Oacute;",
+        'Ò': "&Ograve;",
+        'Õ': "&Otilde;",
+        'Ô': "&Ocirc;",
+        'Ú': "&Uacute;",
+        'Ù': "&Ugrave;",
+        'Û': "&Ucirc;",
+        'Ç': "&Ccedil;",
+    })
+
+# Function that converts any data-frame to XML file
+def dataframe_to_xml(df, filename):
+    root = ET.Element('data')
+
+    for index, row in df.iterrows():
+        item = ET.SubElement(root, 'item')
+        #for col_name, col_value in row.iteritems():
+        for col_name, col_value in row.items():
+            # col_value_escaped = escape_special_chars(str(col_value))
+            # ET.SubElement(item, col_name).text = col_value_escaped
+            ET.SubElement(item, col_name).text = str(col_value)
+
+    tree = ET.ElementTree(root)
+    ET.indent(tree, '   ')
+    tree.write(filename, encoding='utf-8', xml_declaration=True)
 def escape_special_chars(text):
     return saxutils.escape(text, entities={
         "'": "&apos;",
@@ -528,9 +590,6 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             f" as Creditos FROM {entries_table} LG where LG.TIPO not in " \
                             " ('cartões de Crédito','Transf. Bco') GROUP BY MesAno order by Ano desc, mes DESC ) dois ;"
                                , "Debitos Mensais"])
-
-    lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
-                            "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
 
     lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
                             "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])

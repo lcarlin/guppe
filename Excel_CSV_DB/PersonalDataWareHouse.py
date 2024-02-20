@@ -134,7 +134,7 @@ def main(param_file):
         transient_data_table = config['SETTINGS']['TRANSIENT_DATA_TABLE']
         transient_data_file = config['FILE_TYPES']['TRANSIENT_DATA_FILE']
         origem_dados = config['SETTINGS']['TRANSIENT_DATA_COLUMN']
-        other_file_types = config['SETTINGS']['EXPORT_OTHER_TYPES']
+        other_file_types = config.getboolean('SETTINGS', 'EXPORT_OTHER_TYPES')
 
         dinamic_reports = config.getboolean('SETTINGS', 'RUN_DINAMIC_REPORT')
         din_report_guinding = config['SETTINGS']['DIN_REPORT_GUIDING']
@@ -382,9 +382,11 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
     row_count = len(df_out.index)
     df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='ansi')
     if other_types:
-        df_out.to_json(file_full_path + '.json',orient='records')
+        print(f"              Expçorting JSON file(s) ")
+        df_out.to_json(file_full_path + '.json',orient='records', lines=True, indent=1, force_ascii=False)
         # df_out.to_html(file_full_path + '.html')
         # df_out.to_xml(file_full_path + '.xml', parser = 'lxml', pretty_print=True, xml_declaration=True)
+        print(f"              Expçorting XML file(s) ")
         dataframe_to_xml(df_out, file_full_path + '.xml')
 
     print(
@@ -437,16 +439,18 @@ def escape_special_chars(text):
 # Function that converts any data-frame to XML file
 def dataframe_to_xml(df, filename):
     root = ET.Element('data')
+
     for index, row in df.iterrows():
         item = ET.SubElement(root, 'item')
         #for col_name, col_value in row.iteritems():
         for col_name, col_value in row.items():
-            col_value_escaped = escape_special_chars(str(col_value))
-            ET.SubElement(item, col_name).text = col_value_escaped
-            # ET.SubElement(item, col_name).text = str(col_value)
+            # col_value_escaped = escape_special_chars(str(col_value))
+            # ET.SubElement(item, col_name).text = col_value_escaped
+            ET.SubElement(item, col_name).text = str(col_value)
 
     tree = ET.ElementTree(root)
-    tree.write(filename)
+    ET.indent(tree, '   ')
+    tree.write(filename, encoding='utf-8', xml_declaration=True)
 
 def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name, transient_data_table, origing_column):
     print('Exporting Transient data into individual Sheelts ... .. .  ')
@@ -523,6 +527,9 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             f" as Creditos FROM {entries_table} LG where LG.TIPO not in " \
                             " ('cartões de Crédito','Transf. Bco') GROUP BY MesAno order by Ano desc, mes DESC ) dois ;"
                                , "Debitos Mensais"])
+
+    lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
+                            "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
 
     if gera_hist and dynamic_reports:
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)

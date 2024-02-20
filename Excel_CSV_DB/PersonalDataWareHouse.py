@@ -387,6 +387,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
         # df_out.to_html(file_full_path + '.html')
         # df_out.to_xml(file_full_path + '.xml', parser = 'lxml', pretty_print=True, xml_declaration=True)
         print(f"              Expçorting XML file(s) ")
+        print(f"              Expçorting XML file(s) ")
         dataframe_to_xml(df_out, file_full_path + '.xml')
 
     print(
@@ -527,6 +528,9 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             f" as Creditos FROM {entries_table} LG where LG.TIPO not in " \
                             " ('cartões de Crédito','Transf. Bco') GROUP BY MesAno order by Ano desc, mes DESC ) dois ;"
                                , "Debitos Mensais"])
+
+    lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
+                            "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
 
     lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
                             "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])

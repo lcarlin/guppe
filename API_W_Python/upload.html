@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload de Arquivo</title>
+</head>
+<body>
+    <h1>Upload de Arquivo com Informações Adicionais</h1>
+    <form action="http://localhost:5000/upload" method="post" enctype="multipart/form-data">
+        <label for="file">Selecione o arquivo:</label>
+        <input type="file" name="file" required><br><br>
+        <label for="codigo_cliente">Código de Cliente:</label>
+        <input type="text" name="codigo_cliente" required><br><br>
+        <label for="data_nascimento">Data de Nascimento:</label>
+        <input type="text" name="data_nascimento" required><br><br>
+        <label for="numero_cpf">Número CPF:</label>
+        <input type="text" name="numero_cpf" required><br><br>
+        <input type="submit" value="Enviar Arquivo">
+    </form>
+</body>
+</html>

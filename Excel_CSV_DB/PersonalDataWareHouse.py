@@ -69,6 +69,8 @@ import time
 import re
 import xml.etree.ElementTree as ET
 import xml.sax.saxutils as saxutils
+import gzip
+import shutil
 
 def main(param_file):
     # Environment / Variables
@@ -382,13 +384,14 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
     row_count = len(df_out.index)
     df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='ansi')
     if other_types:
-        print(f"              Expçorting JSON file(s) ")
+        print(f"              Exporting JSON file(s) ")
         df_out.to_json(file_full_path + '.json',orient='records', lines=True, indent=1, force_ascii=False)
+        gzip_compressor(file_full_path + '.json')
         # df_out.to_html(file_full_path + '.html')
         # df_out.to_xml(file_full_path + '.xml', parser = 'lxml', pretty_print=True, xml_declaration=True)
-        print(f"              Expçorting XML file(s) ")
-        print(f"              Expçorting XML file(s) ")
+        print(f"              Expoorting XML file(s) ")
         dataframe_to_xml(df_out, file_full_path + '.xml')
+        gzip_compressor(file_full_path + '.xml')
 
     print(
         f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
@@ -528,9 +531,6 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             f" as Creditos FROM {entries_table} LG where LG.TIPO not in " \
                             " ('cartões de Crédito','Transf. Bco') GROUP BY MesAno order by Ano desc, mes DESC ) dois ;"
                                , "Debitos Mensais"])
-
-    lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
-                            "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
 
     lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
                             "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
@@ -806,6 +806,16 @@ def data_loader_parallel(data_base, types_sheet, general_entries_table, guindind
     conn.commit()
     conn.close()
     # connection.close()
+
+def gzip_compressor(arquivo_origem):
+    arquivo_destino = arquivo_origem + '.gz'
+    print(f'creating compressed file {arquivo_destino}')
+    with open(arquivo_origem, 'rb') as f_in:
+        with gzip.open(arquivo_destino, 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
+
+    # Excluindo o arquivo original após a compactação
+    os.remove(arquivo_origem)
 
 
 if __name__ == '__main__':

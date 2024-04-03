@@ -22,8 +22,10 @@
 # 2023-10-05 # 9.2.0   # Export Transient data from API Tab.# Carlin, Luiz A. .'.
 # 2023-12-20 # 9.3.0   # Data Validator: verify if tehe is  # Carlin, Luiz A. .'.
 #                      #  Any invalid data on main fields   #
+# 2024-04-03 # 9.3.2   # remove INPLACE NPN MAN             # Carlin, Luiz A. .'.
+#                      #         # CHANGES Encoding from ansi CP1252  # Carlin, Luiz A. .'.
 ####################################################################################
-# Current Version : 9.3.0
+# Current Version : 9.3.2
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -77,7 +79,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    current_version = "9.2.0"
+    current_version = "9.3.2"
 
     # if the system is windows then use the below
     # command to check for the hostname
@@ -282,8 +284,14 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
         if 'X' == is_loadeable:
             data_frame = pd.read_excel(excel_file, sheet_name=table_to_load)
             if 'X' == is_accounting:
-                data_frame['TIPO'].replace('', np.nan, inplace=True)
-                data_frame['Data'].replace('', np.nan, inplace=True)
+                # data_frame['TIPO'].replace('', np.nan, inplace=True)
+                # data_frame['Data'].replace('', np.nan, inplace=True)
+                # 2024.04.03 - improvment for future pandas 3.0
+                # Series through chained assignment using an inplace method.
+                # The behavior will change in pandas 3.0. This inplace method will never work because the intermediate
+                # object on which we are setting values always behaves as a copy.
+                data_frame['TIPO'] = data_frame['TIPO'].replace('', np.nan)
+                data_frame['Data'] = data_frame['Data'].replace('', np.nan)
 
                 if 'X' == is_cleanable and not save_useless:  ## ATENÇÃO A ISSO AQUI
                     # limpa registros com os Tipos Nulos
@@ -382,7 +390,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
                   f" FROM {table_name} LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
     row_count = len(df_out.index)
-    df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='ansi')
+    df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='cp1252')
     if other_types:
         print(f"              Exporting JSON file(s) ")
         df_out.to_json(file_full_path + '.json',orient='records', lines=True, indent=1, force_ascii=False)

@@ -23,7 +23,8 @@
 # 2023-12-20 # 9.3.0   # Data Validator: verify if tehe is  # Carlin, Luiz A. .'.
 #                      #  Any invalid data on main fields   #
 # 2024-04-03 # 9.3.2   # remove INPLACE NPN MAN             # Carlin, Luiz A. .'.
-#                      #         # CHANGES Encoding from ansi CP1252  # Carlin, Luiz A. .'.
+#                      # CHANGES Encoding from ansi CP1252  #
+# 2024-04-04 # 9.3.2   # files "MesAno" changed to AnoMEs   # Carlin, Luiz A. .'.
 ####################################################################################
 # Current Version : 9.3.2
 ####################################################################################
@@ -305,7 +306,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
                 general_entries_df['Mes'] = 'MM'
                 general_entries_df['Ano'] = 'YYYY'
                 general_entries_df['MES_EXTENSO'] = np.nan
-                general_entries_df['mesAno'] = 'MM/YYYY'
+                general_entries_df['AnoMes'] = 'YYYY/MM'
                 general_entries_df['Origem'] = table_to_load
                 # Ja joga os dados limpos na lançamentos gerais
                 general_entries_df.to_sql(general_entries_table, conn, index=False, if_exists="append")
@@ -385,7 +386,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
                   ", char(39)||cast (mes as text) as 'Mes' " \
                   ", char(39)||cast (ano as text) as 'Ano' " \
                   ", char(39)||MES_EXTENSO as 'Mes(Por Extenso)' " \
-                  ", char(39)||cast (mesAno as text )  as 'Mes/Ano' " \
+                  ", char(39)||cast (AnoMes as text )  as 'Ano/Mes' " \
                   ", LG.ORIGEM  as Origem " \
                   f" FROM {table_name} LG ORDER  BY DATA DESC ; "
     df_out = pd.read_sql(sqlStatment, connection)
@@ -499,7 +500,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
 
     if gera_hist:
         lista_consultas.append([
-            f"select * from {full_hist} where  date(SUBSTR(Referencia,4,4)||'-'||SUBSTR(Referencia,1,2)||'-'||'01') >= date('now','-13 month');" \
+            f"select * from {full_hist} where date(SUBSTR(Referencia,1,4)||'-'||SUBSTR(Referencia,6,2)||'-'||'01') >= date('now','-13 month');" \
             , full_hist + "12Meses"])
         lista_consultas.append([f"select * from {full_hist};", f"{full_hist}"])
         lista_consultas.append([f"select * from {anual_hist};", f"{anual_hist}"])
@@ -518,7 +519,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
          ", char(39)||cast (mes as text) as 'Mes' " \
          ", LG.MES_EXTENSO as 'Mes Por Extenso' " \
          ", char(39)||cast (ano as text) as 'Ano' " \
-         ", char(39)||cast (mesAno as text )  as 'Mes/Ano' " \
+         ", char(39)||cast (AnoMes as text )  as 'Ano/Mes' " \
          ", LG.ORIGEM  as Origem " \
          f" FROM {entries_table} LG ORDER  BY DATA DESC ; ", entries_table])
     lista_consultas.append(["select Ano || ' - ' || Mes as 'Referência', count(1) as 'Total' " \
@@ -533,11 +534,11 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             " WHERE Data >= date('now','-13 month') " \
                             " GROUP BY DIA_SEMANA " \
                             " ORDER BY 2 DESC ;", "Iterações_Semanais_12M"])
-    lista_consultas.append(["select dois.MesAno as Referencia , round(dois.debitos,2) as Débito ," \
+    lista_consultas.append(["select dois.AnoMes as Referencia , round(dois.debitos,2) as Débito ," \
                             " round(dois.creditos,2) as Créditos , round(dois.creditos - dois.debitos,2 ) " \
-                            " as ""Posição"" from ( SELECT MesAno , sum (lg.Debito) as debitos , Sum (lg.Credito) " \
+                            " as ""Posição"" from ( SELECT AnoMes , sum (lg.Debito) as debitos , Sum (lg.Credito) " \
                             f" as Creditos FROM {entries_table} LG where LG.TIPO not in " \
-                            " ('cartões de Crédito','Transf. Bco') GROUP BY MesAno order by Ano desc, mes DESC ) dois ;"
+                            " ('cartões de Crédito','Transf. Bco') GROUP BY AnoMes order by Ano desc, mes DESC ) dois ;"
                                , "Debitos Mensais"])
 
     lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
@@ -620,7 +621,7 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     lista_acoes.append(f"Update {entries_table} \
        set Mes = strftime ('%m',data )  \
        , Ano = strftime ('%Y',data )  \
-       , mesAno = strftime ('%m',data ) ||'/'||strftime ('%Y',data ) ;")
+       , AnoMes = strftime ('%Y',data )||'/'||strftime ('%m',data )  ;")
     lista_acoes.append(f"update {entries_table} set credito = 0 where credito is null ;")
     lista_acoes.append(f"update {entries_table} set debito = 0 where debito is null ;")
     lista_acoes.append(f"Delete from {types_sheet} WHERE ( Código IS NULL or Descrição IS NULL) ;")
@@ -683,7 +684,7 @@ def table_droppator(conexao, table_name):
 def create_pivot_history_anual(data_base_file, types_table, entries_table, out_table):
     print('Creating pivot Table for Anual summarized history ... .. . ')
     connection = sqlite3.connect(data_base_file)
-    ref_anterior = 'MM/YYYY'
+    ref_anterior = 'YYYY/MM'
     sql_statment_types = f'SELECT Código as COD, Descrição as DESC FROM {types_table} ;'
     sql_statment_summary = f'select Ano as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
                            ' GROUP BY Ano, TIPO order by Ano ;'
@@ -717,13 +718,13 @@ def create_pivot_history_anual(data_base_file, types_table, entries_table, out_t
 def create_pivot_history_full(data_base_file, types_table, entries_table, out_table):
     print('Creating pivot Table for summarized history ... .. . ')
     connection = sqlite3.connect(data_base_file)
-    ref_anterior = 'MM/YYYY'
+    ref_anterior = 'YYYY/MM'
     sql_statment_types = f'SELECT Código as COD, Descrição as DESC FROM {types_table} ;'
-    sql_statment_summary = f'select MesAno as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
-                           ' GROUP BY MesAno, TIPO order by Ano, Mes, TIPO desc ;'
+    sql_statment_summary = f'select AnoMes as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
+                           ' GROUP BY AnoMes, TIPO order by Ano, Mes, TIPO desc ;'
     df_types = pd.read_sql(sql_statment_types, connection)
     df_summary = pd.read_sql(sql_statment_summary, connection)
-    dict_hist_base = {'Referencia': '99/9999'}
+    dict_hist_base = {'Referencia': '9999/99'}
     lista_header = ['Referencia']
     for i, DADOS in df_types.iterrows():
         dict_hist_base.update({DADOS.DESC: 0})
@@ -763,7 +764,7 @@ def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
         general_entries_df.insert(1, 'DIA_SEMANA', np.nan)
         general_entries_df['Mes'] = 'MM'
         general_entries_df['Ano'] = 'YYYY'
-        general_entries_df['MesAno'] = 'MM/YYYY'
+        general_entries_df['AnoMes'] = 'YYYY/MM'
         general_entries_df['Origem'] = config_dict['table_to_load']
         # Ja joga os dados limpos na lançamentos gerais
         general_entries_df.to_sql(general_out_table, db_connection, index=False, if_exists="append")

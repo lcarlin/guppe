@@ -25,9 +25,8 @@
 # 2024-04-03 # 9.3.2   # remove INPLACE NPN MAN             # Carlin, Luiz A. .'.
 #                      # CHANGES Encoding from ansi CP1252  #
 # 2024-04-04 # 9.3.2   # files "MesAno" changed to AnoMEs   # Carlin, Luiz A. .'.
-# 2024-05-28 # 9.4.0   # Pivot Table Improvment             # Carlin, Luiz A. .'.
 ####################################################################################
-# Current Version : 9.4.0
+# Current Version : 9.3.2
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -81,7 +80,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    current_version = "9.4.0"
+    current_version = "9.3.2"
 
     # if the system is windows then use the below
     # command to check for the hostname
@@ -238,7 +237,9 @@ def main(param_file):
 
     if create_pivot:
         print(out_line)
-        create_pivot_history(sqlite_database, types_of_entries, general_entries_table, full_hist_table, anual_hist_table)
+        create_pivot_history_full(sqlite_database, types_of_entries, general_entries_table, full_hist_table)
+        print(out_line)
+        create_pivot_history_anual(sqlite_database, types_of_entries, general_entries_table, anual_hist_table)
         if dinamic_reports:
             print(out_line)
             create_dinamic_reports(sqlite_database, input_file, din_report_guinding, full_hist_table)
@@ -318,6 +319,10 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
 
     # Just one commit to Save time. This commit is BEFORE the data_correjeitor
     conn.commit()
+    ## Data Validator
+    # if there is any inconsistent data, the program break and it is shown
+    if not data_verificator (general_entries_table, conn ) :
+       exit()
 
     data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)
     conn.commit()
@@ -401,6 +406,48 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
         f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
     connection.close()
 
+def escape_special_chars(text):
+    return saxutils.escape(text, entities={
+        "'": "&apos;",
+        '"': "&quot;",
+        '>': "&gt;",
+        '<': "&lt;",
+        '&': "&amp;",
+        'á': "&aacute;",
+        'à': "&agrave;",
+        'ã': "&atilde;",
+        'â': "&acirc;",
+        'é': "&eacute;",
+        'è': "&egrave;",
+        'ê': "&ecirc;",
+        'í': "&iacute;",
+        'ì': "&igrave;",
+        'ó': "&oacute;",
+        'ò': "&ograve;",
+        'õ': "&otilde;",
+        'ô': "&ocirc;",
+        'ú': "&uacute;",
+        'ù': "&ugrave;",
+        'û': "&ucirc;",
+        'ç': "&ccedil;",
+        'Á': "&Aacute;",
+        'À': "&Agrave;",
+        'Ã': "&Atilde;",
+        'Â': "&Acirc;",
+        'É': "&Eacute;",
+        'È': "&Egrave;",
+        'Ê': "&Ecirc;",
+        'Í': "&Iacute;",
+        'Ì': "&Igrave;",
+        'Ó': "&Oacute;",
+        'Ò': "&Ograve;",
+        'Õ': "&Otilde;",
+        'Ô': "&Ocirc;",
+        'Ú': "&Uacute;",
+        'Ù': "&Ugrave;",
+        'Û': "&Ucirc;",
+        'Ç': "&Ccedil;",
+    })
 
 # Function that converts any data-frame to XML file
 def dataframe_to_xml(df, filename):
@@ -453,7 +500,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
 
     if gera_hist:
         lista_consultas.append([
-            f"select * from {full_hist} where date(SUBSTR(AnoMes,1,4)||'-'||SUBSTR(AnoMes,6,2)||'-'||'01') >= date('now','-13 month');" \
+            f"select * from {full_hist} where date(SUBSTR(Referencia,1,4)||'-'||SUBSTR(Referencia,6,2)||'-'||'01') >= date('now','-13 month');" \
             , full_hist + "12Meses"])
         lista_consultas.append([f"select * from {full_hist};", f"{full_hist}"])
         lista_consultas.append([f"select * from {anual_hist};", f"{anual_hist}"])
@@ -523,6 +570,42 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
     if write_multiple_files:
         xlsx_writer.close()
 
+
+def data_verificator(general_entries_table, conexao ):
+    print(f'Verifying the Integrity and quality of data loaded into {general_entries_table} ... .. .')
+    conta_erro = 0
+    lista_acoes = []
+    lista_acoes.append(['Data','Validação de datas', '[a-z][A-Z]' ])
+    lista_acoes.append(['Debito','Validação de Campo "Debitos"', '[a-z][A-Z]'])
+    lista_acoes.append(['Credito', 'Validação de Campo "Creditos"', '[a-z][A-Z]'])
+    main_df = pd.read_sql(f'select * from {general_entries_table}', conexao)
+    return True
+
+    for i in range(0, len(lista_acoes)):
+        field = lista_acoes[i][0]
+        action = lista_acoes[i][1] # Action
+        regex = lista_acoes[i][2]
+        # print('------------ THIS IS A DEBUG  ')
+        # print(f'field  -> {field}')
+        # print(f'action -> {action}')
+        # print(f'regex  -> {regex}')
+
+        # print('------------ THIS IS A DEBUG  ')
+        print(f'\033[34m   . .. ... Step: {i + 1:04} : {action} : \033[0m', end=' ')
+        net_df = main_df[~main_df[f"{field}"].str.contains(regex, regex=True, na=True)]
+        if len (net_df) > 0:
+            conta_erro+=1
+            print(f'\033[31m FAIL - ERROR :\033[0m')
+            print('=======================================================================================')
+            print(net_df)
+            print('=======================================================================================')
+        else:
+            print(f'\033[32m OK - SUCCESS; \033[0m')
+
+    if conta_erro == 0:
+        return True
+    else:
+        return False
 
 def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_table):
     print(f'Normalizing data on {entries_table} Table ...')
@@ -600,27 +683,70 @@ def table_droppator(conexao, table_name):
     print(f"Table {table_name} dropped... ")
 
 
-def create_pivot_history(data_base_file, types_table, entries_table, out_table_General ,out_table_Anual):
-    print('Creating pivot Tables ... .. . ')
+def create_pivot_history_anual(data_base_file, types_table, entries_table, out_table):
+    print('Creating pivot Table for Anual summarized history ... .. . ')
     connection = sqlite3.connect(data_base_file)
-
-    sql_statment_types = f'SELECT Descrição as TIPO FROM {types_table} ;'
-    sql_statment_summary = f'SELECT * FROM {entries_table} ;'
-
-    df_summary = pd.read_sql(sql_statment_summary, connection)
+    ref_anterior = 'YYYY/MM'
+    sql_statment_types = f'SELECT Código as COD, Descrição as DESC FROM {types_table} ;'
+    sql_statment_summary = f'select Ano as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
+                           ' GROUP BY Ano, TIPO order by Ano ;'
     df_types = pd.read_sql(sql_statment_types, connection)
+    df_summary = pd.read_sql(sql_statment_summary, connection)
+    dict_hist_base = {'Referencia': '9999'}
+    lista_header = ['Referencia']
+    for i, DADOS in df_types.iterrows():
+        dict_hist_base.update({DADOS.DESC: 0.00})
+        lista_header.append(DADOS.DESC)
 
-    print('                      ... .. . for Monthly summarized history ... .. .')
-    pivot_full = df_summary.pivot_table(index='AnoMes', columns='TIPO', values='Debito', aggfunc='sum').fillna(0)
-    pivot_full = pivot_full[df_types['TIPO']]
-    pivot_full = pivot_full.reset_index()
-    pivot_full.to_sql(out_table_General , connection, index=False, if_exists="replace")
+    lista_full = []
+    current_dict = dict_hist_base.copy()
+    for j, Fetcher in df_summary.iterrows():
+        if ref_anterior != Fetcher.Referencia:
+            lista_full.append(current_dict)
+            ref_anterior = Fetcher.Referencia
+            current_dict = dict_hist_base.copy()
+            current_dict['Referencia'] = Fetcher.Referencia
 
-    print('                      ... .. . for Anual summarized history ... .. .')
-    pivot_anual = df_summary.pivot_table(index='Ano', columns='TIPO', values='Debito', aggfunc='sum').fillna(0)
-    pivot_anual = pivot_anual[df_types['TIPO']]
-    pivot_anual = pivot_anual.reset_index()
-    pivot_anual.to_sql(out_table_Anual, connection, index=False, if_exists="replace")
+        current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
+
+    lista_full.append(current_dict)  # writes the last line into the list
+    dev_null = lista_full.pop(0)  # remove the 1st reference
+    data_to_write = pd.DataFrame(lista_full)
+    data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
+    connection.commit()
+    connection.close()
+
+
+def create_pivot_history_full(data_base_file, types_table, entries_table, out_table):
+    print('Creating pivot Table for summarized history ... .. . ')
+    connection = sqlite3.connect(data_base_file)
+    ref_anterior = 'YYYY/MM'
+    sql_statment_types = f'SELECT Código as COD, Descrição as DESC FROM {types_table} ;'
+    sql_statment_summary = f'select AnoMes as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
+                           ' GROUP BY AnoMes, TIPO order by Ano, Mes, TIPO desc ;'
+    df_types = pd.read_sql(sql_statment_types, connection)
+    df_summary = pd.read_sql(sql_statment_summary, connection)
+    dict_hist_base = {'Referencia': '9999/99'}
+    lista_header = ['Referencia']
+    for i, DADOS in df_types.iterrows():
+        dict_hist_base.update({DADOS.DESC: 0})
+        lista_header.append(DADOS.DESC)
+
+    lista_full = []
+    current_dict = dict_hist_base.copy()
+    for j, Fetcher in df_summary.iterrows():
+        if ref_anterior != Fetcher.Referencia:
+            lista_full.append(current_dict)
+            ref_anterior = Fetcher.Referencia
+            current_dict = dict_hist_base.copy()
+            current_dict['Referencia'] = Fetcher.Referencia
+
+        current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
+
+    lista_full.append(current_dict)
+    dev_null = lista_full.pop(0)  # remove the 1st reference
+    data_to_write = pd.DataFrame(lista_full)
+    data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
     connection.commit()
 
 

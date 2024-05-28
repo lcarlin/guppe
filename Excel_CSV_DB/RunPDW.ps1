@@ -23,11 +23,11 @@ if ( ( -not (Test-Path $pdwExcel )) -or ( -not (Test-Path $pdwDB) )) {
     $dataCriacaopdwDB = (Get-Item $pdwDB).LastWriteTime
     $dataCriacaopdwExcel = (Get-Item $pdwExcel).LastWriteTime
     Write-Host $outLiner
-    Write-Host "Banco-de-dados    :-> " $pdwDB
-    Write-Host "Ultima Atulizacao :-> " $dataCriacaopdwDB 
+    Write-Host "Banco-de-dados     :-> " $pdwDB
+    Write-Host "Ultima Atualizacao :-> " $dataCriacaopdwDB 
     Write-Host $outLiner
-    Write-Host "Planilha          :-> " $pdwExcel
-    Write-Host "Ultima Atulizacao :-> " $dataCriacaopdwExcel
+    Write-Host "Planilha           :-> " $pdwExcel
+    Write-Host "Ultima Atualizacao :-> " $dataCriacaopdwExcel
     Write-Host $outLiner
     # Comparar as datas de criação
     if ($dataCriacaopdwExcel -gt $dataCriacaopdwDB) {

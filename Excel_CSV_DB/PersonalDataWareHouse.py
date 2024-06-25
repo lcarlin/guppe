@@ -267,6 +267,7 @@ def main(param_file):
     print("All Personal Data WareHouse processes has ended! ")
     print(log_line[:-1])
     print(out_line)
+    exit(0)
 
 
 def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
@@ -393,7 +394,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
         gzip_compressor(file_full_path + '.json')
         # df_out.to_html(file_full_path + '.html')
         # df_out.to_xml(file_full_path + '.xml', parser = 'lxml', pretty_print=True, xml_declaration=True)
-        print(f"              Expoorting XML file(s) ")
+        print(f"              Exporting XML file(s) ")
         dataframe_to_xml(df_out, file_full_path + '.xml')
         gzip_compressor(file_full_path + '.xml')
 
@@ -405,7 +406,6 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
 # Function that converts any data-frame to XML file
 def dataframe_to_xml(df, filename):
     root = ET.Element('data')
-
     for index, row in df.iterrows():
         item = ET.SubElement(root, 'item')
         #for col_name, col_value in row.iteritems():
@@ -614,7 +614,7 @@ def create_pivot_history(data_base_file, types_table, entries_table, out_table_G
     pivot_full = df_summary.pivot_table(index='AnoMes', columns='TIPO', values='Debito', aggfunc='sum').fillna(0)
     pivot_full = pivot_full[df_types['TIPO']]
     pivot_full = pivot_full.reset_index()
-    pivot_full.to_sql(out_table_General , connection, index=False, if_exists="replace")
+    pivot_full.to_sql(out_table_General, connection, index=False, if_exists="replace")
 
     print('                      ... .. . for Anual summarized history ... .. .')
     pivot_anual = df_summary.pivot_table(index='Ano', columns='TIPO', values='Debito', aggfunc='sum').fillna(0)

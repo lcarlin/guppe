@@ -1,5 +1,4 @@
 import re
-import sys
 
 def converter_data(data):
     # Converter data do formato DD/MM/YYYY para YYYY/MM/DD
@@ -13,25 +12,22 @@ def converter_linha(linha):
         linha = linha.replace(data, converter_data(data))
     return linha
 
-def processar_arquivo_entrada_saida(arquivo_entrada, arquivo_saida):
-    with open(arquivo_entrada, 'r') as entrada, open(arquivo_saida, 'w') as saida:
+def processar_arquivo_e_ordenar(arquivo_entrada, arquivo_saida):
+    linhas_convertidas = []
+
+    with open(arquivo_entrada, 'r') as entrada:
         for linha in entrada:
             linha_convertida = converter_linha(linha)
-            saida.write(linha_convertida)
+            linhas_convertidas.append(linha_convertida)
+    
+    # Ordenar as linhas convertidas em ordem alfabética crescente
+    linhas_convertidas.sort()
 
-def main(old_log_file):
-    # Exemplo de uso
-    new_log_file = old_log_file + ".new"
-    processar_arquivo_entrada_saida(old_log_file, new_log_file)
+    with open(arquivo_saida, 'w') as saida:
+        for linha in linhas_convertidas:
+            saida.write(linha)
 
-
-if __name__ == '__main__':
-    input_param_file = ""
-    if len(sys.argv) == 2:
-        input_param_file = sys.argv[1]
-    else :
-        print("ERROR - FATAL - FAIL - WARNING ")
-        print("Faltou o nome do arquivo de entrada")
-        exit(1)
-
-    main(input_param_file)
+# Exemplo de uso
+arquivo_entrada = 'PDW.log.old'
+arquivo_saida = 'PDW.CONVERTIDO.log'
+processar_arquivo_e_ordenar(arquivo_entrada, arquivo_saida)

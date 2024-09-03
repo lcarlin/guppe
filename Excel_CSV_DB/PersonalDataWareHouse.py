@@ -26,8 +26,11 @@
 #                      # CHANGES Encoding from ansi CP1252  #
 # 2024-04-04 # 9.3.2   # files "MesAno" changed to AnoMEs   # Carlin, Luiz A. .'.
 # 2024-05-28 # 9.4.0   # Pivot Table Improvment             # Carlin, Luiz A. .'.
+# 2024-08-08 # 9.4.4   # TimeStamp and Separator on LOG     # Carlin, Luiz A. .'.
+# 2024-09-02 # 9.5.0   # totaling daily amount of data In   # Carlin, Luiz A. .'.
+#                      # General Reports                    #
 ####################################################################################
-# Current Version : 9.4.0
+# Current Version : 9.5.0
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -80,8 +83,8 @@ def main(param_file):
     # Environment / Variables
     # current date and time
     start = time.time()
-    started = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    current_version = "9.4.0"
+    started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+    current_version = "9.5.0"
 
     # if the system is windows then use the below
     # command to check for the hostname
@@ -143,7 +146,8 @@ def main(param_file):
         other_file_types = config.getboolean('SETTINGS', 'EXPORT_OTHER_TYPES')
 
         dinamic_reports = config.getboolean('SETTINGS', 'RUN_DINAMIC_REPORT')
-        din_report_guinding = config['SETTINGS']['DIN_REPORT_GUIDING']
+        din_report_guinding = config['SETTINGS']['DIN_REPORT_GUIDING'] 
+        dayly_progress =  config['SETTINGS']['DAYLY_PROGRESS']
 
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
     except FileNotFoundError:
@@ -250,7 +254,7 @@ def main(param_file):
         print(out_line)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
                               general_entries_table, dinamic_reports, din_report_guinding, create_pivot,
-                              anual_hist_table, full_hist_table)
+                              anual_hist_table, full_hist_table, dayly_progress)
 
     if export_transeient_data:
         print(out_line)
@@ -258,8 +262,8 @@ def main(param_file):
 
     end = time.time()
     total_running_time: str = f"{end - start:.2f}"
-    log_line = started + '| Started|' + datetime.datetime.now().strftime(
-        "%d/%m/%Y %H:%M:%S") + f'| Ended| {total_running_time} TotalSecs | Version {current_version} | Hostname {hostname}' + '\n'
+    log_line = started + ' Started |' + datetime.datetime.now().strftime(
+        "%Y/%m/%d %H:%M:%S") + f' Ended | {total_running_time} TotalSecs | Version {current_version} | Hostname {hostname}' + '\n'
     log_file.write(log_line)
     log_file.close()
 
@@ -442,8 +446,10 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     xlsx_writer.close()
 
 def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
-                          dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist):
+                          dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog):
     # TODO: put the Dynamic Reports statments . How? IDK
+    ## PUT here the contagem cumulada call
+    totalizador_diario(sqlite_database, entries_table, day_prog ) 
     print('Exporting Summarized data ... .. .  ')
     connection = sqlite3.connect(sqlite_database)
     file_full_path = dir_out + file_name + '.' + out_extension
@@ -496,6 +502,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
 
     lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
                             "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
+    lista_consultas.append([f"SELECT * FROM {day_prog} ORDER BY 1 DESC;","Contagem Acumulada dia-a-dia"])
 
     if gera_hist and dynamic_reports:
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)
@@ -701,6 +708,17 @@ def gzip_compressor(arquivo_origem):
 
     # Excluindo o arquivo original após a compactação
     os.remove(arquivo_origem)
+
+def totalizador_diario(database_file, in_table, out_table ):
+    print ("Totaling Daily Amount of data ... .. .")
+    conn = sqlite3.connect(database_file)
+    df = pd.read_sql_query(f"select * from {in_table}", conn)
+    df_contagem = df.groupby('Data').size().reset_index(name='Contagem')
+    df_contagem['Contagem Acumulada'] = df_contagem['Contagem'].cumsum()
+    df_contagem = df_contagem[['Data', 'Contagem Acumulada']]
+    number_lines = df_contagem.to_sql(out_table, conn, index=False, if_exists="replace")
+    conn.commit()
+    conn.close()
 
 
 if __name__ == '__main__':

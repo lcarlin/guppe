@@ -275,8 +275,10 @@ def main(param_file):
 
 
 def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
+    print(f"Connecting to SQLite3 Database ... .. .  ")
     conn = sqlite3.connect(data_base)
     work_books = pd.ExcelFile(excel_file)
+    print(f"Reading Data from Guindig Sheet :->  {guindind_sheet} ... .. .  ")
     sheets_dataframe = work_books.parse(sheet_name=guindind_sheet)
     table_droppator(conn.cursor(), general_entries_table)
     print("Running Loader of the Sheets into database Tables ... .. .  ")
@@ -502,7 +504,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
 
     lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
                             "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
-    lista_consultas.append([f"SELECT * FROM {day_prog} ORDER BY 1 DESC;","Contagem Acumulada dia-a-dia"])
+    lista_consultas.append([f"SELECT * FROM {day_prog} ORDER BY 1 DESC;","Contagem dia-a-dia"])
 
     if gera_hist and dynamic_reports:
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)

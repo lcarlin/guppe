@@ -146,7 +146,7 @@ def main(param_file):
         other_file_types = config.getboolean('SETTINGS', 'EXPORT_OTHER_TYPES')
 
         dinamic_reports = config.getboolean('SETTINGS', 'RUN_DINAMIC_REPORT')
-        din_report_guinding = config['SETTINGS']['DIN_REPORT_GUIDING']
+        din_report_guinding = config['SETTINGS']['DIN_REPORT_GUIDING'] 
         dayly_progress =  config['SETTINGS']['DAYLY_PROGRESS']
 
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')

@@ -70,7 +70,7 @@ def main(param_file):
         hostname = os.uname()[1]
 
     config = configparser.ConfigParser()
-    config_file = 'PersonalDataWareHouse.cfg'
+    config_file = 'PersonalDataWareHouse.960.cfg'
 
     if len(param_file) > 0:
         config_file = param_file

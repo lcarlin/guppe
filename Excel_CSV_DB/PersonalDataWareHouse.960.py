@@ -29,6 +29,7 @@
 # 2024-08-08 # 9.4.4   # TimeStamp and Separator on LOG     # Carlin, Luiz A. .'.
 # 2024-09-02 # 9.5.0   # totaling daily amount of data In   # Carlin, Luiz A. .'.
 #                      # General Reports                    #
+# 2024-10-03 # 9.6.0   # payment in installments summary    # Carlin, Luiz A. .'.
 ####################################################################################
 # Current Version : 9.5.0
 ####################################################################################
@@ -73,18 +74,34 @@ import configparser
 import os, platform, sys
 import threading
 import time
-import re
 import xml.etree.ElementTree as ET
-import xml.sax.saxutils as saxutils
 import gzip
 import shutil
+
+def split_paymnt_resume(db_file, split_paymnt_table, out_table):
+    pass
+    print('Creating payment in installments Summaries ... .. .  ')
+    db_conn = sqlite3.connect(db_file)
+
+    df_parcelamentos = pd.read_sql(f"SELECT * FROM {split_paymnt_table}", db_conn)
+    df_agrupado = df_parcelamentos.groupby('Ano_Mes').agg(
+        Quantidade=('Data', 'size'),  # Contagem de registros por Ano/Mes
+        Valor=('Debito', 'sum')  # Soma dos valores da coluna Débito por Ano/Mes
+    ).reset_index()
+    df_agrupado['diff_1'] = df_agrupado['Quantidade'].diff().fillna(0)
+    df_agrupado['diff_2'] = df_agrupado['Valor'].diff().fillna(0)
+    df_agrupado['Ano_Mes'] = df_agrupado['Ano_Mes'].astype(str)
+    df_agrupado['Valor'] = df_agrupado['Valor'].round(2)
+    df_agrupado['diff 2'] = df_agrupado['diff 2'].round(2)
+    df_agrupado.to_sql(out_table, db_conn, index=False, if_exists="replace")
+
 
 def main(param_file):
     # Environment / Variables
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    current_version = "9.5.0"
+    current_version = "9.6.0"
 
     # if the system is windows then use the below
     # command to check for the hostname
@@ -95,7 +112,7 @@ def main(param_file):
         hostname = os.uname()[1]
 
     config = configparser.ConfigParser()
-    config_file = 'PersonalDataWareHouse.cfg'
+    config_file = 'PersonalDataWareHouse.960.cfg'
 
     if len(param_file) > 0:
         config_file = param_file
@@ -148,6 +165,9 @@ def main(param_file):
         dinamic_reports = config.getboolean('SETTINGS', 'RUN_DINAMIC_REPORT')
         din_report_guinding = config['SETTINGS']['DIN_REPORT_GUIDING']
         dayly_progress =  config['SETTINGS']['DAYLY_PROGRESS']
+
+        split_paymnt_table =  config['SETTINGS']['SPLT_PAYMNT_TAB']
+        out_table = config['SETTINGS']['OUT_RES_PMNT_TAB']
 
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
     except FileNotFoundError:
@@ -252,9 +272,11 @@ def main(param_file):
         general_entries_file_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                         general_entries_table, other_file_types)
         print(out_line)
+        split_paymnt_resume(sqlite_database, split_paymnt_table, out_table )
+        print(out_line)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
                               general_entries_table, dinamic_reports, din_report_guinding, create_pivot,
-                              anual_hist_table, full_hist_table, dayly_progress)
+                              anual_hist_table, full_hist_table, dayly_progress, out_table)
 
     if export_transeient_data:
         print(out_line)
@@ -448,7 +470,7 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     xlsx_writer.close()
 
 def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
-                          dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog):
+                          dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res ):
     # TODO: put the Dynamic Reports statments . How? IDK
     ## PUT here the contagem cumulada call
     totalizador_diario(sqlite_database, entries_table, day_prog ) 
@@ -505,6 +527,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
     lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
                             "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
     lista_consultas.append([f"SELECT * FROM {day_prog} ORDER BY 1 DESC;","Contagem dia-a-dia"])
+    lista_consultas.append([f"SELECT * FROM {splt_pmnt_res} ORDER BY 1 DESC;","Resumo de Parcelamentos"])
 
     if gera_hist and dynamic_reports:
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)

@@ -100,10 +100,11 @@ def main(param_file):
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     current_version = "9.6.0"
+    os_pataform = platform.system()
 
     # if the system is windows then use the below
     # command to check for the hostname
-    if platform.system() == "Windows":
+    if  os_pataform == "Windows":
         hostname = platform.uname().node
     else:
         # otherwise use the below command
@@ -283,7 +284,7 @@ def main(param_file):
     end = time.time()
     total_running_time: str = f"{end - start:.2f}"
     log_line = started + ' Started |' + datetime.datetime.now().strftime(
-        "%Y/%m/%d %H:%M:%S") + f' Ended | {total_running_time} TotalSecs | Version {current_version} | Hostname {hostname}' + '\n'
+        "%Y/%m/%d %H:%M:%S") + f' Ended | {total_running_time} TotalSecs | Version {current_version} | Hostname {hostname} | OS {os_pataform}' + '\n'
     log_file.write(log_line)
     log_file.close()
 

@@ -4,8 +4,11 @@
 # Caminho dos arquivos A e B
 
 # Atenção: adequar as 03 variaveis abaixo com base em Vosso Ambiente de Execução, talkey ?
-$dirPDW = "C:\Users\luizc\OneDrive\Documentos\PDW\"
+$dirPDW = "C:\Users\luizc\OneDrive\Documentos\PDW"
 $dirScript = "C:\Users\luizc\PyCharm\guppe\Excel_CSV_DB"
+$dirDestDropBox = "C:\Users\luizc\Dropbox\PDW_DRPBX"
+$dbFile =  "PDW.db"
+$xlsxFile = "PDW.xlsx"
 
 # Caminho para o executável do Python que você deseja executar
 $pythonExe = "C:\Users\luizc\AppData\Local\Programs\Python\Python312\python.exe"
@@ -13,9 +16,13 @@ $pythonExe = "C:\Users\luizc\AppData\Local\Programs\Python\Python312\python.exe"
 $outLiner = ">===================================================================================================================<"
 
 # O nome do .db e do .xlsx tem que ser o mesmo que vem do arquivo "PersonalDataWareHouse.cfg" (ou similar)
-$pdwDB = $dirPDW + "PDW.db"
-$pdwExcel = $dirPDW + "PDW.xlsx"
+$pdwDB = Join-Path -Path $dirPDW -ChildPath $dbFile
+$pdwExcel = Join-Path -Path $dirPDW -ChildPath $xlsxFile
 $pythonScript = "PersonalDataWareHouse.py" 
+
+# Caminho completo do arquivo de origem e destino
+$caminhoOrigem = $pdwExcel
+$caminhoDestino = Join-Path -Path $dirDestDropBox -ChildPath $xlsxFile
 
 if ( ( -not (Test-Path $pdwExcel )) -or ( -not (Test-Path $pdwDB) )) {
     Write-Host $pdwExcel " ou " $pdwDB "Nao localizado"
@@ -34,6 +41,11 @@ if ( ( -not (Test-Path $pdwExcel )) -or ( -not (Test-Path $pdwDB) )) {
         Set-Location $dirScript
         # Executa o script Python em segundo plano
         Start-Process -FilePath $pythonExe -ArgumentList $pythonScript -NoNewWindow -Wait
+
+        # Copiar arquivo, sobrescrevendo se já existir, em modo verbose
+        Copy-Item -Path $caminhoOrigem -Destination $caminhoDestino -Force -Verbose
+        Write-Host "Arquivo copiado de $caminhoOrigem para $caminhoDestino"
+
     } else {
         Write-Host "A planilha nao foi alterada depois da ultima execucao, logo ... "
         Write-Host "Nao ha a necessidade de se exeucutar o Personal Dataware House nesse momento. Verifique mais tarde"

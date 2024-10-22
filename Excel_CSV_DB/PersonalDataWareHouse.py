@@ -30,8 +30,10 @@
 # 2024-09-02 # 9.5.0   # totaling daily amount of data In   # Carlin, Luiz A. .'.
 #                      # General Reports                    #
 # 2024-10-03 # 9.6.0   # payment in installments summary    # Carlin, Luiz A. .'.
+# 2024-10-22 # 9.6.1   # New Pivot Tables with COUNT of     # Carlin, Luiz A. .'.
+#                      # totals                             # Carlin, Luiz A. .'.
 ####################################################################################
-# Current Version : 9.5.0
+# Current Version : 9.6.1
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -99,7 +101,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    current_version = "9.6.0"
+    current_version = "9.6.1"
     os_pataform = platform.system()
 
     # if the system is windows then use the below
@@ -216,7 +218,7 @@ def main(param_file):
     if not is_log_empty and log_file_exists:
         last_run_date = log_file.readlines()[-1].split('|')[0]
     # end of LOG block
-    out_line = ">" + ("=" * 115) + "<"
+    out_line = ">" + ("=" * 120) + "<"
     print(out_line)
     print(f'Current Version         :-> {current_version}')
     print(f'Last RUN Date           :-> {last_run_date}')
@@ -292,7 +294,7 @@ def main(param_file):
     print("All Personal Data WareHouse processes has ended! ")
     print(log_line[:-1])
     print(out_line)
-    exit(0)
+    # exit(0)
 
 
 def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
@@ -486,6 +488,13 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
             , full_hist + "12Meses"])
         lista_consultas.append([f"select * from {full_hist};", f"{full_hist}"])
         lista_consultas.append([f"select * from {anual_hist};", f"{anual_hist}"])
+        ###
+        lista_consultas.append([
+            f"select * from {full_hist}_QTD where date(SUBSTR(AnoMes,1,4)||'-'||SUBSTR(AnoMes,6,2)||'-'||'01') >= date('now','-13 month');" \
+            , full_hist + "_QTD12Meses"])
+        lista_consultas.append([f"select * from {full_hist}_QTD;", f"{full_hist}_QTD"])
+        lista_consultas.append([f"select * from {anual_hist}_QTD;", f"{anual_hist}_QTD"])
+        ###
 
     lista_consultas.append([f"select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from {entries_table}" \
                             " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 " \
@@ -541,7 +550,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
         df_out = pd.read_sql(sql_statment, connection)
 
         if write_multiple_files:
-            message = f'\033[34m   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} \033[33mto {file_full_path}\033[0m'
+            message = f'\033[34m   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet.ljust(27)} \033[33mto {file_full_path}\033[0m'
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
         else:
             file_full_path = dir_out + excel_sheet + '.v2.' + out_extension
@@ -641,17 +650,29 @@ def create_pivot_history(data_base_file, types_table, entries_table, out_table_G
     df_summary = pd.read_sql(sql_statment_summary, connection)
     df_types = pd.read_sql(sql_statment_types, connection)
 
-    print('                      ... .. . for Monthly summarized history ... .. .')
+    print('                      ... .. . for Monthly Values summarized history ... .. .')
     pivot_full = df_summary.pivot_table(index='AnoMes', columns='TIPO', values='Debito', aggfunc='sum').fillna(0)
     pivot_full = pivot_full[df_types['TIPO']]
     pivot_full = pivot_full.reset_index()
     pivot_full.to_sql(out_table_General, connection, index=False, if_exists="replace")
 
-    print('                      ... .. . for Anual summarized history ... .. .')
+    print('                      ... .. . for Monthly total summarized history ... .. .')
+    pivot_full = df_summary.pivot_table(index='AnoMes', columns='TIPO', values='Debito', aggfunc='count').fillna(0)
+    pivot_full = pivot_full[df_types['TIPO']]
+    pivot_full = pivot_full.reset_index()
+    pivot_full.to_sql(out_table_General+'_QTD', connection, index=False, if_exists="replace")
+
+    print('                      ... .. . for Anual Values summarized history ... .. .')
     pivot_anual = df_summary.pivot_table(index='Ano', columns='TIPO', values='Debito', aggfunc='sum').fillna(0)
     pivot_anual = pivot_anual[df_types['TIPO']]
     pivot_anual = pivot_anual.reset_index()
-    pivot_anual.to_sql(out_table_Anual, connection, index=False, if_exists="replace")
+
+    print('                      ... .. . for Anual total summarized history ... .. .')
+    pivot_anual = df_summary.pivot_table(index='Ano', columns='TIPO', values='Debito', aggfunc='count').fillna(0)
+    pivot_anual = pivot_anual[df_types['TIPO']]
+    pivot_anual = pivot_anual.reset_index()
+    pivot_anual.to_sql(out_table_Anual+'_QTD', connection, index=False, if_exists="replace")
+
     connection.commit()
 
 

@@ -41,11 +41,13 @@ if ( ( -not (Test-Path $pdwExcel )) -or ( -not (Test-Path $pdwDB) )) {
         Set-Location $dirScript
         # Executa o script Python em segundo plano
         Start-Process -FilePath $pythonExe -ArgumentList $pythonScript -NoNewWindow -Wait
-
-        # Copiar arquivo, sobrescrevendo se já existir, em modo verbose
-        Copy-Item -Path $caminhoOrigem -Destination $caminhoDestino -Force -Verbose
-        Write-Host "Arquivo copiado de $caminhoOrigem para $caminhoDestino"
-
+        if ($LASTEXITCODE -eq 0) {
+            # Copiar arquivo, sobrescrevendo se já existir, em modo verbose
+            Copy-Item -Path $caminhoOrigem -Destination $caminhoDestino -Force -Verbose
+            Write-Host "Arquivo copiado de $caminhoOrigem para $caminhoDestino"
+        } else {
+            Write-Host "A execução do programa falhou. A cópia não foi efetuada."
+        }
     } else {
         Write-Host "A planilha nao foi alterada depois da ultima execucao, logo ... "
         Write-Host "Nao ha a necessidade de se exeucutar o Personal Dataware House nesse momento. Verifique mais tarde"

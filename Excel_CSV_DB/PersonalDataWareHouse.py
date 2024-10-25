@@ -228,7 +228,7 @@ def main(param_file):
     print(f'Output SQLite3 Database :-> {sqlite_database}')
     print(f'Guiding Excel Sheet     :-> {guiding_table}')
     print(out_line)
-    print("Personal Data WareHouse Processes are Starting | ET&L -> Extract, Transform & Loader !")
+    print("Personal Data Warehouse Processes are Starting | ET&L -> Extract, Transform & Loader !")
 
     if run_loader:
         print(out_line)
@@ -291,7 +291,7 @@ def main(param_file):
     log_file.close()
 
     print(out_line)
-    print("All Personal Data WareHouse processes has ended! ")
+    print("All Personal Data Warehouse processes have ended! ")
     print(log_line[:-1])
     print(out_line)
     # exit(0)
@@ -356,7 +356,7 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
 
 def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, full_pivot):
     # todo: put some Fancy  output Message
-    print('Creating Dinamics Reports for summarized history ... .. . ')
+    print('Creating Dynamic Reports for summarized history ... .. . ')
     conn = sqlite3.connect(sqlite_database)
     # with the name of the din_report_guinding , reads the Sheets do be loaded
     data_frame = pd.read_excel(excel_file, sheet_name=din_report_guinding)
@@ -388,6 +388,7 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, ful
 
         # At the end of the Loop, fix the Strings
         sum_tables = sum_tables[:-1] + ")"
+        
         base_sql_string = base_sql_string + sum_tables + f' as "Valor Total" FROM {full_pivot} HG; '
         # Now, run the SQL Query to build the Data-frame
         df = pd.read_sql_query(base_sql_string, conn)
@@ -650,24 +651,24 @@ def create_pivot_history(data_base_file, types_table, entries_table, out_table_G
     df_summary = pd.read_sql(sql_statment_summary, connection)
     df_types = pd.read_sql(sql_statment_types, connection)
 
-    print('                      ... .. . for Monthly Values summarized history ... .. .')
+    print('                      ... .. . to Monthly Values to summarized in history ... .. .')
     pivot_full = df_summary.pivot_table(index='AnoMes', columns='TIPO', values='Debito', aggfunc='sum').fillna(0)
     pivot_full = pivot_full[df_types['TIPO']]
     pivot_full = pivot_full.reset_index()
     pivot_full.to_sql(out_table_General, connection, index=False, if_exists="replace")
 
-    print('                      ... .. . for Monthly total summarized history ... .. .')
+    print('                      ... .. . to Monthly total to summarized in history ... .. .')
     pivot_full = df_summary.pivot_table(index='AnoMes', columns='TIPO', values='Debito', aggfunc='count').fillna(0)
     pivot_full = pivot_full[df_types['TIPO']]
     pivot_full = pivot_full.reset_index()
     pivot_full.to_sql(out_table_General+'_QTD', connection, index=False, if_exists="replace")
 
-    print('                      ... .. . for Anual Values summarized history ... .. .')
+    print('                      ... .. . to Anual Values to summarized in history ... .. .')
     pivot_anual = df_summary.pivot_table(index='Ano', columns='TIPO', values='Debito', aggfunc='sum').fillna(0)
     pivot_anual = pivot_anual[df_types['TIPO']]
     pivot_anual = pivot_anual.reset_index()
 
-    print('                      ... .. . for Anual total summarized history ... .. .')
+    print('                      ... .. . to Anual total summarized in history ... .. .')
     pivot_anual = df_summary.pivot_table(index='Ano', columns='TIPO', values='Debito', aggfunc='count').fillna(0)
     pivot_anual = pivot_anual[df_types['TIPO']]
     pivot_anual = pivot_anual.reset_index()
@@ -755,7 +756,7 @@ def gzip_compressor(arquivo_origem):
     os.remove(arquivo_origem)
 
 def totalizador_diario(database_file, in_table, out_table ):
-    print ("Totaling Daily Amount of data ... .. .")
+    print ("Totaling the Daily Amount of data ... .. .")
     conn = sqlite3.connect(database_file)
     df = pd.read_sql_query(f"select * from {in_table}", conn)
     df_contagem = df.groupby('Data').size().reset_index(name='Contagem')

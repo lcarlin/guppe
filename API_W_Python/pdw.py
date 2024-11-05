@@ -29,6 +29,7 @@ import sqlite3
 import numpy as np
 import datetime
 import configparser
+from gevent.pywsgi import WSGIServer
 
 
 app = Flask(__name__)
@@ -82,7 +83,7 @@ def form():
 
 
 #############################################################################################
-current_version = "9.2.0"
+current_version = "9.6.1"
 config = configparser.ConfigParser()
 config_file = '..\\Excel_CSV_DB\\PersonalDataWareHouse.cfg'
 try:
@@ -127,7 +128,9 @@ print(out_line)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug=True)
+    http_server = WSGIServer(('0.0.0.0',8123 ), app)
+    http_server.serve_forever()
 
 
 #############################################################################################

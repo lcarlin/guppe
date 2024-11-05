@@ -13,7 +13,7 @@ $xlsxFile = "PDW.xlsx"
 # Caminho para o executável do Python que você deseja executar
 $pythonExe = "C:\Users\luizc\AppData\Local\Programs\Python\Python312\python.exe"
 
-$outLiner = ">===================================================================================================================<"
+$outLiner = ">========================================================================================================================<"
 
 # O nome do .db e do .xlsx tem que ser o mesmo que vem do arquivo "PersonalDataWareHouse.cfg" (ou similar)
 $pdwDB = Join-Path -Path $dirPDW -ChildPath $dbFile
@@ -41,7 +41,10 @@ if ( ( -not (Test-Path $pdwExcel )) -or ( -not (Test-Path $pdwDB) )) {
         Set-Location $dirScript
         # Executa o script Python em segundo plano
         Start-Process -FilePath $pythonExe -ArgumentList $pythonScript -NoNewWindow -Wait
-        if ($LASTEXITCODE -eq 0) {
+        $ReturnCode = $?
+        #$ReturnCode = $LASTEXITCODE 
+        
+        if ($ReturnCode) {
             # Copiar arquivo, sobrescrevendo se já existir, em modo verbose
             Copy-Item -Path $caminhoOrigem -Destination $caminhoDestino -Force -Verbose
             Write-Host "Arquivo copiado de $caminhoOrigem para $caminhoDestino"

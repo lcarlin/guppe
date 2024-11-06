@@ -306,6 +306,7 @@ def monthly_summaries (db_file, in_table, out_table):
     db_conn = sqlite3.connect(db_file)
     sql_statment = f'SELECT * FROM {in_table} ;'
     df_entrada = pd.read_sql(sql_statment, db_conn)
+
     df_agrupado = df_entrada.groupby(['AnoMes', 'Origem']).agg(
         CREDITO=('Credito', 'sum'),
         DEBITO=('Debito', 'sum')
@@ -313,7 +314,16 @@ def monthly_summaries (db_file, in_table, out_table):
     df_agrupado['Posição'] = df_agrupado['CREDITO'] - df_agrupado['DEBITO']
     df_agrupado = df_agrupado.sort_values(by=['Origem', 'AnoMes']).reset_index(drop=True)
 
+    df_agrupado_full = df_entrada.groupby('Origem').agg(
+        CREDITO=('Credito', 'sum'),
+        DEBITO=('Debito', 'sum')
+    ).reset_index()
+    df_agrupado_full['Posição'] = df_agrupado_full['CREDITO'] - df_agrupado_full['DEBITO']
+    df_agrupado_full = df_agrupado_full.sort_values(by='Origem').reset_index(drop=True)
+
     df_agrupado.to_sql(out_table, db_conn, index=False, if_exists='replace')
+    df_agrupado_full.to_sql(out_table +'_FULL', db_conn, index=False, if_exists='replace')
+
 
 def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
     print(f"Connecting to SQLite3 Database ... .. .  ")
@@ -556,7 +566,8 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
     lista_consultas.append([f"SELECT * FROM {day_prog} ORDER BY 1 DESC;","Contagem dia-a-dia"])
     lista_consultas.append([f"SELECT * FROM {splt_pmnt_res} ORDER BY 1 DESC;","Resumo de Parcelamentos"])
-    lista_consultas.append([f"SELECT * FROM {mont_summ} ;","Resumos_In_out"])
+    lista_consultas.append([f"SELECT * FROM {mont_summ} ;","Resumos_In_out Mensal"])
+    lista_consultas.append([f"SELECT * FROM {mont_summ}_full ;","Resumos_In_out FULL"])
 
     if gera_hist and dynamic_reports:
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)

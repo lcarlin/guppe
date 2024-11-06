@@ -32,8 +32,10 @@
 # 2024-10-03 # 9.6.0   # payment in installments summary    # Carlin, Luiz A. .'.
 # 2024-10-22 # 9.6.1   # New Pivot Tables with COUNT of     # Carlin, Luiz A. .'.
 #                      # totals                             # Carlin, Luiz A. .'.
+# 2024-11-06 # 9.7.0   # Generating summaries of all        # Carlin, Luiz A. .'.
+#                      #   accounting tables                #
 ####################################################################################
-# Current Version : 9.6.1
+# Current Version : 9.7.0
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -81,7 +83,6 @@ import gzip
 import shutil
 
 def split_paymnt_resume(db_file, split_paymnt_table, out_table):
-    pass
     print('Creating payment in installments Summaries ... .. .  ')
     db_conn = sqlite3.connect(db_file)
 
@@ -101,7 +102,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    current_version = "9.6.1"
+    current_version = "9.7.0"
     os_pataform = platform.system()
 
     # if the system is windows then use the below
@@ -169,6 +170,7 @@ def main(param_file):
 
         split_paymnt_table =  config['SETTINGS']['SPLT_PAYMNT_TAB']
         out_table = config['SETTINGS']['OUT_RES_PMNT_TAB']
+        monthly_summarie =  config['SETTINGS']['MONTHLY_SUMMATIES']
 
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
     except FileNotFoundError:
@@ -270,6 +272,9 @@ def main(param_file):
 
     if run_reports:
         print(out_line)
+        monthly_summaries (sqlite_database, general_entries_table, monthly_summarie )
+
+        print(out_line)
         general_entries_file_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                         general_entries_table, other_file_types)
         print(out_line)
@@ -277,7 +282,7 @@ def main(param_file):
         print(out_line)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
                               general_entries_table, dinamic_reports, din_report_guinding, create_pivot,
-                              anual_hist_table, full_hist_table, dayly_progress, out_table)
+                              anual_hist_table, full_hist_table, dayly_progress, out_table , monthly_summarie)
 
     if export_transeient_data:
         print(out_line)
@@ -296,6 +301,19 @@ def main(param_file):
     print(out_line)
     # exit(0)
 
+def monthly_summaries (db_file, in_table, out_table):
+    print(f'Generating summaries of all accounting sheets into {out_table} table ... .. .')
+    db_conn = sqlite3.connect(db_file)
+    sql_statment = f'SELECT * FROM {in_table} ;'
+    df_entrada = pd.read_sql(sql_statment, db_conn)
+    df_agrupado = df_entrada.groupby(['AnoMes', 'Origem']).agg(
+        CREDITO=('Credito', 'sum'),
+        DEBITO=('Debito', 'sum')
+    ).reset_index()
+    df_agrupado['Posição'] = df_agrupado['CREDITO'] - df_agrupado['DEBITO']
+    df_agrupado = df_agrupado.sort_values(by=['Origem', 'AnoMes']).reset_index(drop=True)
+
+    df_agrupado.to_sql(out_table, db_conn, index=False, if_exists='replace')
 
 def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
     print(f"Connecting to SQLite3 Database ... .. .  ")
@@ -399,7 +417,7 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, ful
     conn.close()
 
 
-def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name, other_types):
+def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name, other_types) :
     connection = sqlite3.connect(data_base_file)
     file_full_path = dir_out + file_out + '.v2'
     print(f"Exporting {file_full_path} to file(s) ")
@@ -415,6 +433,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
                   ", char(39)||cast (AnoMes as text )  as 'Ano/Mes' " \
                   ", LG.ORIGEM  as Origem " \
                   f" FROM {table_name} LG ORDER  BY DATA DESC ; "
+
     df_out = pd.read_sql(sqlStatment, connection)
     row_count = len(df_out.index)
     df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='cp1252')
@@ -472,7 +491,7 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     xlsx_writer.close()
 
 def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
-                          dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res ):
+                          dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res, mont_summ ):
     # TODO: put the Dynamic Reports statments . How? IDK
     ## PUT here the contagem cumulada call
     totalizador_diario(sqlite_database, entries_table, day_prog ) 
@@ -537,6 +556,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                             "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
     lista_consultas.append([f"SELECT * FROM {day_prog} ORDER BY 1 DESC;","Contagem dia-a-dia"])
     lista_consultas.append([f"SELECT * FROM {splt_pmnt_res} ORDER BY 1 DESC;","Resumo de Parcelamentos"])
+    lista_consultas.append([f"SELECT * FROM {mont_summ} ;","Resumos_In_out"])
 
     if gera_hist and dynamic_reports:
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)
@@ -572,9 +592,9 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
     if save_useless:
         print(f'   . .. ... Saving discated Data')
         table_droppator(cursor, useless_table)
-        lista_acoes.append(
-            f"create table {useless_table} as select * from {entries_table} where (data is null or tipo is null); ", "Saving Useless")
-        lista_acoes.append(f"delete from {entries_table} where (data is null or tipo is null);","Deleting Useless")
+        lista_acoes.append((
+            f"create table {useless_table} as select * from {entries_table} where (data is null or tipo is null); ", "Saving Useless"))
+        lista_acoes.append((f"delete from {entries_table} where (data is null or tipo is null);","Deleting Useless"))
 
     lista_acoes.append((f"Update {entries_table} \
        set Mes = strftime ('%m',data )  \

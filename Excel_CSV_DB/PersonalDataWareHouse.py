@@ -235,7 +235,7 @@ def main(param_file):
     if run_loader:
         print(out_line)
         if not multithread:
-            data_loader(sqlite_database, types_of_entries, general_entries_table, guiding_table, input_file,
+            data_loader(sqlite_database, types_of_entries, general_entries_table, origem_dados, guiding_table, input_file,
                         save_discarted_data, discarted_data_table)
         else:
             print(f'Bad, Bad Server. Not donuts for you')
@@ -325,7 +325,7 @@ def monthly_summaries (db_file, in_table, out_table):
     df_agrupado_full.to_sql(out_table +'_FULL', db_conn, index=False, if_exists='replace')
 
 
-def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
+def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, guindind_sheet, excel_file, save_useless, udt):
     print(f"Connecting to SQLite3 Database ... .. .  ")
     conn = sqlite3.connect(data_base)
     work_books = pd.ExcelFile(excel_file)
@@ -364,7 +364,8 @@ def data_loader(data_base, types_sheet, general_entries_table, guindind_sheet, e
                 general_entries_df['Ano'] = 'YYYY'
                 general_entries_df['MES_EXTENSO'] = np.nan
                 general_entries_df['AnoMes'] = 'YYYY/MM'
-                general_entries_df['Origem'] = table_to_load
+                #general_entries_df['Origem'] = table_to_load
+                general_entries_df[data_origin_col] = table_to_load
                 # Ja joga os dados limpos na lançamentos gerais
                 general_entries_df.to_sql(general_entries_table, conn, index=False, if_exists="append")
                 number_lines = len(data_frame)
@@ -485,16 +486,17 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
     guiding_df = pd.read_sql(f"select distinct {origing_column} from {transient_data_table}", connection)
     conn = connection.cursor()
-
+    # todo
+    # testar substituir  linhas.Origem por linhas.origing_column
     for i, linhas in guiding_df.iterrows():
-        excel_sheet = f"{linhas.origem}"
+        excel_sheet = f"{linhas.Origem}"
         message = f'   . .. ... Step: {i + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
-        sql_statment = f"SELECT * FROM {transient_data_table} where {origing_column} = '{linhas.origem}' and EXPORT_DATE is null order by 1;"
+        sql_statment = f"SELECT * FROM {transient_data_table} where {origing_column} = '{linhas.Origem}' and EXPORT_DATE is null order by 1;"
         df_out = pd.read_sql(sql_statment, connection)
         if len(df_out) > 0 :
             print(message)
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
-            conn.execute(f"UPDATE {transient_data_table} SET EXPORT_DATE = datetime('now') WHERE {origing_column} = '{linhas.origem}'; ")
+            conn.execute(f"UPDATE {transient_data_table} SET EXPORT_DATE = datetime('now') WHERE {origing_column} = '{linhas.Origem}'; ")
             conn.execute('COMMIT; ')
 
     connection.close()
@@ -698,6 +700,7 @@ def create_pivot_history(data_base_file, types_table, entries_table, out_table_G
     pivot_anual = df_summary.pivot_table(index='Ano', columns='TIPO', values='Debito', aggfunc='sum').fillna(0)
     pivot_anual = pivot_anual[df_types['TIPO']]
     pivot_anual = pivot_anual.reset_index()
+    pivot_anual.to_sql(out_table_Anual, connection, index=False, if_exists="replace")
 
     print('                      ... .. . to Anual total summarized in history ... .. .')
     pivot_anual = df_summary.pivot_table(index='Ano', columns='TIPO', values='Debito', aggfunc='count').fillna(0)

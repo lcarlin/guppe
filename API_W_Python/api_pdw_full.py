@@ -24,16 +24,19 @@
 ####################################################################################
 """
 
-from flask import Flask, request, jsonify, render_template, send_file, render_template_string
+from flask import Flask, request, jsonify, render_template, send_file, render_template_string, Response
 import pandas as pd
 import sqlite3
 import numpy as np
 import datetime
 import configparser
-from gevent.pywsgi import WSGIServer
+import time, os
+# from gevent.pywsgi import WSGIServer
 
 
 app = Flask(__name__)
+
+
 # Rota para inserir um lançamento
 @app.route('/inserirLancamento', methods=['POST'])
 def inserir_lancamento():
@@ -82,18 +85,24 @@ def form():
     return render_template('seu_template.html', tipos=tipos, origens=origens)
 
 
-# Função para atualizar o banco de dados após o download
+# Função para realizar a atualização do banco de dados
 def update_database():
-    # Conectar ao banco de dados SQLite remoto
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-
-    # Comando SQL para atualizar a coluna EXPORT_DATE
-    cursor.execute(f"UPDATE {transient_data_table} SET EXPORT_DATE = datetime('now') WHERE EXPORT_DATE IS NULL;")
-
-    # Confirmar e fechar a conexão
+    cursor.execute("UPDATE Transient_data SET EXPORT_DATE = datetime('now') WHERE EXPORT_DATE IS NULL;")
     conn.commit()
     conn.close()
+    print(f'Meteu o Update no banco de dados')
+
+# Função para gerar e retornar o arquivo de download
+def generate_download():
+    # Adicionar timestamp ao nome do arquivo
+    timestamp = datetime.datetime.now().strftime('%Y%m%d.%H%M%S')
+    download_filename = f'PDW.{timestamp}.db'
+    print(f'Tentou Baixar o arquivo {download_filename}')
+
+    # Retornar o arquivo para download
+    return send_file(DB_PATH, as_attachment=True, download_name=download_filename)
 
 # Rota principal da página HTML com o botão de download
 @app.route('/')
@@ -114,25 +123,30 @@ def index():
         </html>
     ''')
 
-# Rota para realizar o download do banco de dados
+# Rota principal de download que chama a função de envio do arquivo e depois atualiza o banco de dados
 @app.route('/download')
 def download_file():
-    # Adicionar timestamp ao nome do arquivo
-    timestamp = datetime.now().strftime('%Y%m%d.%H%M%S')
-    download_filename = f'{out_db}.{timestamp}.{db_file_type}'
+    # Chamar a função de geração de download
+    response = generate_download()
+    print('Null time operation STARTED')
+    time.sleep(5)
+    print('Null time operation ended')
 
-    # Atualizar o banco de dados
-    update_database()
+    # Após o envio do arquivo, verificar se a resposta foi bem-sucedida
+    if isinstance(response, Response) and response.status_code == 200:
+        print(f'O dowload deu certo ')
+        update_database()
 
-    # Realizar o download do arquivo
-    return send_file(DB_PATH, as_attachment=True, download_name=download_filename)
+    return response
 
 
 #############################################################################################
 current_version = "9.7.0"
 api_version = "2.0.0"
 config = configparser.ConfigParser()
-config_file = '..\\Excel_CSV_DB\\PersonalDataWareHouse.cfg'
+config_file = 'PersonalDataWareHouse.cfg'
+os.environ['TZ'] = 'America/Sao_Paulo'
+time.tzset()
 try:
     print('Reading configuration file ... .. .')
     with open(config_file) as cfg:
@@ -140,7 +154,7 @@ try:
 
     parameters_version = config['SETTINGS']['CURRENT_VERSION']
     parameters_api_version = config['SETTINGS']['API_VERSION']
-    if parameters_version != current_version and api_version != parameters_api_version: 
+    if parameters_version != current_version and api_version != parameters_api_version:
         print('Something went wrong ... ')
         print(f'The version(s) in parameter file {config_file} does not Match')
         print('Application ')
@@ -182,9 +196,9 @@ DB_PATH = sqlite_database
 
 
 if __name__ == '__main__':
-    #app.run(debug=True)
-    http_server = WSGIServer(('0.0.0.0',8123 ), app)
-    http_server.serve_forever()
+    app.run(debug=True)
+    #http_server = WSGIServer(('0.0.0.0',8123 ), app)
+    #http_server.serve_forever()
 
 
 #############################################################################################

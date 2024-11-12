@@ -486,8 +486,7 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
     guiding_df = pd.read_sql(f"select distinct {origing_column} from {transient_data_table}", connection)
     conn = connection.cursor()
-    # todo
-    # testar substituir  linhas.Origem por linhas.origing_column
+
     for i, linhas in guiding_df.iterrows():
         excel_sheet = f"{linhas.Origem}"
         message = f'   . .. ... Step: {i + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'

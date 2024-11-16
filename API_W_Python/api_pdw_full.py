@@ -40,6 +40,10 @@ app = Flask(__name__)
 # Rota para inserir um lançamento
 @app.route('/inserirLancamento', methods=['POST'])
 def inserir_lancamento():
+    if os.path.isfile(last_update_file):
+        update_database(open(last_update_file).readlines()[-1])
+        os.remove(last_update_file)
+
     try:
         data = request.form['data']
         tipo = request.form['tipo']
@@ -86,13 +90,16 @@ def form():
 
 
 # Função para realizar a atualização do banco de dados
-def update_database():
+def update_database( data_ajuste ):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("UPDATE Transient_data SET EXPORT_DATE = datetime('now') WHERE EXPORT_DATE IS NULL;")
+    sql_sentence = f"UPDATE Transient_data SET EXPORT_DATE = '{data_ajuste}' WHERE EXPORT_DATE IS NULL;"
+    print(sql_sentence)
+    cursor.execute(sql_sentence)
     conn.commit()
     conn.close()
     print(f'Meteu o Update no banco de dados')
+
 
 # Função para gerar e retornar o arquivo de download
 def generate_download():
@@ -128,25 +135,36 @@ def index():
 def download_file():
     # Chamar a função de geração de download
     response = generate_download()
-    print('Null time operation STARTED')
-    time.sleep(5)
-    print('Null time operation ended')
 
-    # Após o envio do arquivo, verificar se a resposta foi bem-sucedida
-    if isinstance(response, Response) and response.status_code == 200:
-        print(f'O dowload deu certo ')
-        update_database()
+    last_update = open(last_update_file, 'w+')
+    last_update.write( datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+    last_update.close()
+
+#    # Após o envio do arquivo, verificar se a resposta foi bem-sucedida
+#    if isinstance(response, Response) and response.status_code == 200:
+#        update_database()
 
     return response
 
+
+# Rota para exibir o relatório
+@app.route('/relatorio')
+def relatorio():
+    conn = sqlite3.connect(sqlite_database)
+    df = pd.read_sql_query(f"SELECT * FROM {transient_data_table} where export_date is null ORDER BY 1", conn)
+    conn.close()
+
+    # Converte o DataFrame para HTML
+    tabela_html = df.to_html(index=False, classes='table table-striped table-responsive', border=0)
+    return render_template('relatorio.html', tabela=tabela_html)
 
 #############################################################################################
 current_version = "9.7.0"
 api_version = "2.0.0"
 config = configparser.ConfigParser()
-config_file = 'PersonalDataWareHouse.cfg'
+config_file = '../Excel_CSV_DB/PersonalDataWareHouse.cfg'
 os.environ['TZ'] = 'America/Sao_Paulo'
-time.tzset()
+#time.tzset()
 try:
     print('Reading configuration file ... .. .')
     with open(config_file) as cfg:
@@ -173,6 +191,7 @@ try:
     db_file_type = config['FILE_TYPES']['DB_FILE_TYPE']
     types_of_entries = config['SETTINGS']['TYPES_OF_ENTRIES']
     sqlite_database = dir_db + out_db + '.' + db_file_type
+    last_update_file = 'LAST_UPDATE_FILE.dat'
 
 except FileNotFoundError:
     print(f"Configuration file {config_file} not found !")

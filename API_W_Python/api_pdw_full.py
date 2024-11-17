@@ -31,19 +31,12 @@ import numpy as np
 import datetime
 import configparser
 import time, os
-# from gevent.pywsgi import WSGIServer
-
 
 app = Flask(__name__)
-
 
 # Rota para inserir um lançamento
 @app.route('/inserirLancamento', methods=['POST'])
 def inserir_lancamento():
-    if os.path.isfile(last_update_file):
-        update_database(open(last_update_file).readlines()[-1])
-        os.remove(last_update_file)
-
     try:
         data = request.form['data']
         tipo = request.form['tipo']
@@ -89,28 +82,6 @@ def form():
     return render_template('seu_template.html', tipos=tipos, origens=origens)
 
 
-# Função para realizar a atualização do banco de dados
-def update_database( data_ajuste ):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    sql_sentence = f"UPDATE Transient_data SET EXPORT_DATE = '{data_ajuste}' WHERE EXPORT_DATE IS NULL;"
-    print(sql_sentence)
-    cursor.execute(sql_sentence)
-    conn.commit()
-    conn.close()
-    print(f'Meteu o Update no banco de dados')
-
-
-# Função para gerar e retornar o arquivo de download
-def generate_download():
-    # Adicionar timestamp ao nome do arquivo
-    timestamp = datetime.datetime.now().strftime('%Y%m%d.%H%M%S')
-    download_filename = f'PDW.{timestamp}.db'
-    print(f'Tentou Baixar o arquivo {download_filename}')
-
-    # Retornar o arquivo para download
-    return send_file(DB_PATH, as_attachment=True, download_name=download_filename)
-
 # Rota principal da página HTML com o botão de download
 @app.route('/')
 def index():
@@ -133,19 +104,43 @@ def index():
 # Rota principal de download que chama a função de envio do arquivo e depois atualiza o banco de dados
 @app.route('/download')
 def download_file():
-    # Chamar a função de geração de download
-    response = generate_download()
+    # Adicionar timestamp ao nome do arquivo
+    timestamp = datetime.datetime.now().strftime('%Y%m%d.%H%M%S')
+    download_filename = f'PDW.{timestamp}.db'
 
-    last_update = open(last_update_file, 'w+')
-    last_update.write( datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
-    last_update.close()
+    # Gerar a resposta de streaming
+    response = Response(
+        stream_file(DB_PATH),
+        headers={
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': f'attachment; filename={download_filename}'
+        }
+    )
 
-#    # Após o envio do arquivo, verificar se a resposta foi bem-sucedida
-#    if isinstance(response, Response) and response.status_code == 200:
-#        update_database()
+    # Adicionar a lógica para chamar `update_database` após a transmissão do arquivo
+    @response.call_on_close
+    def on_close():
+        update_database()
 
     return response
 
+# Função para realizar a atualização do banco de dados
+def update_database(  ):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    sql_sentence = f"UPDATE Transient_data SET EXPORT_DATE = datetime('now') WHERE EXPORT_DATE IS NULL;"
+    print(sql_sentence)
+    cursor.execute(sql_sentence)
+    conn.commit()
+    conn.close()
+    print(f'Meteu o Update no banco de dados')
+
+# Função para ler o arquivo em blocos e transmiti-lo como resposta
+def stream_file(file_path):
+    # Ler o arquivo em blocos e transmiti-lo
+    with open(file_path, 'rb') as file:
+        while chunk := file.read(8192):  # 8192 bytes por vez (8 KB)
+            yield chunk
 
 # Rota para exibir o relatório
 @app.route('/relatorio')

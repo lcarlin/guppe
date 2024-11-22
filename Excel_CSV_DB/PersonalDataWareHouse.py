@@ -314,6 +314,13 @@ def monthly_summaries (db_file, in_table, out_table):
     df_agrupado['Posição'] = df_agrupado['CREDITO'] - df_agrupado['DEBITO']
     df_agrupado = df_agrupado.sort_values(by=['Origem', 'AnoMes']).reset_index(drop=True)
 
+    df_agrupado_anual = df_entrada.groupby(['Ano', 'Origem']).agg(
+        CREDITO=('Credito', 'sum'),
+        DEBITO=('Debito', 'sum')
+    ).reset_index()
+    df_agrupado_anual['Posição'] = df_agrupado_anual['CREDITO'] - df_agrupado_anual['DEBITO']
+    df_agrupado_anual = df_agrupado_anual.sort_values(by=['Origem', 'Ano']).reset_index(drop=True)
+
     df_agrupado_full = df_entrada.groupby('Origem').agg(
         CREDITO=('Credito', 'sum'),
         DEBITO=('Debito', 'sum')
@@ -322,6 +329,7 @@ def monthly_summaries (db_file, in_table, out_table):
     df_agrupado_full = df_agrupado_full.sort_values(by='Origem').reset_index(drop=True)
 
     df_agrupado.to_sql(out_table, db_conn, index=False, if_exists='replace')
+    df_agrupado_anual.to_sql(out_table +'_ANUAL', db_conn, index=False, if_exists='replace')
     df_agrupado_full.to_sql(out_table +'_FULL', db_conn, index=False, if_exists='replace')
 
 
@@ -568,6 +576,7 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
     lista_consultas.append([f"SELECT * FROM {day_prog} ORDER BY 1 DESC;","Contagem dia-a-dia"])
     lista_consultas.append([f"SELECT * FROM {splt_pmnt_res} ORDER BY 1 DESC;","Resumo de Parcelamentos"])
     lista_consultas.append([f"SELECT * FROM {mont_summ} ;","Resumos_In_out Mensal"])
+    lista_consultas.append([f"SELECT * FROM {mont_summ}_ANUAL ;","Resumos_In_out Anual"])
     lista_consultas.append([f"SELECT * FROM {mont_summ}_full ;","Resumos_In_out FULL"])
 
     if gera_hist and dynamic_reports:

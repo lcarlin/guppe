@@ -68,7 +68,45 @@ def inserir_lancamento():
         <html lang="pt-br">
         <head>
             <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Redirecionando...</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background-color: #f9f9f9;
+                    text-align: center;
+                    color: #333;
+                }
+                .container {
+                    max-width: 600px;
+                    padding: 20px;
+                    background: #fff;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+                h1 {
+                    font-size: 1.5rem;
+                    margin-bottom: 10px;
+                }
+                p {
+                    font-size: 1rem;
+                    margin-bottom: 20px;
+                }
+                @media (max-width: 480px) {
+                    h1 {
+                        font-size: 1.25rem;
+                    }
+                    p {
+                        font-size: 0.9rem;
+                    }
+                }
+            </style>
             <script>
                 setTimeout(function() {
                     window.location.href = "/formulario";
@@ -76,8 +114,10 @@ def inserir_lancamento():
             </script>
         </head>
         <body>
-            <h1>Lançamento inserido com sucesso!</h1>
-            <p>Você será redirecionado para o formulário em 5 segundos...</p>
+            <div class="container">
+                <h1>Lançamento inserido com sucesso!</h1>
+                <p>Você será redirecionado para o formulário em 5 segundos...</p>
+            </div>
         </body>
         </html>
         '''), 201

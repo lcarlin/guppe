@@ -62,7 +62,25 @@ def inserir_lancamento():
         # Inserir o DataFrame no banco de dados
         df.to_sql(transient_data_table, conn, if_exists='append', index=False)
         conn.close()
-        return jsonify({"message": "Lançamento inserido com sucesso!"}), 201
+        # return jsonify({"message": "Lançamento inserido com sucesso!"}), 201
+        return render_template_string('''
+        <!DOCTYPE html>
+        <html lang="pt-br">
+        <head>
+            <meta charset="UTF-8">
+            <title>Redirecionando...</title>
+            <script>
+                setTimeout(function() {
+                    window.location.href = "/formulario";
+                }, 5000); // 5000ms = 5 segundos
+            </script>
+        </head>
+        <body>
+            <h1>Lançamento inserido com sucesso!</h1>
+            <p>Você será redirecionado para o formulário em 5 segundos...</p>
+        </body>
+        </html>
+        '''), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400

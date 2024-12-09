@@ -34,6 +34,7 @@
 #                      # totals                             # Carlin, Luiz A. .'.
 # 2024-11-06 # 9.7.0   # Generating summaries of all        # Carlin, Luiz A. .'.
 #                      #   accounting tables                #
+# 2024-12-09 # 9.7.0   # Genenal Entries Resumes (Y/M)      # Carlin, Luiz A. .'.
 ####################################################################################
 # Current Version : 9.7.0
 ####################################################################################
@@ -578,7 +579,13 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
     lista_consultas.append([f"SELECT * FROM {mont_summ} ;","Resumos_In_out Mensal"])
     lista_consultas.append([f"SELECT * FROM {mont_summ}_ANUAL ;","Resumos_In_out Anual"])
     lista_consultas.append([f"SELECT * FROM {mont_summ}_full ;","Resumos_In_out FULL"])
-
+    lista_consultas.append(["select  TIPO ,AnoMes,  sum(Credito) as Creditos, sum (debito)  as Debitos" \
+                             f" from {entries_table} lg " \
+                             " group by AnoMes , Tipo order by 1,2 ; ","Resumo Mensal Lancto"])
+    lista_consultas.append(["select  TIPO ,Ano,  sum(Credito) as Creditos, sum (debito)  as Debitos" \
+                             f" from {entries_table} lg " \
+                             " group by Ano , Tipo order by 1,2 ; ","Resumo Anual Lancto"])
+   
     if gera_hist and dynamic_reports:
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)
         for i, linhas in df_dyn.iterrows():

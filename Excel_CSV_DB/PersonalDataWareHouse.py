@@ -509,6 +509,7 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
 
     connection.close()
     xlsx_writer.close()
+    return file_full_path
 
 def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
                           dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res, mont_summ ):

@@ -10,6 +10,7 @@
 # Date       # Version #    What                            #   Who
 # 2023-10-04 # 1.0.0   # Inicial Version                    # Carlin, Luiz A. .'.
 # 2024-11-07 # 2.0.0   # Database file dowwnload previa     #
+# 2024*12-23 # 2.0.0.  # Agora Baixa o XLSX pronto, ao inves do DB
 ####################################################################################
 # Current Version :2.0.0
 ####################################################################################
@@ -164,11 +165,13 @@ def index():
 def download_file():
     # Adicionar timestamp ao nome do arquivo
     timestamp = datetime.datetime.now().strftime('%Y%m%d.%H%M%S')
-    download_filename = f'PDW.{timestamp}.db'
+    # download_filename = f'PDW.{timestamp}.db'
+    download_filename = transient_data_exportator(sqlite_database, dir_db, out_type, transient_data_file, transient_data_table,  origem_dados )
 
     # Gerar a resposta de streaming
     response = Response(
-        stream_file(DB_PATH),
+        # stream_file(DB_PATH),
+        stream_file(download_filename),
         headers={
             'Content-Type': 'application/octet-stream',
             'Content-Disposition': f'attachment; filename={download_filename}'
@@ -179,6 +182,7 @@ def download_file():
     @response.call_on_close
     def on_close():
         update_database()
+        os.remove(download_filename)
 
     return response
 
@@ -211,12 +215,39 @@ def relatorio():
     tabela_html = df.to_html(index=False, classes='table table-striped table-responsive', border=0)
     return render_template('relatorio.html', tabela=tabela_html)
 
+def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name, transient_data_table, origing_column):
+    print('Exporting Transient data into individual Sheelts ... .. .  ')
+    #file_full_path = dir_out + file_name + '.' + datetime.datetime.now().strftime(
+    file_full_path = file_name + '.' + datetime.datetime.now().strftime(
+        "%Y%m%d.%H%M%S") + '.' + out_extension
+    connection = sqlite3.connect(sqlite_database)
+    xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
+    guiding_df = pd.read_sql(f"select distinct {origing_column} from {transient_data_table}", connection)
+    conn = connection.cursor()
+
+    for i, linhas in guiding_df.iterrows():
+        excel_sheet = f"{linhas.Origem}"
+        message = f'   . .. ... Step: {i + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
+        sql_statment = f"SELECT * FROM {transient_data_table} where {origing_column} = '{linhas.Origem}' and EXPORT_DATE is null order by 1;"
+        df_out = pd.read_sql(sql_statment, connection)
+        if len(df_out) > 0 :
+            print(message)
+            df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
+#            conn.execute(f"UPDATE {transient_data_table} SET EXPORT_DATE = datetime('now') WHERE {origing_column} = '{linhas.Origem}'; ")
+#            conn.execute('COMMIT; ')
+
+    connection.close()
+    xlsx_writer.close()
+    return file_full_path
+
 #############################################################################################
 current_version = "9.7.0"
 api_version = "2.0.0"
 config = configparser.ConfigParser()
+## atenção , sempre alterar esse PATH em Produção
 config_file = '../Excel_CSV_DB/PersonalDataWareHouse.cfg'
 os.environ['TZ'] = 'America/Sao_Paulo'
+## atenção , sempre descompentar a linha abaixo em prod
 #time.tzset()
 try:
     print('Reading configuration file ... .. .')
@@ -245,6 +276,7 @@ try:
     types_of_entries = config['SETTINGS']['TYPES_OF_ENTRIES']
     sqlite_database = dir_db + out_db + '.' + db_file_type
     last_update_file = 'LAST_UPDATE_FILE.dat'
+    out_type =  config['FILE_TYPES']['TYPE_OUT']
 
 except FileNotFoundError:
     print(f"Configuration file {config_file} not found !")

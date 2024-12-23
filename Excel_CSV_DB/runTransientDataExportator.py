@@ -36,7 +36,7 @@ def extrair_dados (db_input):
         print(e)
         exit(1)
 
-    TDE(db_input, dir_file_out, out_type, transient_data_file, transient_data_table,  origem_dados )
+    nome_arquivo = TDE(db_input, dir_file_out, out_type, transient_data_file, transient_data_table,  origem_dados )
 
 if __name__ == '__main__':
     input_param_file = ""

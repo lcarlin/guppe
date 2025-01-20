@@ -106,7 +106,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    current_version = "9.7.0"
+    current_version = "9.8.0"
     os_pataform = platform.system()
 
     # if the system is windows then use the below

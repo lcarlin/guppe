@@ -342,6 +342,8 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
     sheets_dataframe = work_books.parse(sheet_name=guindind_sheet)
     table_droppator(conn.cursor(), general_entries_table)
     print("Running Loader of the Sheets into database Tables ... .. .  ")
+    first_pass = True
+
     for i, infos in sheets_dataframe.iterrows():
         table_to_load = infos.TABLE_NAME
         is_accounting = infos.ACCOUNTING
@@ -368,28 +370,44 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
 
                 general_entries_df = data_frame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
                 general_entries_df.insert(1, 'DIA_SEMANA', np.nan)
-                # general_entries_df.insert(8, 'MES_EXTENSO', np.nan)
+
                 general_entries_df['Mes'] = 'MM'
                 general_entries_df['Ano'] = 'YYYY'
                 general_entries_df['MES_EXTENSO'] = np.nan
                 general_entries_df['AnoMes'] = 'YYYY/MM'
-                #general_entries_df['Origem'] = table_to_load
                 general_entries_df[data_origin_col] = table_to_load
-                # Ja joga os dados limpos na lançamentos gerais
-                general_entries_df.to_sql(general_entries_table, conn, index=False, if_exists="append")
                 number_lines = len(data_frame)
+                # Convert colunmns "Credito" and "Debito" from str to float
+                general_entries_df['Credito'] = pd.to_numeric(general_entries_df['Credito'], errors='coerce')
+                general_entries_df['Debito'] = pd.to_numeric(general_entries_df['Debito'], errors='coerce')
+
+                # And put the data cleaned into table  lançamentos gerais
+                # general_entries_df.to_sql(general_entries_table, conn, index=False, if_exists="append")
+                if first_pass :
+                    general_entries_df_full = general_entries_df.copy()
+                    first_pass = False
+                else :
+                    general_entries_df_full = pd.concat([general_entries_df_full, general_entries_df], ignore_index=True)
+
             else:
                 # Writes only the tables that aren´t Accounting, because it was already loaded on table general_entries_table
                 number_lines = data_frame.to_sql(table_to_load, conn, index=False, if_exists="replace")
 
             print(f'\033[32mLines Created :-> {str(number_lines).rjust(6)} \033[0m')
 
+    general_entries_df_full = general_entries_df_full.sort_values(
+        by=general_entries_df_full.columns[0],  # Primeira coluna
+        ascending=False,  # Ordenação descendente
+        ignore_index=True  # Reindexar após ordenação
+    )
+
+    general_entries_df_full.to_sql(general_entries_table, conn, index=False, if_exists="replace")
     # Just one commit to Save time. This commit is BEFORE the data_correjeitor
     conn.commit()
+
     data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)
     conn.commit()
     conn.close()
-
 
 def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, full_pivot):
     # todo: put some Fancy  output Message
@@ -435,7 +453,6 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, ful
     # Here is the end of the First Loop
     conn.close()
 
-
 def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name, other_types) :
     connection = sqlite3.connect(data_base_file)
     file_full_path = dir_out + file_out + '.v2'
@@ -469,7 +486,6 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
     print(
         f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
     connection.close()
-
 
 # Function that converts any data-frame to XML file
 def dataframe_to_xml(df, filename):

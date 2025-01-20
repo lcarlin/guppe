@@ -241,7 +241,7 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     return file_full_path
 
 #############################################################################################
-current_version = "9.7.0"
+current_version = "9.8.0"
 api_version = "2.0.0"
 config = configparser.ConfigParser()
 ## atenção , sempre alterar esse PATH em Produção

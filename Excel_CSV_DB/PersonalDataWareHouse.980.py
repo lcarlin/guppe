@@ -90,7 +90,8 @@ def split_paymnt_resume(db_file, split_paymnt_table, out_table):
 
     df_parcelamentos = pd.read_sql(f"SELECT * FROM {split_paymnt_table}", db_conn)
     df_parcelamentos['Ano_Mes'] = pd.to_datetime(df_parcelamentos['Data']).dt.to_period('M')
-    df_agrupado = df_parcelamentos.groupby('Ano_Mes').agg(  Quantidade=('Data', 'size'),  Valor=('Debito', 'sum')  ).reset_index()
+    df_agrupado = df_parcelamentos.groupby('Ano_Mes').agg(Quantidade=('Data', 'size'),
+                                                          Valor=('Debito', 'sum')).reset_index()
     df_agrupado['Diff_QTD'] = df_agrupado['Quantidade'].diff().fillna(0)
     df_agrupado['Diff_Vlr'] = df_agrupado['Valor'].diff().fillna(0)
     df_agrupado['Ano_Mes'] = df_agrupado['Ano_Mes'].astype(str)
@@ -109,7 +110,7 @@ def main(param_file):
 
     # if the system is windows then use the below
     # command to check for the hostname
-    if  os_pataform == "Windows":
+    if os_pataform == "Windows":
         hostname = platform.uname().node
     else:
         # otherwise use the below command
@@ -168,11 +169,11 @@ def main(param_file):
 
         dinamic_reports = config.getboolean('SETTINGS', 'RUN_DINAMIC_REPORT')
         din_report_guinding = config['SETTINGS']['DIN_REPORT_GUIDING']
-        dayly_progress =  config['SETTINGS']['DAYLY_PROGRESS']
+        dayly_progress = config['SETTINGS']['DAYLY_PROGRESS']
 
-        split_paymnt_table =  config['SETTINGS']['SPLT_PAYMNT_TAB']
+        split_paymnt_table = config['SETTINGS']['SPLT_PAYMNT_TAB']
         out_table = config['SETTINGS']['OUT_RES_PMNT_TAB']
-        monthly_summarie =  config['SETTINGS']['MONTHLY_SUMMATIES']
+        monthly_summarie = config['SETTINGS']['MONTHLY_SUMMATIES']
 
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
     except FileNotFoundError:
@@ -237,7 +238,8 @@ def main(param_file):
     if run_loader:
         print(out_line)
         if not multithread:
-            data_loader(sqlite_database, types_of_entries, general_entries_table, origem_dados, guiding_table, input_file,
+            data_loader(sqlite_database, types_of_entries, general_entries_table, origem_dados, guiding_table,
+                        input_file,
                         save_discarted_data, discarted_data_table)
         else:
             print(f'Bad, Bad Server. Not donuts for you')
@@ -267,28 +269,30 @@ def main(param_file):
 
     if create_pivot:
         print(out_line)
-        create_pivot_history(sqlite_database, types_of_entries, general_entries_table, full_hist_table, anual_hist_table)
+        create_pivot_history(sqlite_database, types_of_entries, general_entries_table, full_hist_table,
+                             anual_hist_table)
         if dinamic_reports:
             print(out_line)
             create_dinamic_reports(sqlite_database, input_file, din_report_guinding, full_hist_table)
 
     if run_reports:
         print(out_line)
-        monthly_summaries (sqlite_database, general_entries_table, monthly_summarie )
+        monthly_summaries(sqlite_database, general_entries_table, monthly_summarie)
 
         print(out_line)
         general_entries_file_exportator(sqlite_database, dir_file_out, general_entries_table + '.FULL',
                                         general_entries_table, other_file_types)
         print(out_line)
-        split_paymnt_resume(sqlite_database, split_paymnt_table, out_table )
+        split_paymnt_resume(sqlite_database, split_paymnt_table, out_table)
         print(out_line)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
                               general_entries_table, dinamic_reports, din_report_guinding, create_pivot,
-                              anual_hist_table, full_hist_table, dayly_progress, out_table , monthly_summarie)
+                              anual_hist_table, full_hist_table, dayly_progress, out_table, monthly_summarie)
 
     if export_transeient_data:
         print(out_line)
-        transient_data_exportator(sqlite_database, dir_file_out, out_type, transient_data_file, transient_data_table, origem_dados)
+        transient_data_exportator(sqlite_database, dir_file_out, out_type, transient_data_file, transient_data_table,
+                                  origem_dados)
 
     end = time.time()
     total_running_time: str = f"{end - start:.2f}"
@@ -331,11 +335,12 @@ def monthly_summaries (db_file, in_table, out_table):
     df_agrupado_full = df_agrupado_full.sort_values(by='Origem').reset_index(drop=True)
 
     df_agrupado.to_sql(out_table, db_conn, index=False, if_exists='replace')
-    df_agrupado_anual.to_sql(out_table +'_ANUAL', db_conn, index=False, if_exists='replace')
-    df_agrupado_full.to_sql(out_table +'_FULL', db_conn, index=False, if_exists='replace')
+    df_agrupado_anual.to_sql(out_table + '_ANUAL', db_conn, index=False, if_exists='replace')
+    df_agrupado_full.to_sql(out_table + '_FULL', db_conn, index=False, if_exists='replace')
 
 
-def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, guindind_sheet, excel_file, save_useless, udt):
+def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, guindind_sheet, excel_file,
+                save_useless, udt):
     print(f"Connecting to SQLite3 Database ... .. .  ")
     conn = sqlite3.connect(data_base)
     work_books = pd.ExcelFile(excel_file)
@@ -350,7 +355,8 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
         is_accounting = infos.ACCOUNTING
         is_cleanable = infos.CLEANABLE
         is_loadeable = infos.LOADABLE
-        print(f'\033[34m   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load.strip().ljust(25)} ;\033[0m', end=' ')
+        print(f'\033[34m   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load.strip().ljust(25)} ;\033[0m',
+              end=' ')
         if 'X' == is_loadeable:
             data_frame = pd.read_excel(excel_file, sheet_name=table_to_load)
             if 'X' == is_accounting:
@@ -363,11 +369,11 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
                 data_frame['TIPO'] = data_frame['TIPO'].replace('', np.nan)
                 data_frame['Data'] = data_frame['Data'].replace('', np.nan)
 
-                if 'X' == is_cleanable and not save_useless:  ## ATENÇÃO A ISSO AQUI
-                    # limpa registros com os Tipos Nulos
-                    data_frame.dropna(subset=['TIPO'], inplace=True)
-                    # limpa registros com as Datas Nulas
-                    data_frame.dropna(subset=['Data'], inplace=True)
+                # if 'X' == is_cleanable and not save_useless:  ## ATENÇÃO A ISSO AQUI
+                #     # limpa registros com os Tipos Nulos
+                #     data_frame.dropna(subset=['TIPO'], inplace=True)
+                #     # limpa registros com as Datas Nulas
+                #     data_frame.dropna(subset=['Data'], inplace=True)
 
                 general_entries_df = data_frame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
                 general_entries_df[data_origin_col] = table_to_load
@@ -377,11 +383,12 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
                 # general_entries_df['Debito'] = pd.to_numeric(general_entries_df['Debito'], errors='coerce')
 
                 # And put the data cleaned into table  lançamentos gerais
-                if first_pass :
+                if first_pass:
                     general_entries_df_full = general_entries_df.copy()
                     first_pass = False
-                else :
-                    general_entries_df_full = pd.concat([general_entries_df_full, general_entries_df], ignore_index=True)
+                else:
+                    general_entries_df_full = pd.concat([general_entries_df_full, general_entries_df],
+                                                        ignore_index=True)
 
             else:
                 # Writes only the tables that aren´t Accounting, because it was already loaded on table general_entries_table
@@ -390,11 +397,18 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
             print(f'\033[32mLines Created :-> {str(number_lines).rjust(6)} \033[0m')
 
     print(f'\033[34m   . .. ... Sanitizing DataFrame       :-> {general_entries_table} :\033[0m', end=' ')
+    if  not save_useless:  ## ATENÇÃO A ISSO AQUI
+        # limpa registros com os Tipos Nulos
+        general_entries_df_full.dropna(subset=['TIPO'], inplace=True)
+        # limpa registros com as Datas Nulas
+        general_entries_df_full.dropna(subset=['Data'], inplace=True)
+
+
     general_entries_df_full.insert(1, 'DIA_SEMANA', np.nan)
-    general_entries_df_full.insert(6, 'Mes','MM')
-    general_entries_df_full.insert(7, 'Ano','yyyy')
+    general_entries_df_full.insert(6, 'Mes', 'MM')
+    general_entries_df_full.insert(7, 'Ano', 'yyyy')
     general_entries_df_full.insert(8, 'MES_EXTENSO', np.nan)
-    general_entries_df_full.insert(9, 'AnoMes','YYYY/MM')
+    general_entries_df_full.insert(9, 'AnoMes', 'YYYY/MM')
     # Convert colunmns "Credito" and "Debito" from str to float
     general_entries_df_full['Credito'] = pd.to_numeric(general_entries_df_full['Credito'], errors='coerce')
     general_entries_df_full['Debito'] = pd.to_numeric(general_entries_df_full['Debito'], errors='coerce')
@@ -432,7 +446,8 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, ful
         report_table = linhas.DEST_TABLE
         report_xl_sheet = linhas.SHEETY
         report_description = linhas.REPORT_NAME
-        print(f'\033[34m   . .. ... Step: {i + 1:04} : Creating Dynamic Report Table\033[0m  :-> \033[33m"{report_description}"\033[0m ')
+        print(
+            f'\033[34m   . .. ... Step: {i + 1:04} : Creating Dynamic Report Table\033[0m  :-> \033[33m"{report_description}"\033[0m ')
         columns_of_report = pd.read_excel(excel_file, sheet_name=report_xl_sheet)
 
         # finally, create the table to be used in the future
@@ -451,7 +466,7 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, ful
 
         # At the end of the Loop, fix the Strings
         sum_tables = sum_tables[:-1] + ")"
-        
+
         base_sql_string = base_sql_string + sum_tables + f' as "Valor Total" FROM {full_pivot} HG; '
         # Now, run the SQL Query to build the Data-frame
         df = pd.read_sql_query(base_sql_string, conn)
@@ -483,7 +498,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
     df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='cp1252')
     if other_types:
         print(f"              Exporting JSON file(s) ")
-        df_out.to_json(file_full_path + '.json',orient='records', lines=True, indent=1, force_ascii=False)
+        df_out.to_json(file_full_path + '.json', orient='records', lines=True, indent=1, force_ascii=False)
         gzip_compressor(file_full_path + '.json')
         # df_out.to_html(file_full_path + '.html')
         # df_out.to_xml(file_full_path + '.xml', parser = 'lxml', pretty_print=True, xml_declaration=True)
@@ -500,7 +515,7 @@ def dataframe_to_xml(df, filename):
     root = ET.Element('data')
     for index, row in df.iterrows():
         item = ET.SubElement(root, 'item')
-        #for col_name, col_value in row.iteritems():
+        # for col_name, col_value in row.iteritems():
         for col_name, col_value in row.items():
             # col_value_escaped = escape_special_chars(str(col_value))
             # ET.SubElement(item, col_name).text = col_value_escaped
@@ -524,10 +539,11 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
         message = f'   . .. ... Step: {i + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
         sql_statment = f"SELECT * FROM {transient_data_table} where {origing_column} = '{linhas.Origem}' and EXPORT_DATE is null order by 1;"
         df_out = pd.read_sql(sql_statment, connection)
-        if len(df_out) > 0 :
+        if len(df_out) > 0:
             print(message)
             df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
-            conn.execute(f"UPDATE {transient_data_table} SET EXPORT_DATE = datetime('now') WHERE {origing_column} = '{linhas.Origem}'; ")
+            conn.execute(
+                f"UPDATE {transient_data_table} SET EXPORT_DATE = datetime('now') WHERE {origing_column} = '{linhas.Origem}'; ")
             conn.execute('COMMIT; ')
 
     connection.close()
@@ -535,10 +551,11 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     return file_full_path
 
 def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
-                          dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res, mont_summ ):
+                          dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res,
+                          mont_summ):
     # TODO: put the Dynamic Reports statments . How? IDK
     ## PUT here the contagem cumulada call
-    totalizador_diario(sqlite_database, entries_table, day_prog ) 
+    totalizador_diario(sqlite_database, entries_table, day_prog)
     print('Exporting Summarized data ... .. .  ')
     connection = sqlite3.connect(sqlite_database)
     file_full_path = dir_out + file_name + '.' + out_extension
@@ -600,19 +617,19 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
                                , "Debitos Mensais"])
 
     lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
-                            "group by origem ORDER BY Total desc ; " ,"Histórico de Uso"])
-    lista_consultas.append([f"SELECT * FROM {day_prog} ORDER BY 1 DESC;","Contagem dia-a-dia"])
-    lista_consultas.append([f"SELECT * FROM {splt_pmnt_res} ORDER BY 1 DESC;","Resumo de Parcelamentos"])
-    lista_consultas.append([f"SELECT * FROM {mont_summ} ;","Resumos_In_out Mensal"])
-    lista_consultas.append([f"SELECT * FROM {mont_summ}_ANUAL ;","Resumos_In_out Anual"])
-    lista_consultas.append([f"SELECT * FROM {mont_summ}_full ;","Resumos_In_out FULL"])
+                            "group by origem ORDER BY Total desc ; ", "Histórico de Uso"])
+    lista_consultas.append([f"SELECT * FROM {day_prog} ORDER BY 1 DESC;", "Contagem dia-a-dia"])
+    lista_consultas.append([f"SELECT * FROM {splt_pmnt_res} ORDER BY 1 DESC;", "Resumo de Parcelamentos"])
+    lista_consultas.append([f"SELECT * FROM {mont_summ} ;", "Resumos_In_out Mensal"])
+    lista_consultas.append([f"SELECT * FROM {mont_summ}_ANUAL ;", "Resumos_In_out Anual"])
+    lista_consultas.append([f"SELECT * FROM {mont_summ}_full ;", "Resumos_In_out FULL"])
     lista_consultas.append(["select  TIPO ,AnoMes,  sum(Credito) as Creditos, sum (debito)  as Debitos" \
-                             f" from {entries_table} lg " \
-                             " group by AnoMes , Tipo order by 1,2 ; ","Resumo Mensal Lancto"])
+                            f" from {entries_table} lg " \
+                            " group by AnoMes , Tipo order by 1,2 ; ", "Resumo Mensal Lancto"])
     lista_consultas.append(["select  TIPO ,Ano,  sum(Credito) as Creditos, sum (debito)  as Debitos" \
-                             f" from {entries_table} lg " \
-                             " group by Ano , Tipo order by 1,2 ; ","Resumo Anual Lancto"])
-   
+                            f" from {entries_table} lg " \
+                            " group by Ano , Tipo order by 1,2 ; ", "Resumo Anual Lancto"])
+
     if gera_hist and dynamic_reports:
         df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)
         for i, linhas in df_dyn.iterrows():
@@ -648,8 +665,9 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
         print(f'   . .. ... Saving discated Data')
         table_droppator(cursor, useless_table)
         lista_acoes.append((
-            f"create table {useless_table} as select * from {entries_table} where (data is null or tipo is null); ", "Saving Useless"))
-        lista_acoes.append((f"delete from {entries_table} where (data is null or tipo is null);","Deleting Useless"))
+            f"create table {useless_table} as select * from {entries_table} where (data is null or tipo is null); ",
+            "Saving Useless"))
+        lista_acoes.append((f"delete from {entries_table} where (data is null or tipo is null);", "Deleting Useless"))
 
     lista_acoes.append((f"Update {entries_table} \
        set Mes = strftime ('%m',data )  \
@@ -657,50 +675,60 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
        , AnoMes = strftime ('%Y',data )||'/'||strftime ('%m',data )  ;", "Fixing Dates"))
     lista_acoes.append((f"update {entries_table} set credito = 0 where credito is null ;", "Fixing Credit Info"))
     lista_acoes.append((f"update {entries_table} set debito = 0 where debito is null ;", "Fixing Debit Info"))
-    lista_acoes.append((f"Delete from {types_sheet} WHERE ( Código IS NULL or Descrição IS NULL) ;", "Deleting NULL info"))
+    lista_acoes.append(
+        (f"Delete from {types_sheet} WHERE ( Código IS NULL or Descrição IS NULL) ;", "Deleting NULL info"))
     lista_acoes.append((
-        f"update {entries_table} set descricao = replace (descricao,'∴', '.''.') where descricao like '%∴%' ;", "Fixing Special char (1)"))
+        f"update {entries_table} set descricao = replace (descricao,'∴', '.''.') where descricao like '%∴%' ;",
+        "Fixing Special char (1)"))
     lista_acoes.append((
-        f"update {entries_table} set descricao = replace (descricao,'ś', '''s') where descricao like '%ś%' ;", "Fixing Special char (2)"))
+        f"update {entries_table} set descricao = replace (descricao,'ś', '''s') where descricao like '%ś%' ;",
+        "Fixing Special char (2)"))
     # lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'', '''s')  ;")
-    lista_acoes.append((f"update {entries_table} set credito  = round(credito,2) where credito > 0  ;", "Rouding Credit info"))
-    lista_acoes.append((f"update {entries_table} set debito  = round(debito,2) where debito > 0  ;", "Rouding Debit info"))
+    lista_acoes.append(
+        (f"update {entries_table} set credito  = round(credito,2) where credito > 0  ;", "Rouding Credit info"))
+    lista_acoes.append(
+        (f"update {entries_table} set debito  = round(debito,2) where debito > 0  ;", "Rouding Debit info"))
     lista_acoes.append((
-        f"update {entries_table} set descricao = replace (descricao,',', '|') where descricao like '%,%' ;", "Fixing Special char (3)"))
+        f"update {entries_table} set descricao = replace (descricao,',', '|') where descricao like '%,%' ;",
+        "Fixing Special char (3)"))
     lista_acoes.append((
-        f"update {entries_table} set descricao = replace (descricao,';', '|') where descricao like '%;%' ;", "Fixing Special char (4)"))
+        f"update {entries_table} set descricao = replace (descricao,';', '|') where descricao like '%;%' ;",
+        "Fixing Special char (4)"))
     lista_acoes.append((f"UPDATE {entries_table} " \
-                       "  SET DIA_SEMANA = case cast (strftime('%w', Data ) as integer) " \
-                       "  when 0 then 'Domingo' " \
-                       "  when 1 then 'Segunda-Feira' " \
-                       "  when 2 then 'Terça-Feira' " \
-                       "  when 3 then 'Quarta-Feira' " \
-                       "  when 4 then 'Quinta-Feira' " \
-                       "  when 5 then 'Sexta-Feira' " \
-                       "  when 6 then 'Sábado' " \
-                       "  else 'UNDEFINED' end " \
-                       "    where DIA_SEMANA IS NULL ;", "Fixing Day-Of-Week"))
+                        "  SET DIA_SEMANA = case cast (strftime('%w', Data ) as integer) " \
+                        "  when 0 then 'Domingo' " \
+                        "  when 1 then 'Segunda-Feira' " \
+                        "  when 2 then 'Terça-Feira' " \
+                        "  when 3 then 'Quarta-Feira' " \
+                        "  when 4 then 'Quinta-Feira' " \
+                        "  when 5 then 'Sexta-Feira' " \
+                        "  when 6 then 'Sábado' " \
+                        "  else 'UNDEFINED' end " \
+                        "    where DIA_SEMANA IS NULL ;", "Fixing Day-Of-Week"))
     lista_acoes.append((f"UPDATE {entries_table} " \
-                       "    SET MES_EXTENSO = ( case MES WHEN '01' THEN '01-Janeiro' " \
-                       "        WHEN '02' THEN '02-Fevereiro' " \
-                       "         WHEN '03' THEN '03-Março' " \
-                       "         WHEN '04' THEN '04-Abril' " \
-                       "         WHEN '05' THEN '05-Mail' " \
-                       "         WHEN '06' THEN '06-Junho' " \
-                       "         WHEN '07' THEN '07-Julho' " \
-                       "         WHEN '08' THEN '08-Agosto' " \
-                       "         WHEN '09' THEN '09-Setembro' " \
-                       "         WHEN '10' THEN '10-Outubro' " \
-                       "         WHEN '11' THEN '11-Novembro' " \
-                       "         WHEN '12' THEN '12-Dezembro' " \
-                       "         ELSE 'UNDEFINED' " \
-                       "         END ) " \
-                       "   WHERE MES_EXTENSO IS NULL ;", "Fixing months"))
+                        "    SET MES_EXTENSO = ( case MES WHEN '01' THEN '01-Janeiro' " \
+                        "        WHEN '02' THEN '02-Fevereiro' " \
+                        "         WHEN '03' THEN '03-Março' " \
+                        "         WHEN '04' THEN '04-Abril' " \
+                        "         WHEN '05' THEN '05-Mail' " \
+                        "         WHEN '06' THEN '06-Junho' " \
+                        "         WHEN '07' THEN '07-Julho' " \
+                        "         WHEN '08' THEN '08-Agosto' " \
+                        "         WHEN '09' THEN '09-Setembro' " \
+                        "         WHEN '10' THEN '10-Outubro' " \
+                        "         WHEN '11' THEN '11-Novembro' " \
+                        "         WHEN '12' THEN '12-Dezembro' " \
+                        "         ELSE 'UNDEFINED' " \
+                        "         END ) " \
+                        "   WHERE MES_EXTENSO IS NULL ;", "Fixing months"))
 
-    lista_acoes.append(('DELETE FROM Parcelamentos WHERE 1 = 1 AND (DATA IS NULL OR "Tipo Lançamento" is null) ;',"Deleting Parcelamentos"))
+    lista_acoes.append(('DELETE FROM Parcelamentos WHERE 1 = 1 AND (DATA IS NULL OR "Tipo Lançamento" is null) ;',
+                        "Deleting Parcelamentos"))
     # lista_acoes.append((f'create index SHAWASKA on {entries_table}  (DATA, TIPO, DESCRICAO) ',"(Re)creating Index"))
     lista_acoes.append((f'DROP VIEW IF EXISTS Origens; ', "Dropping View"))
-    lista_acoes.append((f"create view Origens as select TABLE_NAME as nome from GUIDING gd where gd.LOADABLE = 'X' AND GD.ACCOUNTING = 'X';", "Creating View"))
+    lista_acoes.append((
+                       f"create view Origens as select TABLE_NAME as nome from GUIDING gd where gd.LOADABLE = 'X' AND GD.ACCOUNTING = 'X';",
+                       "Creating View"))
 
     for i in range(0, len(lista_acoes)):
         sql_string = lista_acoes[i][0]
@@ -714,7 +742,8 @@ def table_droppator(conexao, table_name):
     cursor.execute("DROP TABLE IF EXISTS " + table_name)
     print(f"Table {table_name} dropped... ")
 
-def create_pivot_history(data_base_file, types_table, entries_table, out_table_General ,out_table_Anual):
+
+def create_pivot_history(data_base_file, types_table, entries_table, out_table_General, out_table_Anual):
     print('Creating pivot Tables ... .. . ')
     connection = sqlite3.connect(data_base_file)
 
@@ -734,7 +763,7 @@ def create_pivot_history(data_base_file, types_table, entries_table, out_table_G
     pivot_full = df_summary.pivot_table(index='AnoMes', columns='TIPO', values='Debito', aggfunc='count').fillna(0)
     pivot_full = pivot_full[df_types['TIPO']]
     pivot_full = pivot_full.reset_index()
-    pivot_full.to_sql(out_table_General+'_QTD', connection, index=False, if_exists="replace")
+    pivot_full.to_sql(out_table_General + '_QTD', connection, index=False, if_exists="replace")
 
     print('                      ... .. . to Anual Values to summarized in history ... .. .')
     pivot_anual = df_summary.pivot_table(index='Ano', columns='TIPO', values='Debito', aggfunc='sum').fillna(0)
@@ -746,7 +775,7 @@ def create_pivot_history(data_base_file, types_table, entries_table, out_table_G
     pivot_anual = df_summary.pivot_table(index='Ano', columns='TIPO', values='Debito', aggfunc='count').fillna(0)
     pivot_anual = pivot_anual[df_types['TIPO']]
     pivot_anual = pivot_anual.reset_index()
-    pivot_anual.to_sql(out_table_Anual+'_QTD', connection, index=False, if_exists="replace")
+    pivot_anual.to_sql(out_table_Anual + '_QTD', connection, index=False, if_exists="replace")
 
     connection.commit()
 
@@ -827,8 +856,9 @@ def gzip_compressor(arquivo_origem):
     # Excluindo o arquivo original após a compactação
     os.remove(arquivo_origem)
 
-def totalizador_diario(database_file, in_table, out_table ):
-    print ("Totaling the Daily Amount of data ... .. .")
+
+def totalizador_diario(database_file, in_table, out_table):
+    print("Totaling the Daily Amount of data ... .. .")
     conn = sqlite3.connect(database_file)
     df = pd.read_sql_query(f"select * from {in_table}", conn)
     df_contagem = df.groupby('Data').size().reset_index(name='Contagem')

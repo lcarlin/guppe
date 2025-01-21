@@ -84,7 +84,6 @@ import xml.etree.ElementTree as ET
 import gzip
 import shutil
 
-
 def split_paymnt_resume(db_file, split_paymnt_table, out_table):
     print('Creating payment in installments Summaries ... .. .  ')
     db_conn = sqlite3.connect(db_file)
@@ -162,7 +161,7 @@ def main(param_file):
         discarted_data_table = config['SETTINGS']['DISCARTED_DATA_TABLE']
         full_hist_table = config['SETTINGS']['FULL_PIVOT_TABLE']
         anual_hist_table = config['SETTINGS']['ANUAL_PIVOT_TABLE']
-        export_transeient_data = config.getboolean('SETTINGS', 'EXPORT_TRANSIENT_DATA')
+        export_transeient_data = config.getboolean('SETTINGS','EXPORT_TRANSIENT_DATA')
         transient_data_table = config['SETTINGS']['TRANSIENT_DATA_TABLE']
         transient_data_file = config['FILE_TYPES']['TRANSIENT_DATA_FILE']
         origem_dados = config['SETTINGS']['TRANSIENT_DATA_COLUMN']
@@ -308,8 +307,7 @@ def main(param_file):
     print(out_line)
     # exit(0)
 
-
-def monthly_summaries(db_file, in_table, out_table):
+def monthly_summaries (db_file, in_table, out_table):
     print(f'Generating summaries of all accounting sheets into {out_table} table ... .. .')
     db_conn = sqlite3.connect(db_file)
     sql_statment = f'SELECT * FROM {in_table} ;'
@@ -371,11 +369,11 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
                 data_frame['TIPO'] = data_frame['TIPO'].replace('', np.nan)
                 data_frame['Data'] = data_frame['Data'].replace('', np.nan)
 
-                if 'X' == is_cleanable and not save_useless:  ## ATENÇÃO A ISSO AQUI
-                    # limpa registros com os Tipos Nulos
-                    data_frame.dropna(subset=['TIPO'], inplace=True)
-                    # limpa registros com as Datas Nulas
-                    data_frame.dropna(subset=['Data'], inplace=True)
+                # if 'X' == is_cleanable and not save_useless:  ## ATENÇÃO A ISSO AQUI
+                #     # limpa registros com os Tipos Nulos
+                #     data_frame.dropna(subset=['TIPO'], inplace=True)
+                #     # limpa registros com as Datas Nulas
+                #     data_frame.dropna(subset=['Data'], inplace=True)
 
                 general_entries_df = data_frame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
                 general_entries_df[data_origin_col] = table_to_load
@@ -399,6 +397,13 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
             print(f'\033[32mLines Created :-> {str(number_lines).rjust(6)} \033[0m')
 
     print(f'\033[34m   . .. ... Sanitizing DataFrame       :-> {general_entries_table} :\033[0m', end=' ')
+    if  not save_useless:  ## ATENÇÃO A ISSO AQUI
+        # limpa registros com os Tipos Nulos
+        general_entries_df_full.dropna(subset=['TIPO'], inplace=True)
+        # limpa registros com as Datas Nulas
+        general_entries_df_full.dropna(subset=['Data'], inplace=True)
+
+
     general_entries_df_full.insert(1, 'DIA_SEMANA', np.nan)
     general_entries_df_full.insert(6, 'Mes', 'MM')
     general_entries_df_full.insert(7, 'Ano', 'yyyy')
@@ -425,7 +430,6 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
     data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)
     conn.commit()
     conn.close()
-
 
 def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, full_pivot):
     # todo: put some Fancy  output Message
@@ -472,8 +476,7 @@ def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, ful
     # Here is the end of the First Loop
     conn.close()
 
-
-def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name, other_types):
+def general_entries_file_exportator(data_base_file, dir_out, file_out, table_name, other_types) :
     connection = sqlite3.connect(data_base_file)
     file_full_path = dir_out + file_out + '.v2'
     print(f"Exporting {file_full_path} to file(s) ")
@@ -507,7 +510,6 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
         f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
     connection.close()
 
-
 # Function that converts any data-frame to XML file
 def dataframe_to_xml(df, filename):
     root = ET.Element('data')
@@ -522,7 +524,6 @@ def dataframe_to_xml(df, filename):
     tree = ET.ElementTree(root)
     ET.indent(tree, '   ')
     tree.write(filename, encoding='utf-8', xml_declaration=True)
-
 
 def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name, transient_data_table, origing_column):
     print('Exporting Transient data into individual Sheelts ... .. .  ')
@@ -548,7 +549,6 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     connection.close()
     xlsx_writer.close()
     return file_full_path
-
 
 def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
                           dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res,
@@ -737,7 +737,6 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
         cursor.execute(sql_string)
         print(f'\033[31mLines Affected: {str(cursor.rowcount).rjust(5)}\033[0m')
 
-
 def table_droppator(conexao, table_name):
     cursor = conexao
     cursor.execute("DROP TABLE IF EXISTS " + table_name)
@@ -808,7 +807,6 @@ def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
     db_connection.close()
     print(f'   . .. ... .... End of Thread Number :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
 
-
 # def data_loader_parallel(data_base, general_entries_table, guindind_sheet, excel_file):
 def data_loader_parallel(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
     conn = sqlite3.connect(data_base, check_same_thread=False)
@@ -849,7 +847,6 @@ def data_loader_parallel(data_base, types_sheet, general_entries_table, guindind
     conn.close()
     # connection.close()
 
-
 def gzip_compressor(arquivo_origem):
     arquivo_destino = arquivo_origem + '.gz'
     print(f'creating compressed file {arquivo_destino}')
@@ -871,7 +868,6 @@ def totalizador_diario(database_file, in_table, out_table):
     number_lines = df_contagem.to_sql(out_table, conn, index=False, if_exists="replace")
     conn.commit()
     conn.close()
-
 
 if __name__ == '__main__':
     input_param_file = ""

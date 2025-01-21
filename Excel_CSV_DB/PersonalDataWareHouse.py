@@ -350,6 +350,8 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
     sheets_dataframe = work_books.parse(sheet_name=guindind_sheet)
     table_droppator(conn.cursor(), general_entries_table)
     print("Running Loader of the Sheets into database Tables ... .. .  ")
+    first_pass = True
+
     for i, infos in sheets_dataframe.iterrows():
         table_to_load = infos.TABLE_NAME
         is_accounting = infos.ACCOUNTING
@@ -376,25 +378,50 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
                     data_frame.dropna(subset=['Data'], inplace=True)
 
                 general_entries_df = data_frame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
-                general_entries_df.insert(1, 'DIA_SEMANA', np.nan)
-                # general_entries_df.insert(8, 'MES_EXTENSO', np.nan)
-                general_entries_df['Mes'] = 'MM'
-                general_entries_df['Ano'] = 'YYYY'
-                general_entries_df['MES_EXTENSO'] = np.nan
-                general_entries_df['AnoMes'] = 'YYYY/MM'
-                # general_entries_df['Origem'] = table_to_load
                 general_entries_df[data_origin_col] = table_to_load
-                # Ja joga os dados limpos na lançamentos gerais
-                general_entries_df.to_sql(general_entries_table, conn, index=False, if_exists="append")
                 number_lines = len(data_frame)
+                # # Convert colunmns "Credito" and "Debito" from str to float
+                # general_entries_df['Credito'] = pd.to_numeric(general_entries_df['Credito'], errors='coerce')
+                # general_entries_df['Debito'] = pd.to_numeric(general_entries_df['Debito'], errors='coerce')
+
+                # And put the data cleaned into table  lançamentos gerais
+                if first_pass:
+                    general_entries_df_full = general_entries_df.copy()
+                    first_pass = False
+                else:
+                    general_entries_df_full = pd.concat([general_entries_df_full, general_entries_df],
+                                                        ignore_index=True)
+
             else:
                 # Writes only the tables that aren´t Accounting, because it was already loaded on table general_entries_table
                 number_lines = data_frame.to_sql(table_to_load, conn, index=False, if_exists="replace")
 
             print(f'\033[32mLines Created :-> {str(number_lines).rjust(6)} \033[0m')
 
+    print(f'\033[34m   . .. ... Sanitizing DataFrame       :-> {general_entries_table} :\033[0m', end=' ')
+    general_entries_df_full.insert(1, 'DIA_SEMANA', np.nan)
+    general_entries_df_full.insert(6, 'Mes', 'MM')
+    general_entries_df_full.insert(7, 'Ano', 'yyyy')
+    general_entries_df_full.insert(8, 'MES_EXTENSO', np.nan)
+    general_entries_df_full.insert(9, 'AnoMes', 'YYYY/MM')
+    # Convert colunmns "Credito" and "Debito" from str to float
+    general_entries_df_full['Credito'] = pd.to_numeric(general_entries_df_full['Credito'], errors='coerce')
+    general_entries_df_full['Debito'] = pd.to_numeric(general_entries_df_full['Debito'], errors='coerce')
+
+    # sort the data_frame before persist it on the database'
+    general_entries_df_full = general_entries_df_full.sort_values(
+        by=general_entries_df_full.columns[0],  # Primeira coluna
+        ascending=False,  # Ordenação descendente
+        ignore_index=True  # Reindexar após ordenação
+    )
+    print(f'\033[32mDone !!! \033[0m')
+
+    print(f'\033[34m   . .. ... Writing Dataframe fo Table :-> {general_entries_table} :\033[0m', end=' ')
+    general_entries_df_full.to_sql(general_entries_table, conn, index=False, if_exists="replace")
     # Just one commit to Save time. This commit is BEFORE the data_correjeitor
     conn.commit()
+    print(f'\033[32mDone !!! \033[0m')
+
     data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)
     conn.commit()
     conn.close()
@@ -548,25 +575,28 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
             , full_hist + "_QTD12Meses"])
         lista_consultas.append([f"select * from {full_hist}_QTD;", f"{full_hist}_QTD"])
         lista_consultas.append([f"select * from {anual_hist}_QTD;", f"{anual_hist}_QTD"])
-        ###
+        ##
 
     lista_consultas.append([f"select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from {entries_table}" \
                             " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 " \
                             " group by tipo order by 2 desc;", "Ultimos30Dias"])
-    lista_consultas.append(
-        ["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4) AS Quando " \
-         ", LG.DIA_SEMANA as 'Dia da Semana' " \
-         ", LG.Tipo as 'Tipo' " \
-         ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
-         ", replace (LG.Credito, '.', ',') as 'Credito' " \
-         ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
-         ", char(39)|| substr(LG.DATA, 9,2) as Dia" \
-         ", char(39)||cast (mes as text) as 'Mes' " \
-         ", LG.MES_EXTENSO as 'Mes Por Extenso' " \
-         ", char(39)||cast (ano as text) as 'Ano' " \
-         ", char(39)||cast (AnoMes as text )  as 'Ano/Mes' " \
-         ", LG.ORIGEM  as Origem " \
-         f" FROM {entries_table} LG ORDER  BY DATA DESC ; ", entries_table])
+    # lista_consultas.append(
+    #     ["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4) AS Quando " \
+    #      ", LG.DIA_SEMANA as 'Dia da Semana' " \
+    #      ", LG.Tipo as 'Tipo' " \
+    #      ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
+    #      ", replace (LG.Credito, '.', ',') as 'Credito' " \
+    #      ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
+    #      ", char(39)|| substr(LG.DATA, 9,2) as Dia" \
+    #      ", char(39)|| mes as 'Mes' " \
+    #      # ", char(39)|| cast (mes as text) as 'Mes' " \
+    #      # ", char(39)||cast (ano as text) as 'Ano' " \
+    #      ", char(39)|| ano as 'Ano' " \
+    #      #", char(39)||cast (AnoMes as text )  as 'Ano/Mes' " \
+    #      ", LG.MES_EXTENSO as 'Mes Por Extenso' " \
+    #      ", char(39)|| AnoMes as 'Ano/Mes' " \
+    #      ", LG.ORIGEM  as Origem " \
+    #      f" FROM {entries_table} LG ;", entries_table])
     lista_consultas.append(["select Ano || ' - ' || Mes as 'Referência', count(1) as 'Total' " \
                             ", round( cast (count(1) as float)  / ( case Mes when '01' then 31" \
                             " when '02' then 28 when '03' then 31 when '04' then 30 when '05' then 31" \
@@ -694,7 +724,7 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
 
     lista_acoes.append(('DELETE FROM Parcelamentos WHERE 1 = 1 AND (DATA IS NULL OR "Tipo Lançamento" is null) ;',
                         "Deleting Parcelamentos"))
-    lista_acoes.append((f'create index SHAWASKA on {entries_table}  (DATA, TIPO, DESCRICAO) ', "(Re)creating Index"))
+    # lista_acoes.append((f'create index SHAWASKA on {entries_table}  (DATA, TIPO, DESCRICAO) ',"(Re)creating Index"))
     lista_acoes.append((f'DROP VIEW IF EXISTS Origens; ', "Dropping View"))
     lista_acoes.append((
                        f"create view Origens as select TABLE_NAME as nome from GUIDING gd where gd.LOADABLE = 'X' AND GD.ACCOUNTING = 'X';",

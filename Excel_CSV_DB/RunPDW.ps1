@@ -1,5 +1,6 @@
 # Caminho para o executável do Python
 # C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -ExecutionPolicy Bypass -File C:\Users\F169352\python\guppe\Excel_CSV_DB\RunPDW.ps1
+# C:\Program Files\PowerShell\7\pwsh.exe -noexit -ExecutionPolicy Bypass -File C:\Users\luizc\PyCharm\guppe\Excel_CSV_DB\RunPDW.ps1
 # powershell.exe -noexit -ExecutionPolicy Bypass -File C:\Users\F169352\python\guppe\Excel_CSV_DB\RunPDW.ps1
 # Caminho dos arquivos A e B
 

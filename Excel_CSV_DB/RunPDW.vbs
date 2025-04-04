@@ -1,7 +1,7 @@
 ' Caminho para os arquivos e diretórios
 Dim dirPDW, dirScript, lineOut, pdwDB, pdwExcel, dataCriacaopdwDB, dataCriacaopdwExcel, pythonExe, pythonScript, mensagem
 
-dirPDW = "C:\Users\luizc\OneDrive\Documentos\PDW\"
+dirPDW = "X:\Documentos\PDW\"
 dirScript = "C:\Users\luizc\PyCharm\guppe\Excel_CSV_DB\"
 lineOut = ">===================================================================================================================<"
 pdwDB = dirPDW & "PDW.db"

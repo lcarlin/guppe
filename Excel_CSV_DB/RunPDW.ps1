@@ -5,14 +5,15 @@
 # Caminho dos arquivos A e B
 
 # Atenção: adequar as 03 variaveis abaixo com base em Vosso Ambiente de Execução, talkey ?
-$dirPDW = "C:\Users\luizc\OneDrive\Documentos\PDW"
-$dirScript = "C:\Users\luizc\PyCharm\guppe\Excel_CSV_DB"
-$dirDestDropBox = "C:\Users\luizc\Dropbox\PDW_DRPBX"
+$dirPDW = "X:\Documentos\PDW"
+$localUser = $env:HOMEDRIVE + "\" +  $env:HOMEPATH
+$dirScript = $localUser + "\PyCharm\guppe\Excel_CSV_DB"
+$dirDestDropBox = $localUser + "\Dropbox\PDW_DRPBX"
 $dbFile =  "PDW.db"
 $xlsxFile = "PDW.xlsx"
 
 # Caminho para o executável do Python que você deseja executar
-$pythonExe = "C:\Users\luizc\AppData\Local\Programs\Python\Python312\python.exe"
+$pythonExe = $env:LOCALAPPDATA + "\" + "Programs\Python\Python312\python.exe"
 
 $outLiner = ">========================================================================================================================<"
 

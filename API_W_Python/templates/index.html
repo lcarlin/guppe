@@ -1,108 +1,99 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Data Warehouse - API UI</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f6f8;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        header {
-            background-color: #1976d2;
-            color: white;
-            padding: 1rem 2rem;
-            width: 100%;
-            text-align: center;
-        }
-
-        .container {
-            margin-top: 2rem;
-            width: 90%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        button, input[type="submit"] {
-            padding: 0.8rem 1rem;
-            font-size: 1rem;
-            border: none;
-            border-radius: 8px;
-            background-color: #1976d2;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover, input[type="submit"]:hover {
-            background-color: #145a9c;
-        }
-
-        form {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        input, select {
-            padding: 0.6rem;
-            width: 100%;
-            margin-bottom: 0.8rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                width: 95%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Personal Data Warehouse - API</title>
+  <!-- Materialize CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {
+      background: #f3f4f6;
+    }
+    .container {
+      margin-top: 40px;
+      margin-bottom: 60px;
+    }
+    .card-panel {
+      padding: 20px;
+    }
+    .btn-large {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+    .form-section {
+      margin-top: 40px;
+    }
+    h5 {
+      font-weight: 500;
+    }
+    @media (max-width: 600px) {
+      .btn-large {
+        font-size: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <h1>Personal Data Warehouse</h1>
-        <p>Interface Responsiva da API</p>
-    </header>
+  <nav class="blue darken-2">
+    <div class="nav-wrapper container">
+      <span class="brand-logo center">Personal Data Warehouse</span>
+    </div>
+  </nav>
 
-    <div class="container">
+  <div class="container">
 
-        <form action="/formulario" method="get">
-            <button type="submit">Abrir Formulário</button>
-        </form>
-
-        <form action="/extrair" method="get">
-            <button type="submit">Extrair Banco de Dados (.xlsx)</button>
-        </form>
-
-        <form action="/relatorio" method="get">
-            <button type="submit">Ver Relatório</button>
-        </form>
-
-        <form action="/inserirLancamento" method="post">
-            <h3>Inserir Novo Lançamento</h3>
-            <input type="date" name="data" required>
-            <input type="text" name="tipo" placeholder="Tipo" required>
-            <input type="text" name="descricao" placeholder="Descrição" required>
-            <input type="number" step="0.01" name="credito" placeholder="Crédito" required>
-            <input type="number" step="0.01" name="debito" placeholder="Débito" required>
-            <input type="text" name="origem" placeholder="Origem" required>
-            <input type="submit" value="Inserir Lançamento">
-        </form>
-
+    <!-- Botões das Rotas -->
+    <div class="row">
+      <div class="col s12 m4">
+        <a href="/formulario" class="btn-large waves-effect waves-light blue"><i class="material-icons left">assignment</i>Formulário</a>
+      </div>
+      <div class="col s12 m4">
+        <a href="/extrair" class="btn-large waves-effect waves-light green"><i class="material-icons left">file_download</i>Extrair Dados</a>
+      </div>
+      <div class="col s12 m4">
+        <a href="/relatorio" class="btn-large waves-effect waves-light orange"><i class="material-icons left">assessment</i>Relatório</a>
+      </div>
     </div>
 
+    <!-- Formulário de Lançamento -->
+    <div class="card-panel z-depth-2 form-section">
+      <h5>Inserir Novo Lançamento</h5>
+      <form action="/inserirLancamento" method="post">
+        <div class="input-field">
+          <input type="date" name="data" required>
+          <label class="active">Data</label>
+        </div>
+        <div class="input-field">
+          <input type="text" name="tipo" required>
+          <label>Tipo</label>
+        </div>
+        <div class="input-field">
+          <input type="text" name="descricao" required>
+          <label>Descrição</label>
+        </div>
+        <div class="input-field">
+          <input type="number" step="0.01" name="credito" required>
+          <label>Crédito</label>
+        </div>
+        <div class="input-field">
+          <input type="number" step="0.01" name="debito" required>
+          <label>Débito</label>
+        </div>
+        <div class="input-field">
+          <input type="text" name="origem" required>
+          <label>Origem</label>
+        </div>
+        <button type="submit" class="btn-large waves-effect waves-light blue"><i class="material-icons left">add_circle</i>Inserir</button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- Materialize JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>
 </html>

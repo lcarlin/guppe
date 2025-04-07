@@ -140,9 +140,12 @@ def form():
     conn.close()
     return render_template('seu_template.html', tipos=tipos, origens=origens)
 
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 # Rota principal da página HTML com o botão de download
-@app.route('/')
+@app.route('/extrair')
 def index():
     return render_template_string('''
         <!DOCTYPE html>

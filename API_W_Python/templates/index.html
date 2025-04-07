@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Data Warehouse - API UI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #1976d2;
+            color: white;
+            padding: 1rem 2rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        .container {
+            margin-top: 2rem;
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        button, input[type="submit"] {
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            background-color: #1976d2;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover, input[type="submit"]:hover {
+            background-color: #145a9c;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input, select {
+            padding: 0.6rem;
+            width: 100%;
+            margin-bottom: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Personal Data Warehouse</h1>
+        <p>Interface Responsiva da API</p>
+    </header>
+
+    <div class="container">
+
+        <form action="/formulario" method="get">
+            <button type="submit">Abrir Formulário</button>
+        </form>
+
+        <form action="/extrair" method="get">
+            <button type="submit">Extrair Banco de Dados (.xlsx)</button>
+        </form>
+
+        <form action="/relatorio" method="get">
+            <button type="submit">Ver Relatório</button>
+        </form>
+
+        <form action="/inserirLancamento" method="post">
+            <h3>Inserir Novo Lançamento</h3>
+            <input type="date" name="data" required>
+            <input type="text" name="tipo" placeholder="Tipo" required>
+            <input type="text" name="descricao" placeholder="Descrição" required>
+            <input type="number" step="0.01" name="credito" placeholder="Crédito" required>
+            <input type="number" step="0.01" name="debito" placeholder="Débito" required>
+            <input type="text" name="origem" placeholder="Origem" required>
+            <input type="submit" value="Inserir Lançamento">
+        </form>
+
+    </div>
+
+</body>
+</html>

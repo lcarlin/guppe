@@ -301,6 +301,9 @@ def main(param_file):
 =======
     total_running_time: str = f"{end - start:7.2f}"
 >>>>>>> Stashed changes
+=======
+    total_running_time: str = f"{end - start:7.2f}"
+>>>>>>> Stashed changes
     log_line = started + ' Started |' + datetime.datetime.now().strftime(
         "%Y/%m/%d %H:%M:%S") + f' Ended | {total_running_time} TotalSecs | Version {current_version} | Hostname {hostname} | OS {os_pataform}' + '\n'
     log_file.write(log_line)

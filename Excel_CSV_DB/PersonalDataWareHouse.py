@@ -296,6 +296,7 @@ def main(param_file):
 
     end = time.time()
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     total_running_time: str = f"{end - start:8.2f}"
 =======
     total_running_time: str = f"{end - start:7.2f}"

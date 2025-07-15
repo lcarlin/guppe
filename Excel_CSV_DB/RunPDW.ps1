@@ -32,6 +32,7 @@ if ( ( -not (Test-Path $pdwExcel )) -or ( -not (Test-Path $pdwDB) )) {
     $dataCriacaopdwDB = (Get-Item $pdwDB).LastWriteTime
     $dataCriacaopdwExcel = (Get-Item $pdwExcel).LastWriteTime
     Write-Host $outLiner
+    Write-Host "Python Interpreter :-> " $pythonExe
     Write-Host "Banco-de-dados     :-> " $pdwDB
     Write-Host "Ultima Atualizacao :-> " $dataCriacaopdwDB 
     Write-Host $outLiner

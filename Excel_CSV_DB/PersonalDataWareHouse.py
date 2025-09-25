@@ -36,8 +36,9 @@
 #                      #   accounting tables                #
 # 2024-12-09 # 9.7.0   # Genenal Entries Resumes (Y/M)      # Carlin, Luiz A. .'.
 # 2025-01-20 # 9.8.0   # Optimizing Data Loader funciont    # Carlin, Luiz A. .'.
+# 2025-09-25 # 9.8.1   # put Round at data loader           # Carlin, Luiz A. .'.
 ####################################################################################
-# Current Version : 9.8.0
+# Current Version : 9.8.1
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -105,7 +106,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    current_version = "9.8.0"
+    current_version = "9.8.1"
     os_pataform = platform.system()
 
     # if the system is windows then use the below
@@ -410,8 +411,8 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
     general_entries_df_full.insert(8, 'MES_EXTENSO', np.nan)
     general_entries_df_full.insert(9, 'AnoMes', 'YYYY/MM')
     # Convert colunmns "Credito" and "Debito" from str to float
-    general_entries_df_full['Credito'] = pd.to_numeric(general_entries_df_full['Credito'], errors='coerce')
-    general_entries_df_full['Debito'] = pd.to_numeric(general_entries_df_full['Debito'], errors='coerce')
+    general_entries_df_full['Credito'] = pd.to_numeric(general_entries_df_full['Credito'], errors='coerce').round(2)
+    general_entries_df_full['Debito'] = pd.to_numeric(general_entries_df_full['Debito'], errors='coerce').round(2)
 
     # sort the data_frame before persist it on the database'
     general_entries_df_full = general_entries_df_full.sort_values(

@@ -106,7 +106,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    current_version = "9.8.1"
+    current_version = "9.9.0"
     os_pataform = platform.system()
 
     # if the system is windows then use the below
@@ -350,6 +350,28 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
     table_droppator(conn.cursor(), general_entries_table)
     print("Running Loader of the Sheets into database Tables ... .. .  ")
     first_pass = True
+    meses = {1: "01-Janeiro",
+             2: "02-Fevereiro",
+             3: "03-Março",
+             4: "04-Abril",
+             5: "05-Maio",
+             6: "06-Junho",
+             7: "07-Julho",
+             8: "08-Agosto",
+             9: "09-Setembro",
+             10: "10-Outubro",
+             11: "11-Novembro",
+             12: "12-Dezembro" }
+
+    dias_semana = {
+        0: "Segunda-feira",
+        1: "Terça-feira",
+        2: "Quarta-feira",
+        3: "Quinta-feira",
+        4: "Sexta-feira",
+        5: "Sábado",
+        6: "Domingo"
+    }
 
     for i, infos in sheets_dataframe.iterrows():
         table_to_load = infos.TABLE_NAME
@@ -398,21 +420,42 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
             print(f'\033[32mLines Created :-> {str(number_lines).rjust(6)} \033[0m')
 
     print(f'\033[34m   . .. ... Sanitizing DataFrame       :-> {general_entries_table} :\033[0m', end=' ')
+
     if  not save_useless:  ## ATENÇÃO A ISSO AQUI
         # limpa registros com os Tipos Nulos
         general_entries_df_full.dropna(subset=['TIPO'], inplace=True)
         # limpa registros com as Datas Nulas
         general_entries_df_full.dropna(subset=['Data'], inplace=True)
 
-
+    # Add new columns with NULL or default values
     general_entries_df_full.insert(1, 'DIA_SEMANA', np.nan)
     general_entries_df_full.insert(6, 'Mes', 'MM')
     general_entries_df_full.insert(7, 'Ano', 'yyyy')
     general_entries_df_full.insert(8, 'MES_EXTENSO', np.nan)
     general_entries_df_full.insert(9, 'AnoMes', 'YYYY/MM')
-    # Convert colunmns "Credito" and "Debito" from str to float
-    general_entries_df_full['Credito'] = pd.to_numeric(general_entries_df_full['Credito'], errors='coerce').round(2)
-    general_entries_df_full['Debito'] = pd.to_numeric(general_entries_df_full['Debito'], errors='coerce').round(2)
+    dt = general_entries_df_full['Data'].dt
+
+    # fix the data in several columns
+    general_entries_df_full = (
+        general_entries_df_full
+        .assign(
+            Credito=pd.to_numeric(general_entries_df_full['Credito'], errors='coerce').round(2).fillna(0),
+            Debito=pd.to_numeric(general_entries_df_full['Debito'], errors='coerce').round(2).fillna(0),
+            MES_EXTENSO=dt.month.map(meses),
+            DIA_SEMANA=dt.dayofweek.map(dias_semana),
+            Mes=dt.strftime("%m"),
+            Ano=dt.strftime("%Y"),
+            AnoMes=dt.strftime("%Y/%m"),
+            AnoMesNum=dt.strftime("%Y%m"),   # opcional: AAAAMM numérico
+            DESCRICAO = (
+                general_entries_df_full['DESCRICAO']
+                .str.replace(r"[;,]", "|", regex=True)  # troca vírgula e ponto e vírgula por |
+                .str.replace("∴", " .'. ")  # troca caractere especial
+                .str.replace("ś","s")
+                .str.strip()  # remove espaços extras no início/fim
+            )
+        )
+    )
 
     # sort the data_frame before persist it on the database'
     general_entries_df_full = general_entries_df_full.sort_values(
@@ -420,6 +463,7 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
         ascending=False,  # Ordenação descendente
         ignore_index=True  # Reindexar após ordenação
     )
+
     print(f'\033[32mDone !!! \033[0m')
 
     print(f'\033[34m   . .. ... Writing Dataframe fo Table :-> {general_entries_table} :\033[0m', end=' ')
@@ -670,59 +714,8 @@ def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_
             "Saving Useless"))
         lista_acoes.append((f"delete from {entries_table} where (data is null or tipo is null);", "Deleting Useless"))
 
-    lista_acoes.append((f"Update {entries_table} \
-       set Mes = strftime ('%m',data )  \
-       , Ano = strftime ('%Y',data )  \
-       , AnoMes = strftime ('%Y',data )||'/'||strftime ('%m',data )  ;", "Fixing Dates"))
-    lista_acoes.append((f"update {entries_table} set credito = 0 where credito is null ;", "Fixing Credit Info"))
-    lista_acoes.append((f"update {entries_table} set debito = 0 where debito is null ;", "Fixing Debit Info"))
     lista_acoes.append(
         (f"Delete from {types_sheet} WHERE ( Código IS NULL or Descrição IS NULL) ;", "Deleting NULL info"))
-    lista_acoes.append((
-        f"update {entries_table} set descricao = replace (descricao,'∴', '.''.') where descricao like '%∴%' ;",
-        "Fixing Special char (1)"))
-    lista_acoes.append((
-        f"update {entries_table} set descricao = replace (descricao,'ś', '''s') where descricao like '%ś%' ;",
-        "Fixing Special char (2)"))
-    # lista_acoes.append(f"update {entries_table} set descricao = replace (descricao,'', '''s')  ;")
-    lista_acoes.append(
-        (f"update {entries_table} set credito  = round(credito,2) where credito > 0  ;", "Rouding Credit info"))
-    lista_acoes.append(
-        (f"update {entries_table} set debito  = round(debito,2) where debito > 0  ;", "Rouding Debit info"))
-    lista_acoes.append((
-        f"update {entries_table} set descricao = replace (descricao,',', '|') where descricao like '%,%' ;",
-        "Fixing Special char (3)"))
-    lista_acoes.append((
-        f"update {entries_table} set descricao = replace (descricao,';', '|') where descricao like '%;%' ;",
-        "Fixing Special char (4)"))
-    lista_acoes.append((f"UPDATE {entries_table} " \
-                        "  SET DIA_SEMANA = case cast (strftime('%w', Data ) as integer) " \
-                        "  when 0 then 'Domingo' " \
-                        "  when 1 then 'Segunda-Feira' " \
-                        "  when 2 then 'Terça-Feira' " \
-                        "  when 3 then 'Quarta-Feira' " \
-                        "  when 4 then 'Quinta-Feira' " \
-                        "  when 5 then 'Sexta-Feira' " \
-                        "  when 6 then 'Sábado' " \
-                        "  else 'UNDEFINED' end " \
-                        "    where DIA_SEMANA IS NULL ;", "Fixing Day-Of-Week"))
-    lista_acoes.append((f"UPDATE {entries_table} " \
-                        "    SET MES_EXTENSO = ( case MES WHEN '01' THEN '01-Janeiro' " \
-                        "        WHEN '02' THEN '02-Fevereiro' " \
-                        "         WHEN '03' THEN '03-Março' " \
-                        "         WHEN '04' THEN '04-Abril' " \
-                        "         WHEN '05' THEN '05-Mail' " \
-                        "         WHEN '06' THEN '06-Junho' " \
-                        "         WHEN '07' THEN '07-Julho' " \
-                        "         WHEN '08' THEN '08-Agosto' " \
-                        "         WHEN '09' THEN '09-Setembro' " \
-                        "         WHEN '10' THEN '10-Outubro' " \
-                        "         WHEN '11' THEN '11-Novembro' " \
-                        "         WHEN '12' THEN '12-Dezembro' " \
-                        "         ELSE 'UNDEFINED' " \
-                        "         END ) " \
-                        "   WHERE MES_EXTENSO IS NULL ;", "Fixing months"))
-
     lista_acoes.append(('DELETE FROM Parcelamentos WHERE 1 = 1 AND (DATA IS NULL OR "Tipo Lançamento" is null) ;',
                         "Deleting Parcelamentos"))
     # lista_acoes.append((f'create index SHAWASKA on {entries_table}  (DATA, TIPO, DESCRICAO) ',"(Re)creating Index"))

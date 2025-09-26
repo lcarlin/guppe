@@ -37,8 +37,9 @@
 # 2024-12-09 # 9.7.0   # Genenal Entries Resumes (Y/M)      # Carlin, Luiz A. .'.
 # 2025-01-20 # 9.8.0   # Optimizing Data Loader funciont    # Carlin, Luiz A. .'.
 # 2025-09-25 # 9.8.1   # put Round at data loader           # Carlin, Luiz A. .'.
+# 2025-09-25 # 9.9.0   # Improvements on Dataframe Sanity   # Carlin, Luiz A. .'.
 ####################################################################################
-# Current Version : 9.8.1
+# Current Version : 9.9.0
 ####################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -446,7 +447,7 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
             Mes=dt.strftime("%m"),
             Ano=dt.strftime("%Y"),
             AnoMes=dt.strftime("%Y/%m"),
-            AnoMesNum=dt.strftime("%Y%m"),   # opcional: AAAAMM numérico
+            # AnoMesNum=dt.strftime("%Y%m"),   # opcional: AAAAMM numérico
             DESCRICAO = (
                 general_entries_df_full['DESCRICAO']
                 .str.replace(r"[;,]", "|", regex=True)  # troca vírgula e ponto e vírgula por |

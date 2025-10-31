@@ -49,7 +49,7 @@ if ( ( -not (Test-Path $pdwExcel )) -or ( -not (Test-Path $pdwDB) )) {
         
         if ($ReturnCode) {
             # Copiar arquivo, sobrescrevendo se já existir, em modo verbose
-            Copy-Item -Path $caminhoOrigem -Destination $caminhoDestino -Force -Verbose
+            Copy-Item -Path $caminhoOrigem -Destination $caminhoDestino -Force # -Verbose
             Write-Host "Arquivo copiado de $caminhoOrigem para $caminhoDestino"
         } else {
             Write-Host "A execução do programa falhou. A cópia não foi efetuada."

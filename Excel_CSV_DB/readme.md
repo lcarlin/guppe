@@ -48,4 +48,54 @@ Pré-requisitos:
 - Python 3.10+
 - Bibliotecas:
   ```bash
-  pip install pandas openpyxl sqlalchemy tabulate
+  pip install pandas openpyxl sqlalchemy tabulate xlsxwriter xlrd numpy lxml tabulate
+--
+## 🧠 Uso Básico
+```bash
+   python PersonalDataWareHouse.py
+```
+
+Ou passando parâmetros personalizados:
+```bash
+   python PersonalDataWareHouse.py ArquivoDeParametros.cfg
+```
+---
+## 🧰 Tecnologias Utilizadas
+- Python 3.x
+- Pandas
+- SQLite
+- SQLAlchemy
+- OpenPyXL
+- JSON Configs
+---
+## 🧭 Roadmap (Próximos Passos)
+- Integração com MongoDB
+- Interface Web (Flask Dashboard)
+- Agendador de cargas
+- Análises financeiras automatizadas
+- Exportação direta para Google Sheets
+---
+## 📚 Motivação
+Este projeto nasceu da necessidade de organizar dados pessoais dispersos em planilhas, extratos e arquivos manuais, aplicando os mesmos princípios de Business Intelligence e Data Warehousing usados em grandes corporações.
+
+É, no fundo, um exercício de autonomia digital: 
+> “Se os dados são o novo petróleo, o PDW é a tua refinaria particular.”
+
+---
+
+## 👨‍💻 Autor
+Carlin, Luiz A..'.  
+M.'.M.'.  
+Especialista em sistemas de Billing e integração de dados corporativos
+Entusiasta de ETL, Oracle, Linux, Tarot de Thoth e boa engenharia de software.
+
+---
+
+## 🧾 Licença
+Este projeto é distribuído sob a MIT License.
+Consulte o arquivo LICENSE  para mais detalhes.
+
+---
+
+## 🌌 Citação Final
+“A verdadeira inteligência de dados não está no código, mas na curiosidade de quem decide olhar para os próprios números.”

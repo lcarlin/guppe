@@ -1,19 +1,20 @@
 """
-####################################################################################
+##############################################################################################
 # Author  : Carlin, Luiz A. .'.
 # e-mail  : luiz.carlin@gmail.com
 # Date    : 04-OCT-2023
 # purpose : API to populate tha table
 #           ET&L -> Extract, Transform & Loader
-####################################################################################
+##############################################################################################
 # Version control
-# Date       # Version #    What                            #   Who
-# 2023-10-04 # 1.0.0   # Inicial Version                    # Carlin, Luiz A. .'.
-# 2024-11-07 # 2.0.0   # Database file dowwnload previa     #
-# 2024*12-23 # 2.0.0.  # Agora Baixa o XLSX pronto, ao inves do DB
-####################################################################################
-# Current Version :2.0.0
-####################################################################################
+# Date       # Version #    What                                    #   Who
+# 2023-10-04 # 1.0.0   # Inicial Version                            # Carlin, Luiz A. .'.
+# 2024-11-07 # 2.0.0   # Database file dowwnload previa             # Carlin, Luiz A. .'.
+# 2024-12-23 # 2.0.0.  # Agora Baixa o XLSX pronto, ao inves do DB  # Carlin, Luiz A. .'.
+# 2025-10-31 # 2.0.1   # Validações pra não baixar file empty       # Carlin, Luiz A. .'.
+##############################################################################################
+# Current Version :2.0.1
+##############################################################################################
 # TODO: Read parameters from configuration (data base, tables, etc)
 # TODO:   READ : Database dir.
 # TODO:   READ : database Name
@@ -22,7 +23,7 @@
 # TODO: Print configurarion
 # TODO: Print Inserted item
 # TODO: Print read Item from form
-####################################################################################
+##############################################################################################
 """
 
 from flask import Flask, request, jsonify, render_template, send_file, render_template_string, Response
@@ -170,22 +171,25 @@ def download_file():
     timestamp = datetime.datetime.now().strftime('%Y%m%d.%H%M%S')
     # download_filename = f'PDW.{timestamp}.db'
     download_filename = transient_data_exportator(sqlite_database, dir_db, out_type, transient_data_file, transient_data_table,  origem_dados )
+    # 205-10-31
+    if download_filename is not None:
+        # Gerar a resposta de streaming
+        response = Response(
+            # stream_file(DB_PATH),
+            stream_file(download_filename),
+            headers={
+                'Content-Type': 'application/octet-stream',
+                'Content-Disposition': f'attachment; filename={download_filename}'
+            }
+        )
 
-    # Gerar a resposta de streaming
-    response = Response(
-        # stream_file(DB_PATH),
-        stream_file(download_filename),
-        headers={
-            'Content-Type': 'application/octet-stream',
-            'Content-Disposition': f'attachment; filename={download_filename}'
-        }
-    )
-
-    # Adicionar a lógica para chamar `update_database` após a transmissão do arquivo
-    @response.call_on_close
-    def on_close():
-        update_database()
-        os.remove(download_filename)
+        # Adicionar a lógica para chamar `update_database` após a transmissão do arquivo
+        @response.call_on_close
+        def on_close():
+            update_database()
+            os.remove(download_filename)
+    else:  # 205-10-31
+        response = 404
 
     return response
 
@@ -228,24 +232,32 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     guiding_df = pd.read_sql(f"select distinct {origing_column} from {transient_data_table}", connection)
     conn = connection.cursor()
 
-    for i, linhas in guiding_df.iterrows():
-        excel_sheet = f"{linhas.Origem}"
-        message = f'   . .. ... Step: {i + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
-        sql_statment = f"SELECT * FROM {transient_data_table} where {origing_column} = '{linhas.Origem}' and EXPORT_DATE is null order by 1;"
-        df_out = pd.read_sql(sql_statment, connection)
-        if len(df_out) > 0 :
-            print(message)
-            df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
-#            conn.execute(f"UPDATE {transient_data_table} SET EXPORT_DATE = datetime('now') WHERE {origing_column} = '{linhas.Origem}'; ")
-#            conn.execute('COMMIT; ')
+    # 205-10-31
+    if not guiding_df.empty:
+        for i, linhas in guiding_df.iterrows():
+            excel_sheet = f"{linhas.Origem}"
+            message = f'   . .. ... Step: {i + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
+            sql_statment = f"SELECT * FROM {transient_data_table} where {origing_column} = '{linhas.Origem}' and EXPORT_DATE is null order by 1;"
+            df_out = pd.read_sql(sql_statment, connection)
+            if len(df_out) > 0 :
+                print(message)
+                df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
+    #            conn.execute(f"UPDATE {transient_data_table} SET EXPORT_DATE = datetime('now') WHERE {origing_column} = '{linhas.Origem}'; ")
+    #            conn.execute('COMMIT; ')
+
+        xlsx_writer.close()
+
+    else:
+        # 205-10-31
+        print('There is no Transient data o export ... .. . nothing to do  ... .. .  ')
+        file_full_path = None
 
     connection.close()
-    xlsx_writer.close()
     return file_full_path
 
 #############################################################################################
-current_version = "9.8.0"
-api_version = "2.0.0"
+current_version = "9.9.0"
+api_version = "2.0.1"
 config = configparser.ConfigParser()
 ## atenção , sempre alterar esse PATH em Produção
 config_file = '../Excel_CSV_DB/PersonalDataWareHouse.cfg'
@@ -307,5 +319,4 @@ if __name__ == '__main__':
     #http_server = WSGIServer(('0.0.0.0',8123 ), app)
     #http_server.serve_forever()
 
-
-#############################################################################################
+##############################################################################################

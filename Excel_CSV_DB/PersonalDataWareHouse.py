@@ -225,7 +225,7 @@ def main(param_file):
     if not is_log_empty and log_file_exists:
         last_run_date = log_file.readlines()[-1].split('|')[0]
     # end of LOG block
-    out_line = ">" + ("=" * 120) + "<"
+    out_line = ">" + ("=" * 130) + "<"
     print(out_line)
     print(f'Current Version         :-> {current_version}')
     print(f'Last RUN Date           :-> {last_run_date}')

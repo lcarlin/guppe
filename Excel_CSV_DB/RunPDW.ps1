@@ -15,7 +15,7 @@ $xlsxFile = "PDW.xlsx"
 # Caminho para o executável do Python que você deseja executar
 $pythonExe = $env:LOCALAPPDATA + "\" + "Programs\Python\Python312\python.exe"
 
-$outLiner = ">========================================================================================================================<"
+$outLiner = ">==================================================================================================================================<"
 
 # O nome do .db e do .xlsx tem que ser o mesmo que vem do arquivo "PersonalDataWareHouse.cfg" (ou similar)
 $pdwDB = Join-Path -Path $dirPDW -ChildPath $dbFile

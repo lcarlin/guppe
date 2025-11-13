@@ -12,6 +12,35 @@ $dirDestDropBox = $localUser + "\Dropbox\PDW_DRPBX"
 $dbFile =  "PDW.db"
 $xlsxFile = "PDW.xlsx"
 
+# 2025-11-03
+# Caminho completo do script atual
+# $scriptPath = $MyInvocation.MyCommand.Path
+# Nome do script sem extensão
+# $scriptBase = [System.IO.Path]::GetFileNameWithoutExtension($scriptPath)
+# $lockFile = Join-Path $dirPDW ("$scriptBase.lock")
+
+# Cria o caminho do arquivo .lock # 2025-11-03
+$lockFile = Join-Path $dirPDW  ("{0}.lock" -f ([IO.Path]::GetFileNameWithoutExtension($MyInvocation.MyCommand.Path)))
+
+# 2025-11-03
+if (Test-Path $lockFile) {
+    Write-Host "Lock file já existe. Outro processo pode estar rodando. Abortando..."
+	Get-Content $lockFile | Write-Output
+    exit 1
+}
+
+# Dados que você quer registrar # 2025-11-03
+$pidy   = $PID
+$scriptName = $MyInvocation.MyCommand.Name
+$hostName   = $env:COMPUTERNAME
+$timestamp  = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+
+# Monta a string no mesmo estilo do Bash # 2025-11-03
+$lockInfo = "PID: $pidy | Script: $scriptName | Host: $hostName | When: $timestamp"
+
+# Escreve no arquivo (anexando se já existir) # 2025-11-03
+Add-Content -Path $lockFile -Value $lockInfo
+
 # Caminho para o executável do Python que você deseja executar
 $pythonExe = $env:LOCALAPPDATA + "\" + "Programs\Python\Python312\python.exe"
 
@@ -61,4 +90,6 @@ if ( ( -not (Test-Path $pdwExcel )) -or ( -not (Test-Path $pdwDB) )) {
 }
 # Aguarda até que uma tecla seja pressionada antes de encerrar o script
 Write-Host "Pressione qualquer tecla para sair..."
+# Remove o lock no final
+Remove-Item $lockFile -Force  # 2025-11-03
 $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown") | Out-Null

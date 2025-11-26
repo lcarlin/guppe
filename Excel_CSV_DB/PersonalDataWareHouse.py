@@ -1,51 +1,52 @@
 """
-####################################################################################
+#############################################################################################
 # Author  : Carlin, Luiz A. .'.
 # e-mail  : luiz.carlin@gmail.com
 # Date    : 13-DEC-2022
 # purpose : Import Sheets from Excel Workbook into SQLite3 Tables
 #           ET&L -> Extract, Transform & Loader
-####################################################################################
+#############################################################################################
 # Version control
-# Date       # Version #    What                            #   Who
-# 2022-12-26 # 8       # Merge With Version 6.1 and 7       # Carlin, Luiz A. .'.
-# 2023-04-12 # 9.0.4   # Export date in several formats in  #
-#                      # LANCAMENTOS_GERAIS                 # Carlin, Luiz A. .'.
-# 2023-04-20 # 9.1.0   # Run dinamic reports based on anual #
-#                      # info                               # Carlin, Luiz A. .'.
-# 2023-08-23 # 9.1.5   # create Index Main table            # Carlin, Luiz A. .'.
-#                      # Do not create intermediate tables  #
-#                      #  Anymore for Accounting Sheets     #
-#                      # Now the export function            #
-#                      #   Just Export data                 #
-#                      # New Columns on the main Table      #
-# 2023-10-05 # 9.2.0   # Export Transient data from API Tab.# Carlin, Luiz A. .'.
-# 2023-12-20 # 9.3.0   # Data Validator: verify if tehe is  # Carlin, Luiz A. .'.
-#                      #  Any invalid data on main fields   #
-# 2024-04-03 # 9.3.2   # remove INPLACE NPN MAN             # Carlin, Luiz A. .'.
-#                      # CHANGES Encoding from ansi CP1252  #
-# 2024-04-04 # 9.3.2   # files "MesAno" changed to AnoMEs   # Carlin, Luiz A. .'.
-# 2024-05-28 # 9.4.0   # Pivot Table Improvment             # Carlin, Luiz A. .'.
-# 2024-08-08 # 9.4.4   # TimeStamp and Separator on LOG     # Carlin, Luiz A. .'.
-# 2024-09-02 # 9.5.0   # totaling daily amount of data In   # Carlin, Luiz A. .'.
-#                      # General Reports                    #
-# 2024-10-03 # 9.6.0   # payment in installments summary    # Carlin, Luiz A. .'.
-# 2024-10-22 # 9.6.1   # New Pivot Tables with COUNT of     # Carlin, Luiz A. .'.
-#                      # totals                             # Carlin, Luiz A. .'.
-# 2024-11-06 # 9.7.0   # Generating summaries of all        # Carlin, Luiz A. .'.
-#                      #   accounting tables                #
-# 2024-12-09 # 9.7.0   # Genenal Entries Resumes (Y/M)      # Carlin, Luiz A. .'.
-# 2025-01-20 # 9.8.0   # Optimizing Data Loader funciont    # Carlin, Luiz A. .'.
-# 2025-09-25 # 9.8.1   # put Round at data loader           # Carlin, Luiz A. .'.
-# 2025-09-25 # 9.9.0   # Improvements on Dataframe Sanity   # Carlin, Luiz A. .'.
-####################################################################################
-# Current Version : 9.9.0
-####################################################################################
+# Date       #  Version #    What                                      #   Who
+# 2022-12-26 #  8       # Merge With Version 6.1 and 7                 # Carlin, Luiz A. .'.
+# 2023-04-12 #  9.0.4   # Export date in several formats in            #
+#                       # LANCAMENTOS_GERAIS                           # Carlin, Luiz A. .'.
+# 2023-04-20 #  9.1.0   # Run dinamic reports based on anual           #
+#                       # info                                         # Carlin, Luiz A. .'.
+# 2023-08-23 #  9.1.5   # create Index Main table                      # Carlin, Luiz A. .'.
+#                       # Do not create intermediate tables            #
+#                       #  Anymore for Accounting Sheets               #
+#                       # Now the export function                      #
+#                       #   Just Export data                           #
+#                       # New Columns on the main Table                #
+# 2023-10-05 #  9.2.0   # Export Transient data from API Tab           # Carlin, Luiz A. .'.
+# 2023-12-20 #  9.3.0   # Data Validator: verify if tehe is            # Carlin, Luiz A. .'.
+#                       #  Any invalid data on main fields             #
+# 2024-04-03 #  9.3.2   # remove INPLACE NPN MAN                       # Carlin, Luiz A. .'.
+#                       # CHANGES Encoding from ansi CP1252            #
+# 2024-04-04 #  9.3.2   # files "MesAno" changed to AnoMEs             # Carlin, Luiz A. .'.
+# 2024-05-28 #  9.4.0   # Pivot Table Improvment                       # Carlin, Luiz A. .'.
+# 2024-08-08 #  9.4.4   # TimeStamp and Separator on LOG               # Carlin, Luiz A. .'.
+# 2024-09-02 #  9.5.0   # totaling daily amount of data In             # Carlin, Luiz A. .'.
+#                       # General Reports                              #
+# 2024-10-03 #  9.6.0   # payment in installments summary              # Carlin, Luiz A. .'.
+# 2024-10-22 #  9.6.1   # New Pivot Tables with COUNT of               # Carlin, Luiz A. .'.
+#                       # totals                                       # Carlin, Luiz A. .'.
+# 2024-11-06 #  9.7.0   # Generating summaries of all                  # Carlin, Luiz A. .'.
+#                       #   accounting tables                          #
+# 2024-12-09 #  9.7.0   # Genenal Entries Resumes (Y/M)                # Carlin, Luiz A. .'.
+# 2025-01-20 #  9.8.0   # Optimizing Data Loader funciont              # Carlin, Luiz A. .'.
+# 2025-09-25 #  9.8.1   # put Round at data loader                     # Carlin, Luiz A. .'.
+# 2025-09-25 #  9.9.0   # Improvements on Dataframe Sanity             # Carlin, Luiz A. .'.
+# 2025-11-26 #  9.10.0  # ReFactoring of Data_loader function          # Carlin, Luiz A. .'.
+#############################################################################################
+# Current Version : 9.10.0
+#############################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
 # TODO: read encrypted excel file ?
 # TODO: Write encrypted Excel file ?
-# TODO: Remove parallel items ?
+# TODO: Remove parallel items (Done)
 # TODO: be able to use another databases ?
 # TODO: Refactor code to be able to use another types od database
 # TODO: Version Number in main module (done)
@@ -86,28 +87,12 @@ import xml.etree.ElementTree as ET
 import gzip
 import shutil
 
-def split_paymnt_resume(db_file, split_paymnt_table, out_table):
-    print('Creating payment in installments Summaries ... .. .  ')
-    db_conn = sqlite3.connect(db_file)
-
-    df_parcelamentos = pd.read_sql(f"SELECT * FROM {split_paymnt_table}", db_conn)
-    df_parcelamentos['Ano_Mes'] = pd.to_datetime(df_parcelamentos['Data']).dt.to_period('M')
-    df_agrupado = df_parcelamentos.groupby('Ano_Mes').agg(Quantidade=('Data', 'size'),
-                                                          Valor=('Debito', 'sum')).reset_index()
-    df_agrupado['Diff_QTD'] = df_agrupado['Quantidade'].diff().fillna(0)
-    df_agrupado['Diff_Vlr'] = df_agrupado['Valor'].diff().fillna(0)
-    df_agrupado['Ano_Mes'] = df_agrupado['Ano_Mes'].astype(str)
-    df_agrupado['Valor'] = df_agrupado['Valor'].round(2)
-    df_agrupado['Diff_Vlr'] = df_agrupado['Diff_Vlr'].round(2)
-    df_agrupado.to_sql(out_table, db_conn, index=False, if_exists="replace")
-
-
 def main(param_file):
     # Environment / Variables
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    current_version = "9.9.0"
+    current_version = "9.10.0"
     os_pataform = platform.system()
 
     # if the system is windows then use the below
@@ -149,7 +134,7 @@ def main(param_file):
         db_file_type = config['FILE_TYPES']['DB_FILE_TYPE']
         log_file_cfg = dir_log + config['FILE_TYPES']['LOG_FILE']
 
-        splitter = config.getint('SETTINGS', 'PARALLELS')
+        # splitter = config.getint('SETTINGS', 'PARALLELS')
         multithread = config.getboolean('SETTINGS', 'MULTITHREADING')
         overwrite_db = config.getboolean('SETTINGS', 'OVERWRITE_DB')
         run_loader = config.getboolean('SETTINGS', 'RUN_DATA_LOADER')
@@ -163,9 +148,9 @@ def main(param_file):
         discarted_data_table = config['SETTINGS']['DISCARTED_DATA_TABLE']
         full_hist_table = config['SETTINGS']['FULL_PIVOT_TABLE']
         anual_hist_table = config['SETTINGS']['ANUAL_PIVOT_TABLE']
-        export_transeient_data = config.getboolean('SETTINGS','EXPORT_TRANSIENT_DATA')
-        transient_data_table = config['SETTINGS']['TRANSIENT_DATA_TABLE']
-        transient_data_file = config['FILE_TYPES']['TRANSIENT_DATA_FILE']
+        # export_transeient_data = config.getboolean('SETTINGS','EXPORT_TRANSIENT_DATA')
+        # transient_data_table = config['SETTINGS']['TRANSIENT_DATA_TABLE']
+        # transient_data_file = config['FILE_TYPES']['TRANSIENT_DATA_FILE']
         origem_dados = config['SETTINGS']['TRANSIENT_DATA_COLUMN']
         other_file_types = config.getboolean('SETTINGS', 'EXPORT_OTHER_TYPES')
 
@@ -225,7 +210,7 @@ def main(param_file):
     if not is_log_empty and log_file_exists:
         last_run_date = log_file.readlines()[-1].split('|')[0]
     # end of LOG block
-    out_line = ">" + ("=" * 130) + "<"
+    out_line = ">" + ("=" * 120) + "<"
     print(out_line)
     print(f'Current Version         :-> {current_version}')
     print(f'Last RUN Date           :-> {last_run_date}')
@@ -240,9 +225,8 @@ def main(param_file):
     if run_loader:
         print(out_line)
         if not multithread:
-            data_loader(sqlite_database, types_of_entries, general_entries_table, origem_dados, guiding_table,
-                        input_file,
-                        save_discarted_data, discarted_data_table)
+            new_data_loader(sqlite_database, types_of_entries, general_entries_table, origem_dados, guiding_table,
+                        input_file, save_discarted_data, discarted_data_table)
         else:
             print(f'Bad, Bad Server. Not donuts for you')
             print(f'Threads are evil. Avoid them.')
@@ -291,10 +275,10 @@ def main(param_file):
                               general_entries_table, dinamic_reports, din_report_guinding, create_pivot,
                               anual_hist_table, full_hist_table, dayly_progress, out_table, monthly_summarie)
 
-    if export_transeient_data:
-        print(out_line)
-        transient_data_exportator(sqlite_database, dir_file_out, out_type, transient_data_file, transient_data_table,
-                                  origem_dados)
+    # if export_transeient_data:
+    #     print(out_line)
+    #     transient_data_exportator(sqlite_database, dir_file_out, out_type, transient_data_file, transient_data_table,
+    #                               origem_dados)
 
     end = time.time()
     total_running_time: str = f"{end - start:7.2f}"
@@ -308,6 +292,21 @@ def main(param_file):
     print(log_line[:-1])
     print(out_line)
     # exit(0)
+
+def split_paymnt_resume(db_file, split_paymnt_table, out_table):
+    print('Creating payment in installments Summaries ... .. .  ')
+    db_conn = sqlite3.connect(db_file)
+
+    df_parcelamentos = pd.read_sql(f"SELECT * FROM {split_paymnt_table}", db_conn)
+    df_parcelamentos['Ano_Mes'] = pd.to_datetime(df_parcelamentos['Data']).dt.to_period('M')
+    df_agrupado = df_parcelamentos.groupby('Ano_Mes').agg(Quantidade=('Data', 'size'),
+                                                          Valor=('Debito', 'sum')).reset_index()
+    df_agrupado['Diff_QTD'] = df_agrupado['Quantidade'].diff().fillna(0)
+    df_agrupado['Diff_Vlr'] = df_agrupado['Valor'].diff().fillna(0)
+    df_agrupado['Ano_Mes'] = df_agrupado['Ano_Mes'].astype(str)
+    df_agrupado['Valor'] = df_agrupado['Valor'].round(2)
+    df_agrupado['Diff_Vlr'] = df_agrupado['Diff_Vlr'].round(2)
+    df_agrupado.to_sql(out_table, db_conn, index=False, if_exists="replace")
 
 def monthly_summaries (db_file, in_table, out_table):
     print(f'Generating summaries of all accounting sheets into {out_table} table ... .. .')
@@ -340,142 +339,6 @@ def monthly_summaries (db_file, in_table, out_table):
     df_agrupado_anual.to_sql(out_table + '_ANUAL', db_conn, index=False, if_exists='replace')
     df_agrupado_full.to_sql(out_table + '_FULL', db_conn, index=False, if_exists='replace')
 
-
-def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, guindind_sheet, excel_file,
-                save_useless, udt):
-    print(f"Connecting to SQLite3 Database ... .. .  ")
-    conn = sqlite3.connect(data_base)
-    work_books = pd.ExcelFile(excel_file)
-    print(f"Reading Data from Guindig Sheet :->  {guindind_sheet} ... .. .  ")
-    sheets_dataframe = work_books.parse(sheet_name=guindind_sheet)
-    table_droppator(conn.cursor(), general_entries_table)
-    print("Running Loader of the Sheets into database Tables ... .. .  ")
-    first_pass = True
-    meses = {1: "01-Janeiro",
-             2: "02-Fevereiro",
-             3: "03-Março",
-             4: "04-Abril",
-             5: "05-Maio",
-             6: "06-Junho",
-             7: "07-Julho",
-             8: "08-Agosto",
-             9: "09-Setembro",
-             10: "10-Outubro",
-             11: "11-Novembro",
-             12: "12-Dezembro" }
-
-    dias_semana = {
-        0: "Segunda-feira",
-        1: "Terça-feira",
-        2: "Quarta-feira",
-        3: "Quinta-feira",
-        4: "Sexta-feira",
-        5: "Sábado",
-        6: "Domingo"
-    }
-
-    for i, infos in sheets_dataframe.iterrows():
-        table_to_load = infos.TABLE_NAME
-        is_accounting = infos.ACCOUNTING
-        is_cleanable = infos.CLEANABLE
-        is_loadeable = infos.LOADABLE
-        print(f'\033[34m   . .. ... Step: {i + 1:04} ; Table (Sheet) :-> {table_to_load.strip().ljust(25)} ;\033[0m',
-              end=' ')
-        if 'X' == is_loadeable:
-            data_frame = pd.read_excel(excel_file, sheet_name=table_to_load)
-            if 'X' == is_accounting:
-                # data_frame['TIPO'].replace('', np.nan, inplace=True)
-                # data_frame['Data'].replace('', np.nan, inplace=True)
-                # 2024.04.03 - improvment for future pandas 3.0
-                # Series through chained assignment using an inplace method.
-                # The behavior will change in pandas 3.0. This inplace method will never work because the intermediate
-                # object on which we are setting values always behaves as a copy.
-                data_frame['TIPO'] = data_frame['TIPO'].replace('', np.nan)
-                data_frame['Data'] = data_frame['Data'].replace('', np.nan)
-
-                # if 'X' == is_cleanable and not save_useless:  ## ATENÇÃO A ISSO AQUI
-                #     # limpa registros com os Tipos Nulos
-                #     data_frame.dropna(subset=['TIPO'], inplace=True)
-                #     # limpa registros com as Datas Nulas
-                #     data_frame.dropna(subset=['Data'], inplace=True)
-
-                general_entries_df = data_frame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
-                general_entries_df[data_origin_col] = table_to_load
-                number_lines = len(data_frame)
-                # # Convert colunmns "Credito" and "Debito" from str to float
-                # general_entries_df['Credito'] = pd.to_numeric(general_entries_df['Credito'], errors='coerce')
-                # general_entries_df['Debito'] = pd.to_numeric(general_entries_df['Debito'], errors='coerce')
-
-                # And put the data cleaned into table  lançamentos gerais
-                if first_pass:
-                    general_entries_df_full = general_entries_df.copy()
-                    first_pass = False
-                else:
-                    general_entries_df_full = pd.concat([general_entries_df_full, general_entries_df],
-                                                        ignore_index=True)
-
-            else:
-                # Writes only the tables that aren´t Accounting, because it was already loaded on table general_entries_table
-                number_lines = data_frame.to_sql(table_to_load, conn, index=False, if_exists="replace")
-
-            print(f'\033[32mLines Created :-> {str(number_lines).rjust(6)} \033[0m')
-
-    print(f'\033[34m   . .. ... Sanitizing DataFrame       :-> {general_entries_table} :\033[0m', end=' ')
-
-    if  not save_useless:  ## ATENÇÃO A ISSO AQUI
-        # limpa registros com os Tipos Nulos
-        general_entries_df_full.dropna(subset=['TIPO'], inplace=True)
-        # limpa registros com as Datas Nulas
-        general_entries_df_full.dropna(subset=['Data'], inplace=True)
-
-    # Add new columns with NULL or default values
-    general_entries_df_full.insert(1, 'DIA_SEMANA', np.nan)
-    general_entries_df_full.insert(6, 'Mes', 'MM')
-    general_entries_df_full.insert(7, 'Ano', 'yyyy')
-    general_entries_df_full.insert(8, 'MES_EXTENSO', np.nan)
-    general_entries_df_full.insert(9, 'AnoMes', 'YYYY/MM')
-    dt = general_entries_df_full['Data'].dt
-
-    # fix the data in several columns
-    general_entries_df_full = (
-        general_entries_df_full
-        .assign(
-            Credito=pd.to_numeric(general_entries_df_full['Credito'], errors='coerce').round(2).fillna(0),
-            Debito=pd.to_numeric(general_entries_df_full['Debito'], errors='coerce').round(2).fillna(0),
-            MES_EXTENSO=dt.month.map(meses),
-            DIA_SEMANA=dt.dayofweek.map(dias_semana),
-            Mes=dt.strftime("%m"),
-            Ano=dt.strftime("%Y"),
-            AnoMes=dt.strftime("%Y/%m"),
-            # AnoMesNum=dt.strftime("%Y%m"),   # opcional: AAAAMM numérico
-            DESCRICAO = (
-                general_entries_df_full['DESCRICAO']
-                .str.replace(r"[;,]", "|", regex=True)  # troca vírgula e ponto e vírgula por |
-                .str.replace("∴", " .'. ")  # troca caractere especial
-                .str.replace("ś","s")
-                .str.strip()  # remove espaços extras no início/fim
-            )
-        )
-    )
-
-    # sort the data_frame before persist it on the database'
-    general_entries_df_full = general_entries_df_full.sort_values(
-        by=general_entries_df_full.columns[0],  # Primeira coluna
-        ascending=False,  # Ordenação descendente
-        ignore_index=True  # Reindexar após ordenação
-    )
-
-    print(f'\033[32mDone !!! \033[0m')
-
-    print(f'\033[34m   . .. ... Writing Dataframe fo Table :-> {general_entries_table} :\033[0m', end=' ')
-    general_entries_df_full.to_sql(general_entries_table, conn, index=False, if_exists="replace")
-    # Just one commit to Save time. This commit is BEFORE the data_correjeitor
-    conn.commit()
-    print(f'\033[32mDone !!! \033[0m')
-
-    data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)
-    conn.commit()
-    conn.close()
 
 def create_dinamic_reports(sqlite_database, excel_file, din_report_guinding, full_pivot):
     # todo: put some Fancy  output Message
@@ -570,31 +433,6 @@ def dataframe_to_xml(df, filename):
     tree = ET.ElementTree(root)
     ET.indent(tree, '   ')
     tree.write(filename, encoding='utf-8', xml_declaration=True)
-
-def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name, transient_data_table, origing_column):
-    print('Exporting Transient data into individual Sheelts ... .. .  ')
-    file_full_path = dir_out + file_name + '.' + datetime.datetime.now().strftime(
-        "%Y%m%d.%H%M%S") + '.' + out_extension
-    connection = sqlite3.connect(sqlite_database)
-    xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
-    guiding_df = pd.read_sql(f"select distinct {origing_column} from {transient_data_table}", connection)
-    conn = connection.cursor()
-
-    for i, linhas in guiding_df.iterrows():
-        excel_sheet = f"{linhas.Origem}"
-        message = f'   . .. ... Step: {i + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
-        sql_statment = f"SELECT * FROM {transient_data_table} where {origing_column} = '{linhas.Origem}' and EXPORT_DATE is null order by 1;"
-        df_out = pd.read_sql(sql_statment, connection)
-        if len(df_out) > 0:
-            print(message)
-            df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
-            conn.execute(
-                f"UPDATE {transient_data_table} SET EXPORT_DATE = datetime('now') WHERE {origing_column} = '{linhas.Origem}'; ")
-            conn.execute('COMMIT; ')
-
-    connection.close()
-    xlsx_writer.close()
-    return file_full_path
 
 def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
                           dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res,
@@ -702,7 +540,6 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
     if write_multiple_files:
         xlsx_writer.close()
 
-
 def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_table):
     print(f'Normalizing data on {entries_table} Table ...')
     cursor = conexao
@@ -775,73 +612,6 @@ def create_pivot_history(data_base_file, types_table, entries_table, out_table_G
     connection.commit()
 
 
-def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
-    db_connection = sqlite3.connect(db_file)
-    tmp_table_name = config_dict['table_to_load']
-    print(f'   . .. ... .... Begin of Thread Number :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
-    data_frame = pd.read_excel(xls_file, sheet_name=config_dict['table_to_load'])
-    if 'X' == config_dict['isAccounting'] and 'X' == config_dict['isCleanable']:
-        # delete records with null 'TIPO'
-        data_frame['TIPO'].replace('', np.nan, inplace=True)
-        data_frame.dropna(subset=['TIPO'], inplace=True)
-        # delete records with null DATA column
-        data_frame['Data'].replace('', np.nan, inplace=True)
-        data_frame.dropna(subset=['Data'], inplace=True)
-        general_entries_df = data_frame[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
-        general_entries_df.insert(1, 'DIA_SEMANA', np.nan)
-        general_entries_df['Mes'] = 'MM'
-        general_entries_df['Ano'] = 'YYYY'
-        general_entries_df['AnoMes'] = 'YYYY/MM'
-        general_entries_df['Origem'] = config_dict['table_to_load']
-        # Ja joga os dados limpos na lançamentos gerais
-        general_entries_df.to_sql(general_out_table, db_connection, index=False, if_exists="append")
-
-    # grava a tabela (UNITÁRIA) do data_frame do BD
-    data_frame.to_sql(config_dict['table_to_load'], db_connection, index=False, if_exists="replace")
-    db_connection.commit()
-    db_connection.close()
-    print(f'   . .. ... .... End of Thread Number :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
-
-# def data_loader_parallel(data_base, general_entries_table, guindind_sheet, excel_file):
-def data_loader_parallel(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
-    conn = sqlite3.connect(data_base, check_same_thread=False)
-    work_books = pd.ExcelFile(excel_file)
-    sheets_dataframe = work_books.parse(sheet_name=guindind_sheet)
-    table_droppator(conn.cursor(), general_entries_table)
-    conn.commit()
-    jobs = list()
-    print("Running Loader of the Sheets into database Tables ... .. .  ")
-    for i, infos in sheets_dataframe.iterrows():
-        dict_config = {'table_to_load': infos.TABLE_NAME,
-                       'isAccounting': infos.ACCOUNTING,
-                       'isCleanable': infos.CLEANABLE,
-                       'isLoadeable': infos.LOADABLE}
-
-        tmp_table_name = dict_config['table_to_load']
-        print(f'   . .. ... Step:->  {i + 1:04} ; Table (Sheet) :-> "{tmp_table_name}"')
-        if 'X' == dict_config['isLoadeable']:
-            # thread = threading.Thread(target=parallel_df(conn, excel_File, dict_config, General_Entries_table, i + 1))
-            thread = threading.Thread(target=parallel_df,
-                                      args=(data_base, excel_file, dict_config, general_entries_table, i + 1))
-            jobs.append(thread)
-
-    print(f'   . .. ... Starting Multi-Threaging processing')
-    for m in jobs:
-        m.start()
-
-    print(f'   . .. ... Waiting for Threads to End ')
-    # Ensure all  the threads have finished
-    for index, tread in enumerate(jobs):
-        print(f'   ... .. . Index Of :-> {index}')
-        thread.join()
-
-    print(f'   . .. ... All threads has ended ')
-    data_correjeitor(conn.cursor(), types_sheet, general_entries_table, save_useless, udt)
-    print(f'   . .. ... Data-Loader Done !!! !! ! ')
-    conn.commit()
-    conn.close()
-    # connection.close()
-
 def gzip_compressor(arquivo_origem):
     arquivo_destino = arquivo_origem + '.gz'
     print(f'creating compressed file {arquivo_destino}')
@@ -849,20 +619,351 @@ def gzip_compressor(arquivo_origem):
         with gzip.open(arquivo_destino, 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
 
-    # Excluindo o arquivo original após a compactação
+    # removing original file after compression is done
     os.remove(arquivo_origem)
 
-
 def totalizador_diario(database_file, in_table, out_table):
-    print("Totaling the Daily Amount of data ... .. .")
+    print("Totaling the Daily Amount of data ... .. .", end=' ')
     conn = sqlite3.connect(database_file)
     df = pd.read_sql_query(f"select * from {in_table}", conn)
     df_contagem = df.groupby('Data').size().reset_index(name='Contagem')
     df_contagem['Contagem Acumulada'] = df_contagem['Contagem'].cumsum()
     df_contagem = df_contagem[['Data', 'Contagem Acumulada']]
     number_lines = df_contagem.to_sql(out_table, conn, index=False, if_exists="replace")
+    print(f'\033[32m Done !!!  {number_lines} Days loaded \033[0m')
     conn.commit()
     conn.close()
+
+## ------------------------------------------------------------------------------------------
+# new stuff
+"""
+Módulo refatorado do data_loader
+Separado em funções modulares com responsabilidades únicas
+
+"""
+# ============================================================================
+# FUNÇÕES AUXILIARES - DICIONÁRIOS E CONSTANTES
+# ============================================================================
+
+def get_month_names():
+    """
+    Retorna dicionário com nomes dos meses em português.
+
+    Returns:
+        dict: Mapeamento de número do mês para nome formatado
+    """
+    return {
+        1: "01-Janeiro",
+        2: "02-Fevereiro",
+        3: "03-Março",
+        4: "04-Abril",
+        5: "05-Maio",
+        6: "06-Junho",
+        7: "07-Julho",
+        8: "08-Agosto",
+        9: "09-Setembro",
+        10: "10-Outubro",
+        11: "11-Novembro",
+        12: "12-Dezembro"
+    }
+
+
+def get_weekday_names():
+    """
+    Retorna dicionário com nomes dos dias da semana em português.
+
+    Returns:
+        dict: Mapeamento de número do dia para nome
+    """
+    return {
+        0: "Segunda-feira",
+        1: "Terça-feira",
+        2: "Quarta-feira",
+        3: "Quinta-feira",
+        4: "Sexta-feira",
+        5: "Sábado",
+        6: "Domingo"
+    }
+
+
+# ============================================================================
+# FUNÇÕES DE LEITURA E PROCESSAMENTO DE EXCEL
+# ============================================================================
+
+def read_guiding_sheet(excel_file, sheet_name):
+    """
+    Lê a planilha de configuração/guia que define quais sheets processar.
+
+    Args:
+        excel_file (str): Caminho do arquivo Excel
+        sheet_name (str): Nome da planilha guia
+
+    Returns:
+        pd.DataFrame: DataFrame com configurações das planilhas
+    """
+    print(f"Reading Data from Guindig Sheet :->  {sheet_name} ... .. .  ")
+    workbook = pd.ExcelFile(excel_file)
+    return workbook.parse(sheet_name=sheet_name)
+
+
+def process_accounting_sheet(excel_file, sheet_name, origin_col_name):
+    """
+    Processa uma planilha contábil individual.
+
+    Args:
+        excel_file (str): Caminho do arquivo Excel
+        sheet_name (str): Nome da planilha a processar
+        origin_col_name (str): Nome da coluna que identifica origem dos dados
+
+    Returns:
+        tuple: (DataFrame processado, número de linhas)
+    """
+    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+    df['TIPO'] = df['TIPO'].replace('', np.nan)
+    df['Data'] = df['Data'].replace('', np.nan)
+    entries_df = df[["Data", "TIPO", "DESCRICAO", "Credito", "Debito"]].copy()
+    entries_df[origin_col_name] = sheet_name
+    return entries_df, len(df)
+
+def process_non_accounting_sheet(excel_file, sheet_name, conn):
+    """
+    Processa e salva uma planilha não-contábil diretamente no banco.
+
+    Args:
+        excel_file (str): Caminho do arquivo Excel
+        sheet_name (str): Nome da planilha
+        conn: Conexão SQLite
+
+    Returns:
+        int: Número de linhas processadas
+    """
+    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+    return df.to_sql(sheet_name, conn, index=False, if_exists="replace")
+
+# ============================================================================
+# FUNÇÕES DE SANITIZAÇÃO E TRANSFORMAÇÃO
+# ============================================================================
+
+def clean_description_text(text_series):
+    """
+    Limpa e padroniza o texto das descrições.
+
+    Args:
+        text_series (pd.Series): Série com textos para limpar
+
+    Returns:
+        pd.Series: Série com textos limpos
+    """
+    return (
+        text_series
+        .str.replace(r"[;,]", "|", regex=True)  # Substitui vírgula e ponto-vírgula
+        .str.replace("∴", " .'. ")  # Substitui caractere especial
+        .str.replace("ś", "s")  # Remove acentuação
+        .str.strip()  # Remove espaços extras
+    )
+
+def add_temporal_columns(df):
+    """
+    Adiciona colunas relacionadas a datas (mês, ano, dia da semana, etc).
+
+    Args:
+        df (pd.DataFrame): DataFrame com coluna 'Data'
+
+    Returns:
+        pd.DataFrame: DataFrame com colunas adicionadas
+    """
+    df.insert(1, 'DIA_SEMANA', np.nan)
+    df.insert(6, 'Mes', 'MM')
+    df.insert(7, 'Ano', 'yyyy')
+    df.insert(8, 'MES_EXTENSO', np.nan)
+    df.insert(9, 'AnoMes', 'YYYY/MM')
+    return df
+
+def enrich_dataframe_with_dates(df):
+    """
+    Enriquece o DataFrame com informações temporais derivadas da coluna Data.
+
+    Args:
+        df (pd.DataFrame): DataFrame com coluna 'Data' do tipo datetime
+
+    Returns:
+        pd.DataFrame: DataFrame enriquecido
+    """
+    dt = df['Data'].dt
+    meses = get_month_names()
+    dias_semana = get_weekday_names()
+
+    return df.assign(
+        MES_EXTENSO=dt.month.map(meses),
+        DIA_SEMANA=dt.dayofweek.map(dias_semana),
+        Mes=dt.strftime("%m"),
+        Ano=dt.strftime("%Y"),
+        AnoMes=dt.strftime("%Y/%m")
+    )
+
+def sanitize_financial_columns(df):
+    """
+    Converte e limpa as colunas financeiras (Credito e Debito).
+
+    Args:
+        df (pd.DataFrame): DataFrame com colunas 'Credito' e 'Debito'
+
+    Returns:
+        pd.DataFrame: DataFrame com colunas sanitizadas
+    """
+    return df.assign(
+        Credito=pd.to_numeric(df['Credito'], errors='coerce').round(2).fillna(0),
+        Debito=pd.to_numeric(df['Debito'], errors='coerce').round(2).fillna(0)
+    )
+
+
+def sanitize_entries_dataframe(df, remove_nulls=True):
+    """
+    Sanitiza e enriquece o DataFrame consolidado de lançamentos.
+
+    Args:
+        df (pd.DataFrame): DataFrame bruto de lançamentos
+        remove_nulls (bool): Se deve remover registros com TIPO ou Data nulos
+
+    Returns:
+        pd.DataFrame: DataFrame sanitizado e enriquecido
+    """
+    print(f'\033[34m   . .. ... Sanitizing DataFrame       :-> \033[0m', end=' ')
+    if remove_nulls:
+        df = df.dropna(subset=['TIPO'])
+        df = df.dropna(subset=['Data'])
+
+    df = add_temporal_columns(df)
+    df = sanitize_financial_columns(df)
+    df = enrich_dataframe_with_dates(df)
+    df['DESCRICAO'] = clean_description_text(df['DESCRICAO'])
+    print(f'\033[32mDone !!! \033[0m')
+    return df
+
+def sort_dataframe_by_date(df, ascending=False):
+    """
+    Ordena o DataFrame pela primeira coluna (Data).
+
+    Args:
+        df (pd.DataFrame): DataFrame a ordenar
+        ascending (bool): Ordem ascendente (True) ou descendente (False)
+
+    Returns:
+        pd.DataFrame: DataFrame ordenado
+    """
+    return df.sort_values(
+        by=df.columns[0],
+        ascending=ascending,
+        ignore_index=True
+    )
+
+
+def save_dataframe_to_database(df, conn, table_name, sort_by_date=True):
+    """
+    Salva DataFrame no banco de dados SQLite.
+
+    Args:
+        df (pd.DataFrame): DataFrame a salvar
+        conn: Conexão SQLite
+        table_name (str): Nome da tabela
+        sort_by_date (bool): Se deve ordenar por data antes de salvar
+
+    Returns:
+        int: Número de linhas salvas
+    """
+    print(f'\033[34m   . .. ... Writing Dataframe to Table :-> {table_name} :\033[0m', end=' ')
+    if sort_by_date:
+        df = sort_dataframe_by_date(df, ascending=False)
+
+    df.to_sql(table_name, conn, index=False, if_exists="replace")
+    print(f'\033[32mDone !!! \033[0m')
+    return len(df)
+
+# ============================================================================
+# 2025-11-26 - FUNÇÃO PRINCIPAL REFATORADA
+# ============================================================================
+def new_data_loader(data_base, types_sheet, general_entries_table, data_origin_col,
+                    guiding_sheet, excel_file, save_useless, udt):
+    """
+    Carrega dados de planilhas Excel para banco de dados SQLite.
+
+    Esta função orquestra todo o processo de ETL:
+    1. Conecta ao banco de dados
+    2. Lê configurações da planilha guia
+    3. Processa cada planilha conforme configuração
+    4. Consolida dados contábeis
+    5. Sanitiza e enriquece os dados
+    6. Persiste no banco de dados
+    7. Executa correções adicionais
+
+    Args:
+        data_base (str): Caminho do banco SQLite
+        types_sheet (str): Nome da planilha de tipos
+        general_entries_table (str): Nome da tabela de lançamentos gerais
+        data_origin_col (str): Nome da coluna de origem dos dados
+        guiding_sheet (str): Nome da planilha guia com configurações
+        excel_file (str): Caminho do arquivo Excel
+        save_useless (bool): Se deve manter registros com dados nulos
+        udt: Parâmetro adicional para data_correjeitor
+    """
+    print(f"Connecting to SQLite3 Database ... .. .  ")
+    conn = sqlite3.connect(data_base)
+    cursor = conn.cursor()
+
+    sheets_dataframe = read_guiding_sheet(excel_file, guiding_sheet)
+    table_droppator(cursor, general_entries_table)
+    print("Running Loader of the Sheets into database Tables ... .. .  ")
+
+    all_entries = []
+
+    for i, infos in sheets_dataframe.iterrows():
+        table_to_load = infos.TABLE_NAME
+        is_accounting = infos.ACCOUNTING
+        is_loadable = infos.LOADABLE
+
+        print(f'\033[34m   . .. ... Step: {i + 1:04} ; '
+              f'Table (Sheet) :-> {table_to_load.strip().ljust(25)} ;\033[0m', end=' ')
+
+        if 'X' == is_loadable:
+            if 'X' == is_accounting:
+                # Processa planilha contábil
+                entries_df, number_lines = process_accounting_sheet(
+                    excel_file, table_to_load, data_origin_col
+                )
+                all_entries.append(entries_df)
+            else:
+                # Processa planilha não-contábil
+                number_lines = process_non_accounting_sheet(
+                    excel_file, table_to_load, conn
+                )
+
+            print(f'\033[32mLines Created :-> {str(number_lines).rjust(6)} \033[0m')
+
+    if all_entries:
+        general_entries_df_full = pd.concat(all_entries, ignore_index=True)
+    else:
+        # Cria DataFrame vazio com estrutura esperada se não houver dados
+        general_entries_df_full = pd.DataFrame(
+            columns=["Data", "TIPO", "DESCRICAO", "Credito", "Debito", data_origin_col]
+        )
+
+    general_entries_df_full = sanitize_entries_dataframe(
+        general_entries_df_full,
+        remove_nulls=not save_useless
+    )
+    save_dataframe_to_database(
+        general_entries_df_full,
+        conn,
+        general_entries_table,
+        sort_by_date=True
+    )
+    conn.commit()
+    data_correjeitor(cursor, types_sheet, general_entries_table, save_useless, udt)
+    conn.commit()
+    conn.close()
+
+## end of new stuff
+## ------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     input_param_file = ""

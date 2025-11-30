@@ -1,0 +1,105 @@
+# Arquivo de configuração de queries SQL
+# Use {variable_name} para substituição de variáveis
+
+# Queries executadas quando gera_hist = True
+queries_gera_hist:
+  - sql: "select * from {full_hist} where date(SUBSTR(AnoMes,1,4)||'-'||SUBSTR(AnoMes,6,2)||'-'||'01') >= date('now','-13 month');"
+    sheet_name: "{full_hist}12Meses"
+
+  - sql: "select * from {full_hist};"
+    sheet_name: "{full_hist}"
+
+  - sql: "select * from {anual_hist};"
+    sheet_name: "{anual_hist}"
+
+  - sql: "select * from {full_hist}_QTD where date(SUBSTR(AnoMes,1,4)||'-'||SUBSTR(AnoMes,6,2)||'-'||'01') >= date('now','-13 month');"
+    sheet_name: "{full_hist}_QTD12Meses"
+
+  - sql: "select * from {full_hist}_QTD;"
+    sheet_name: "{full_hist}_QTD"
+
+  - sql: "select * from {anual_hist}_QTD;"
+    sheet_name: "{anual_hist}_QTD"
+
+# Queries padrão (executadas sempre)
+queries_padrao:
+  - sql: >
+      select tipo as Categoria, sum(debito) as Valor , count(1) as QTD 
+      from {entries_table}
+      where Data >= date('now','-1 month')  
+      and Data <= date('now', '+1 day') 
+      and debito > 0
+      group by tipo 
+      order by 2 desc;
+    sheet_name: "Ultimos30Dias"
+
+  - sql: >
+      select Ano || ' - ' || Mes as 'Referência', count(1) as 'Total',
+      round( cast (count(1) as float) / ( case Mes 
+        when '01' then 31 when '02' then 28 when '03' then 31 
+        when '04' then 30 when '05' then 31 when '06' then 30 
+        when '07' then 31 when '08' then 31 when '09' then 30 
+        when '10' then 31 when '11' then 30 when '12' then 31 
+      end ),2) as 'Por Dia'
+      from {entries_table} 
+      group by Ano || ' - ' || Mes
+      order by Ano || ' - ' || Mes desc;
+    sheet_name: "Iterações_Mensais"
+
+  - sql: >
+      SELECT DIA_SEMANA, COUNT(1) AS TOTAL
+      FROM {entries_table} LG
+      WHERE Data >= date('now','-13 month')
+      GROUP BY DIA_SEMANA
+      ORDER BY 2 DESC;
+    sheet_name: "Iterações_Semanais_12M"
+
+  - sql: >
+      select dois.AnoMes as Referencia, 
+      round(dois.debitos,2) as Débito,
+      round(dois.creditos,2) as Créditos, 
+      round(dois.creditos - dois.debitos,2) as "Posição" 
+      from (
+        SELECT AnoMes, sum(lg.Debito) as debitos, Sum(lg.Credito) as Creditos
+        FROM {entries_table} LG 
+        where LG.TIPO not in ('cartões de Crédito','Transf. Bco')
+        GROUP BY AnoMes 
+        order by Ano desc, mes DESC
+      ) dois;
+    sheet_name: "Debitos Mensais"
+
+  - sql: >
+      SELECT origem, count(1) as Total 
+      FROM {entries_table}
+      group by origem 
+      ORDER BY Total desc;
+    sheet_name: "Histórico de Uso"
+
+  - sql: "SELECT * FROM {day_prog} ORDER BY 1 DESC;"
+    sheet_name: "Contagem dia-a-dia"
+
+  - sql: "SELECT * FROM {splt_pmnt_res} ORDER BY 1 DESC;"
+    sheet_name: "Resumo de Parcelamentos"
+
+  - sql: "SELECT * FROM {mont_summ};"
+    sheet_name: "Resumos_In_out Mensal"
+
+  - sql: "SELECT * FROM {mont_summ}_ANUAL;"
+    sheet_name: "Resumos_In_out Anual"
+
+  - sql: "SELECT * FROM {mont_summ}_full;"
+    sheet_name: "Resumos_In_out FULL"
+
+  - sql: >
+      select TIPO, AnoMes, sum(Credito) as Creditos, sum(debito) as Debitos
+      from {entries_table} lg
+      group by AnoMes, Tipo 
+      order by 1,2;
+    sheet_name: "Resumo Mensal Lancto"
+
+  - sql: >
+      select TIPO, Ano, sum(Credito) as Creditos, sum(debito) as Debitos
+      from {entries_table} lg
+      group by Ano, Tipo 
+      order by 1,2;
+    sheet_name: "Resumo Anual Lancto"

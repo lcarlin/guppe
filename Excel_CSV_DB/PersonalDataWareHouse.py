@@ -39,8 +39,9 @@
 # 2025-09-25 #  9.8.1   # put Round at data loader                     # Carlin, Luiz A. .'.
 # 2025-09-25 #  9.9.0   # Improvements on Dataframe Sanity             # Carlin, Luiz A. .'.
 # 2025-11-26 #  9.10.0  # ReFactoring of Data_loader function          # Carlin, Luiz A. .'.
+# 2025-11-28 #  9.11.1  # Refactoring od XLSREPORT with YAML file      # Carlin, Luiz A. .'.
 #############################################################################################
-# Current Version : 9.10.0
+# Current Version : 9.11.0
 #############################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -86,13 +87,14 @@ import time
 import xml.etree.ElementTree as ET
 import gzip
 import shutil
+import yaml
 
 def main(param_file):
     # Environment / Variables
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    current_version = "9.10.0"
+    current_version = "9.11.0"
     os_pataform = platform.system()
 
     # if the system is windows then use the below
@@ -161,6 +163,7 @@ def main(param_file):
         split_paymnt_table = config['SETTINGS']['SPLT_PAYMNT_TAB']
         out_table = config['SETTINGS']['OUT_RES_PMNT_TAB']
         monthly_summarie = config['SETTINGS']['MONTHLY_SUMMATIES']
+        queries_file = config['SETTINGS']['YAML_SQL_FILE']
 
         # NOVO02 = config.getboolean('settings', 'SelfDestruction')
     except FileNotFoundError:
@@ -174,6 +177,7 @@ def main(param_file):
         exit(1)
 
     input_file = dir_file_in + in_file + '.' + in_type
+    pdw_sql_file = dir_file_in + queries_file
     if overwrite_db:
         sqlite_database = dir_db + out_db + '.' + db_file_type
     else:
@@ -212,13 +216,15 @@ def main(param_file):
     # end of LOG block
     out_line = ">" + ("=" * 120) + "<"
     print(out_line)
-    print(f'Current Version         :-> {current_version}')
-    print(f'Last RUN Date           :-> {last_run_date}')
-    print(f'Config/INI File         :-> {config_file}')
-    print(f'LOG File                :-> {log_file_cfg} ')
-    print(f'Excel Sheet  Input file :-> {input_file}')
-    print(f'Output SQLite3 Database :-> {sqlite_database}')
-    print(f'Guiding Excel Sheet     :-> {guiding_table}')
+    print(f'Current Version         :-> \033[32m{current_version}\033[0m')
+    print(f'Last RUN Date           :-> \033[32m{last_run_date}\033[0m')
+    print(f'Config/INI File         :-> \033[32m{config_file}\033[0m')
+    print(f'YAML Queries File       :-> \033[32m{pdw_sql_file}\033[0m')
+    print(f'LOG File                :-> \033[32m{log_file_cfg}\033[0m ')
+    print(f'Excel Sheet  Input file :-> \033[32m{input_file}\033[0m')
+    print(f'Output SQLite3 Database :-> \033[32m{sqlite_database}\033[0m')
+    print(f'Guiding Excel Sheet     :-> \033[32m{guiding_table}\033[0m')
+     
     print(out_line)
     print("Personal Data Warehouse Processes are Starting | ET&L -> Extract, Transform & Loader !")
 
@@ -262,6 +268,7 @@ def main(param_file):
             create_dinamic_reports(sqlite_database, input_file, din_report_guinding, full_hist_table)
 
     if run_reports:
+        
         print(out_line)
         monthly_summaries(sqlite_database, general_entries_table, monthly_summarie)
 
@@ -273,7 +280,7 @@ def main(param_file):
         print(out_line)
         xlsx_report_generator(sqlite_database, dir_file_out, output_name, multi_rept_file, out_type,
                               general_entries_table, dinamic_reports, din_report_guinding, create_pivot,
-                              anual_hist_table, full_hist_table, dayly_progress, out_table, monthly_summarie)
+                              anual_hist_table, full_hist_table, dayly_progress, out_table, monthly_summarie, pdw_sql_file)
 
     # if export_transeient_data:
     #     print(out_line)
@@ -434,111 +441,6 @@ def dataframe_to_xml(df, filename):
     ET.indent(tree, '   ')
     tree.write(filename, encoding='utf-8', xml_declaration=True)
 
-def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
-                          dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res,
-                          mont_summ):
-    # TODO: put the Dynamic Reports statments . How? IDK
-    ## PUT here the contagem cumulada call
-    totalizador_diario(sqlite_database, entries_table, day_prog)
-    print('Exporting Summarized data ... .. .  ')
-    connection = sqlite3.connect(sqlite_database)
-    file_full_path = dir_out + file_name + '.' + out_extension
-    lista_consultas = []
-    if write_multiple_files:
-        xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
-
-    if gera_hist:
-        lista_consultas.append([
-            f"select * from {full_hist} where date(SUBSTR(AnoMes,1,4)||'-'||SUBSTR(AnoMes,6,2)||'-'||'01') >= date('now','-13 month');" \
-            , full_hist + "12Meses"])
-        lista_consultas.append([f"select * from {full_hist};", f"{full_hist}"])
-        lista_consultas.append([f"select * from {anual_hist};", f"{anual_hist}"])
-        ###
-        lista_consultas.append([
-            f"select * from {full_hist}_QTD where date(SUBSTR(AnoMes,1,4)||'-'||SUBSTR(AnoMes,6,2)||'-'||'01') >= date('now','-13 month');" \
-            , full_hist + "_QTD12Meses"])
-        lista_consultas.append([f"select * from {full_hist}_QTD;", f"{full_hist}_QTD"])
-        lista_consultas.append([f"select * from {anual_hist}_QTD;", f"{anual_hist}_QTD"])
-        ##
-
-    lista_consultas.append([f"select tipo as Categoria, sum(debito) as Valor , count(1) as QTD from {entries_table}" \
-                            " where Data >= date('now','-1 month')  and Data <= date('now', '+1 day') and debito > 0 " \
-                            " group by tipo order by 2 desc;", "Ultimos30Dias"])
-    # lista_consultas.append(
-    #     ["SELECT substr (LG.DATA, 9,2 ) || '/' || substr (LG.DATA, 6,2 ) || '/' || substr(LG.DATA, 1,4) AS Quando " \
-    #      ", LG.DIA_SEMANA as 'Dia da Semana' " \
-    #      ", LG.Tipo as 'Tipo' " \
-    #      ", LG.DESCRICAO  as 'Descricao/Lancamento' " \
-    #      ", replace (LG.Credito, '.', ',') as 'Credito' " \
-    #      ", replace (LG.DEBITO, '.', ',') as 'Debito' " \
-    #      ", char(39)|| substr(LG.DATA, 9,2) as Dia" \
-    #      ", char(39)|| mes as 'Mes' " \
-    #      # ", char(39)|| cast (mes as text) as 'Mes' " \
-    #      # ", char(39)||cast (ano as text) as 'Ano' " \
-    #      ", char(39)|| ano as 'Ano' " \
-    #      #", char(39)||cast (AnoMes as text )  as 'Ano/Mes' " \
-    #      ", LG.MES_EXTENSO as 'Mes Por Extenso' " \
-    #      ", char(39)|| AnoMes as 'Ano/Mes' " \
-    #      ", LG.ORIGEM  as Origem " \
-    #      f" FROM {entries_table} LG ;", entries_table])
-    lista_consultas.append(["select Ano || ' - ' || Mes as 'Referência', count(1) as 'Total' " \
-                            ", round( cast (count(1) as float)  / ( case Mes when '01' then 31" \
-                            " when '02' then 28 when '03' then 31 when '04' then 30 when '05' then 31" \
-                            " when '06' then 30 when '07' then 31 when '08' then 31 when '09' then 30" \
-                            " when '10' then 31 when '11' then 30 when '12' then 31 end ),2) as 'Por Dia'" \
-                            f" from {entries_table} group by  Ano || ' - ' || Mes " \
-                            " order by  Ano || ' - ' || Mes desc ;", "Iterações_Mensais"])
-    lista_consultas.append(["SELECT DIA_SEMANA, COUNT(1) AS TOTAL " \
-                            f" FROM {entries_table} LG " \
-                            " WHERE Data >= date('now','-13 month') " \
-                            " GROUP BY DIA_SEMANA " \
-                            " ORDER BY 2 DESC ;", "Iterações_Semanais_12M"])
-    lista_consultas.append(["select dois.AnoMes as Referencia , round(dois.debitos,2) as Débito ," \
-                            " round(dois.creditos,2) as Créditos , round(dois.creditos - dois.debitos,2 ) " \
-                            " as ""Posição"" from ( SELECT AnoMes , sum (lg.Debito) as debitos , Sum (lg.Credito) " \
-                            f" as Creditos FROM {entries_table} LG where LG.TIPO not in " \
-                            " ('cartões de Crédito','Transf. Bco') GROUP BY AnoMes order by Ano desc, mes DESC ) dois ;"
-                               , "Debitos Mensais"])
-
-    lista_consultas.append([f"SELECT origem, count(1) as Total FROM {entries_table} " \
-                            "group by origem ORDER BY Total desc ; ", "Histórico de Uso"])
-    lista_consultas.append([f"SELECT * FROM {day_prog} ORDER BY 1 DESC;", "Contagem dia-a-dia"])
-    lista_consultas.append([f"SELECT * FROM {splt_pmnt_res} ORDER BY 1 DESC;", "Resumo de Parcelamentos"])
-    lista_consultas.append([f"SELECT * FROM {mont_summ} ;", "Resumos_In_out Mensal"])
-    lista_consultas.append([f"SELECT * FROM {mont_summ}_ANUAL ;", "Resumos_In_out Anual"])
-    lista_consultas.append([f"SELECT * FROM {mont_summ}_full ;", "Resumos_In_out FULL"])
-    lista_consultas.append(["select  TIPO ,AnoMes,  sum(Credito) as Creditos, sum (debito)  as Debitos" \
-                            f" from {entries_table} lg " \
-                            " group by AnoMes , Tipo order by 1,2 ; ", "Resumo Mensal Lancto"])
-    lista_consultas.append(["select  TIPO ,Ano,  sum(Credito) as Creditos, sum (debito)  as Debitos" \
-                            f" from {entries_table} lg " \
-                            " group by Ano , Tipo order by 1,2 ; ", "Resumo Anual Lancto"])
-
-    if gera_hist and dynamic_reports:
-        df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)
-        for i, linhas in df_dyn.iterrows():
-            lista_consultas.append([f"SELECT * FROM {linhas.DEST_TABLE} ;", f"{linhas.REPORT_NAME}"])
-
-    for k in range(0, len(lista_consultas)):
-        consulta = lista_consultas[k]
-        sql_statment = consulta[0]
-        excel_sheet = consulta[1]
-        # print(sql_statment)
-        df_out = pd.read_sql(sql_statment, connection)
-
-        if write_multiple_files:
-            message = f'\033[34m   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet.ljust(27)} \033[33mto {file_full_path}\033[0m'
-            df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
-        else:
-            file_full_path = dir_out + excel_sheet + '.v2.' + out_extension
-            message = f'   . .. ... Step: {k + 1:04} :-> Exporting {file_full_path} to file(s) '
-            df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False, date_format='DD/MM/YYYY')
-
-        print(message)
-
-    connection.close()
-    if write_multiple_files:
-        xlsx_writer.close()
 
 def data_correjeitor(conexao, types_sheet, entries_table, save_useless, useless_table):
     print(f'Normalizing data on {entries_table} Table ...')
@@ -667,7 +569,6 @@ def get_month_names():
         12: "12-Dezembro"
     }
 
-
 def get_weekday_names():
     """
     Retorna dicionário com nomes dos dias da semana em português.
@@ -701,7 +602,8 @@ def read_guiding_sheet(excel_file, sheet_name):
     Returns:
         pd.DataFrame: DataFrame com configurações das planilhas
     """
-    print(f"Reading Data from Guindig Sheet :->  {sheet_name} ... .. .  ")
+
+    print(f"Reading Data from Guindig Sheet :->  \033[32m{sheet_name}\033[0m ... .. .  ")
     workbook = pd.ExcelFile(excel_file)
     return workbook.parse(sheet_name=sheet_name)
 
@@ -857,7 +759,6 @@ def sort_dataframe_by_date(df, ascending=False):
         ignore_index=True
     )
 
-
 def save_dataframe_to_database(df, conn, table_name, sort_by_date=True):
     """
     Salva DataFrame no banco de dados SQLite.
@@ -961,6 +862,101 @@ def new_data_loader(data_base, types_sheet, general_entries_table, data_origin_c
     data_correjeitor(cursor, types_sheet, general_entries_table, save_useless, udt)
     conn.commit()
     conn.close()
+
+def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
+                          dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res,
+                          mont_summ, yaml_queries_file):
+    """
+    Gera relatórios em Excel a partir de queries SQL definidas em arquivo YAML.
+
+    Args:
+        yaml_queries_file: Caminho para o arquivo YAML contendo as queries
+    """
+
+    # Carrega as queries do arquivo YAML
+    queries_config = None
+    try:
+        # Carrega as queries do arquivo YAML
+        with open(yaml_queries_file, 'r', encoding='utf-8') as file:
+            queries_config = yaml.safe_load(file)
+    except FileNotFoundError:
+        print(f"Erro: O arquivo '{yaml_queries_file}' não foi encontrado.")
+        exit(1)
+    except PermissionError:
+        print(f"Erro: Sem permissão para ler o arquivo '{yaml_queries_file}'.")
+        exit(1)
+    except yaml.YAMLError as e:
+        print(f"Erro ao processar o YAML: {e}")
+        exit(1)
+    except UnicodeDecodeError:
+        print(f"Erro: Problema de codificação ao ler o arquivo '{yaml_queries_file}'.")
+        exit(1)
+    except Exception as e:
+        print(f"Erro inesperado ao ler o arquivo: {e}")
+        exit(1)
+
+    print(f'Queries File located :->\033[32m {yaml_queries_file}\033[0m')
+    totalizador_diario(sqlite_database, entries_table, day_prog)
+    print('Exporting Summarized data ... .. .  ')
+
+    connection = sqlite3.connect(sqlite_database)
+    file_full_path = dir_out + file_name + '.' + out_extension
+    lista_consultas = []
+
+    if write_multiple_files:
+        xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
+
+    # Monta as queries substituindo os placeholders pelas variáveis
+    variables = {
+        'entries_table': entries_table,
+        'full_hist': full_hist,
+        'anual_hist': anual_hist,
+        'day_prog': day_prog,
+        'splt_pmnt_res': splt_pmnt_res,
+        'mont_summ': mont_summ,
+        'dyn_rep_tab': dyn_rep_tab
+    }
+
+    # Processa queries condicionais (gera_hist)
+    if gera_hist:
+        for query_item in queries_config.get('queries_gera_hist', []):
+            sql = query_item['sql'].format(**variables)
+            sheet_name = query_item['sheet_name'].format(**variables)
+            lista_consultas.append([sql, sheet_name])
+
+    # Processa queries padrão
+    for query_item in queries_config.get('queries_padrao', []):
+        sql = query_item['sql'].format(**variables)
+        sheet_name = query_item['sheet_name']
+        lista_consultas.append([sql, sheet_name])
+
+    # Processa queries dinâmicas
+    if gera_hist and dynamic_reports:
+        df_dyn = pd.read_sql(f"select * from {dyn_rep_tab}", connection)
+        for i, linhas in df_dyn.iterrows():
+            lista_consultas.append([f"SELECT * FROM {linhas.DEST_TABLE} ;", f"{linhas.REPORT_NAME}"])
+
+    # Loop de exportação (mantido idêntico)
+    for k in range(0, len(lista_consultas)):
+        consulta = lista_consultas[k]
+        sql_statment = consulta[0]
+        excel_sheet = consulta[1]
+        # print(sql_statment)
+        df_out = pd.read_sql(sql_statment, connection)
+
+        if write_multiple_files:
+            message = f'\033[34m   . .. ... Step: {k + 1:04} :-> Exporting Sheet {excel_sheet.ljust(27)} \033[33mto {file_full_path}\033[0m'
+            df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
+        else:
+            file_full_path = dir_out + excel_sheet + '.v2.' + out_extension
+            message = f'   . .. ... Step: {k + 1:04} :-> Exporting {file_full_path} to file(s) '
+            df_out.to_excel(file_full_path, sheet_name=excel_sheet, index=False, date_format='DD/MM/YYYY')
+
+        print(message)
+
+    connection.close()
+    if write_multiple_files:
+        xlsx_writer.close()
 
 ## end of new stuff
 ## ------------------------------------------------------------------------------------------

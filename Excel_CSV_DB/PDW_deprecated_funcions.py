@@ -1,5 +1,5 @@
 # 2025-26-11
-
+#######################################################################################################
 def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, guindind_sheet, excel_file,
                 save_useless, udt):
     print(f"Connecting to SQLite3 Database ... .. .  ")
@@ -136,8 +136,7 @@ def data_loader(data_base, types_sheet, general_entries_table, data_origin_col, 
     conn.commit()
     conn.close()
 
-
-
+#######################################################################################################
 def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name, transient_data_table, origing_column):
     print('Exporting Transient data into individual Sheelts ... .. .  ')
     file_full_path = dir_out + file_name + '.' + datetime.datetime.now().strftime(
@@ -163,7 +162,7 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     xlsx_writer.close()
     return file_full_path
 
-
+#######################################################################################################
 def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
     db_connection = sqlite3.connect(db_file)
     tmp_table_name = config_dict['table_to_load']
@@ -191,6 +190,7 @@ def parallel_df(db_file, xls_file, config_dict, general_out_table, index):
     db_connection.close()
     print(f'   . .. ... .... End of Thread Number :-> {index}  ; Table/Sheet Name :-> {tmp_table_name} ')
 
+#######################################################################################################
 # def data_loader_parallel(data_base, general_entries_table, guindind_sheet, excel_file):
 def data_loader_parallel(data_base, types_sheet, general_entries_table, guindind_sheet, excel_file, save_useless, udt):
     conn = sqlite3.connect(data_base, check_same_thread=False)
@@ -231,8 +231,8 @@ def data_loader_parallel(data_base, types_sheet, general_entries_table, guindind
     conn.close()
     # connection.close()
 
-
-def old_xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
+#######################################################################################################
+def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_files, out_extension, entries_table,
                           dynamic_reports, dyn_rep_tab, gera_hist, anual_hist, full_hist, day_prog, splt_pmnt_res,
                           mont_summ):
     # TODO: put the Dynamic Reports statments . How? IDK
@@ -337,3 +337,175 @@ def old_xlsx_report_generator(sqlite_database, dir_out, file_name, write_multipl
     connection.close()
     if write_multiple_files:
         xlsx_writer.close()
+#######################################################################################################
+
+def escape_special_chars(text):
+    return saxutils.escape(text, entities={
+        "'": "&apos;",
+        '"': "&quot;",
+        '>': "&gt;",
+        '<': "&lt;",
+        '&': "&amp;",
+        'á': "&aacute;",
+        'à': "&agrave;",
+        'ã': "&atilde;",
+        'â': "&acirc;",
+        'é': "&eacute;",
+        'è': "&egrave;",
+        'ê': "&ecirc;",
+        'í': "&iacute;",
+        'ì': "&igrave;",
+        'ó': "&oacute;",
+        'ò': "&ograve;",
+        'õ': "&otilde;",
+        'ô': "&ocirc;",
+        'ú': "&uacute;",
+        'ù': "&ugrave;",
+        'û': "&ucirc;",
+        'ç': "&ccedil;",
+        'Á': "&Aacute;",
+        'À': "&Agrave;",
+        'Ã': "&Atilde;",
+        'Â': "&Acirc;",
+        'É': "&Eacute;",
+        'È': "&Egrave;",
+        'Ê': "&Ecirc;",
+        'Í': "&Iacute;",
+        'Ì': "&Igrave;",
+        'Ó': "&Oacute;",
+        'Ò': "&Ograve;",
+        'Õ': "&Otilde;",
+        'Ô': "&Ocirc;",
+        'Ú': "&Uacute;",
+        'Ù': "&Ugrave;",
+        'Û': "&Ucirc;",
+        'Ç': "&Ccedil;",
+    })
+
+#######################################################################################################
+
+def data_verificator(general_entries_table, conexao ):
+    print(f'Verifying the Integrity and quality of data loaded into {general_entries_table} ... .. .')
+    conta_erro = 0
+    lista_acoes = []
+    lista_acoes.append(['Data','Validação de datas', '[a-z][A-Z]' ])
+    lista_acoes.append(['Debito','Validação de Campo "Debitos"', '[a-z][A-Z]'])
+    lista_acoes.append(['Credito', 'Validação de Campo "Creditos"', '[a-z][A-Z]'])
+    main_df = pd.read_sql(f'select * from {general_entries_table}', conexao)
+    return True
+
+    for i in range(0, len(lista_acoes)):
+        field = lista_acoes[i][0]
+        action = lista_acoes[i][1] # Action
+        regex = lista_acoes[i][2]
+        # print('------------ THIS IS A DEBUG  ')
+        # print(f'field  -> {field}')
+        # print(f'action -> {action}')
+        # print(f'regex  -> {regex}')
+
+        # print('------------ THIS IS A DEBUG  ')
+        print(f'\033[34m   . .. ... Step: {i + 1:04} : {action} : \033[0m', end=' ')
+        net_df = main_df[~main_df[f"{field}"].str.contains(regex, regex=True, na=True)]
+        if len (net_df) > 0:
+            conta_erro+=1
+            print(f'\033[31m FAIL - ERROR :\033[0m')
+            print('=======================================================================================')
+            print(net_df)
+            print('=======================================================================================')
+        else:
+            print(f'\033[32m OK - SUCCESS; \033[0m')
+
+    if conta_erro == 0:
+        return True
+    else:
+        return False
+#######################################################################################################
+
+def create_pivot_history_anual(data_base_file, types_table, entries_table, out_table):
+    print('Creating pivot Table for Anual summarized history ... .. . ')
+    connection = sqlite3.connect(data_base_file)
+    ref_anterior = 'YYYY/MM'
+    sql_statment_types = f'SELECT Código as COD, Descrição as DESC FROM {types_table} ;'
+    sql_statment_summary = f'select Ano as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
+                           ' GROUP BY Ano, TIPO order by Ano ;'
+    df_types = pd.read_sql(sql_statment_types, connection)
+    df_summary = pd.read_sql(sql_statment_summary, connection)
+    dict_hist_base = {'Referencia': '9999'}
+    lista_header = ['Referencia']
+    for i, DADOS in df_types.iterrows():
+        dict_hist_base.update({DADOS.DESC: 0.00})
+        lista_header.append(DADOS.DESC)
+
+    lista_full = []
+    current_dict = dict_hist_base.copy()
+    for j, Fetcher in df_summary.iterrows():
+        if ref_anterior != Fetcher.Referencia:
+            lista_full.append(current_dict)
+            ref_anterior = Fetcher.Referencia
+            current_dict = dict_hist_base.copy()
+            current_dict['Referencia'] = Fetcher.Referencia
+
+        current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
+
+    lista_full.append(current_dict)  # writes the last line into the list
+    dev_null = lista_full.pop(0)  # remove the 1st reference
+    data_to_write = pd.DataFrame(lista_full)
+    data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
+    connection.commit()
+    connection.close()
+
+
+def create_pivot_history_full(data_base_file, types_table, entries_table, out_table):
+    print('Creating pivot Table for summarized history ... .. . ')
+    connection = sqlite3.connect(data_base_file)
+    ref_anterior = 'YYYY/MM'
+    sql_statment_types = f'SELECT Código as COD, Descrição as DESC FROM {types_table} ;'
+    sql_statment_summary = f'select AnoMes as Referencia, TIPO, sum(Debito) as DEBITOS FROM {entries_table} ' \
+                           ' GROUP BY AnoMes, TIPO order by Ano, Mes, TIPO desc ;'
+    df_types = pd.read_sql(sql_statment_types, connection)
+    df_summary = pd.read_sql(sql_statment_summary, connection)
+    dict_hist_base = {'Referencia': '9999/99'}
+    lista_header = ['Referencia']
+    for i, DADOS in df_types.iterrows():
+        dict_hist_base.update({DADOS.DESC: 0})
+        lista_header.append(DADOS.DESC)
+
+    lista_full = []
+    current_dict = dict_hist_base.copy()
+    for j, Fetcher in df_summary.iterrows():
+        if ref_anterior != Fetcher.Referencia:
+            lista_full.append(current_dict)
+            ref_anterior = Fetcher.Referencia
+            current_dict = dict_hist_base.copy()
+            current_dict['Referencia'] = Fetcher.Referencia
+
+        current_dict[Fetcher.TIPO] += Fetcher.DEBITOS
+
+    lista_full.append(current_dict)
+    dev_null = lista_full.pop(0)  # remove the 1st reference
+    data_to_write = pd.DataFrame(lista_full)
+    data_to_write.to_sql(out_table, connection, index=False, if_exists="replace")
+    connection.commit()
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################

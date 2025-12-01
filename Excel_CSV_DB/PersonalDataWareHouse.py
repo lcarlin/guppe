@@ -423,7 +423,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
         gzip_compressor(file_full_path + '.xml')
 
     print(
-        f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> {row_count}')
+        f'File(s) export(s) for table "{table_name}" has been created successfully! Total Lines exported :-> \033[32m{row_count}\033[0m')
     connection.close()
 
 # Function that converts any data-frame to XML file
@@ -881,20 +881,19 @@ def xlsx_report_generator(sqlite_database, dir_out, file_name, write_multiple_fi
             queries_config = yaml.safe_load(file)
     except FileNotFoundError:
         print(f"Erro: O arquivo '{yaml_queries_file}' não foi encontrado.")
-        exit(1)
     except PermissionError:
         print(f"Erro: Sem permissão para ler o arquivo '{yaml_queries_file}'.")
-        exit(1)
     except yaml.YAMLError as e:
         print(f"Erro ao processar o YAML: {e}")
-        exit(1)
     except UnicodeDecodeError:
         print(f"Erro: Problema de codificação ao ler o arquivo '{yaml_queries_file}'.")
-        exit(1)
     except Exception as e:
         print(f"Erro inesperado ao ler o arquivo: {e}")
-        exit(1)
 
+    if queries_config is None :
+       print('exiting due previous errors ... .. .') 
+       exit (1) 
+    
     print(f'Queries File located :->\033[32m {yaml_queries_file}\033[0m')
     totalizador_diario(sqlite_database, entries_table, day_prog)
     print('Exporting Summarized data ... .. .  ')

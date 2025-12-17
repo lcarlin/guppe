@@ -12,6 +12,7 @@
 # 2024-11-07 # 2.0.0   # Database file dowwnload previa             # Carlin, Luiz A. .'.
 # 2024-12-23 # 2.0.0.  # Agora Baixa o XLSX pronto, ao inves do DB  # Carlin, Luiz A. .'.
 # 2025-10-31 # 2.0.1   # Validações pra não baixar file empty       # Carlin, Luiz A. .'.
+# 2025-12-17 # 2.0.2   # Melhorias nas validações                   # Carlin, Luiz A. .'.
 ##############################################################################################
 # Current Version :2.0.1
 ##############################################################################################
@@ -156,9 +157,9 @@ def index():
             <title>Download Banco de Dados</title>
         </head>
         <body>
-            <h1>Baixar Banco de Dados Remoto</h1>
+            <h1>Baixar os Dados Remoto em formato XLSX</h1>
             <form action="/download" method="get">
-                <button type="submit">Baixar Banco-de-dados remoto</button>
+                <button type="submit">Clique aqui para gerar a planilha! </button>
             </form>
         </body>
         </html>
@@ -229,21 +230,24 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
         "%Y%m%d.%H%M%S") + '.' + out_extension
     connection = sqlite3.connect(sqlite_database)
     xlsx_writer = pd.ExcelWriter(file_full_path, engine='xlsxwriter', date_format='yyyy-mm-dd')
-    guiding_df = pd.read_sql(f"select distinct {origing_column} from {transient_data_table}", connection)
+    guiding_df = pd.read_sql(f"select distinct {origing_column} from {transient_data_table} where EXPORT_DATE is null", connection)
     conn = connection.cursor()
 
-    # 205-10-31
+    # 2025-10-31
     if not guiding_df.empty:
         for i, linhas in guiding_df.iterrows():
             excel_sheet = f"{linhas.Origem}"
-            message = f'   . .. ... Step: {i + 1:04} :-> Exporting Sheet {excel_sheet.ljust(25)} to {file_full_path}'
             sql_statment = f"SELECT * FROM {transient_data_table} where {origing_column} = '{linhas.Origem}' and EXPORT_DATE is null order by 1;"
             df_out = pd.read_sql(sql_statment, connection)
-            if len(df_out) > 0 :
+            total_linhas = len(df_out)
+            if total_linhas > 0 :
+                message = f'   . .. ... Step: {i + 1:04} :-> Exporting {str(total_linhas).rjust(8)} lines to Sheet {excel_sheet.ljust(25)} to {file_full_path}'
                 print(message)
                 df_out.to_excel(xlsx_writer, sheet_name=excel_sheet, index=False)
     #            conn.execute(f"UPDATE {transient_data_table} SET EXPORT_DATE = datetime('now') WHERE {origing_column} = '{linhas.Origem}'; ")
     #            conn.execute('COMMIT; ')
+            else:
+                print(f"No data found for {excel_sheet}")
 
         xlsx_writer.close()
 
@@ -256,13 +260,13 @@ def transient_data_exportator(sqlite_database, dir_out, out_extension, file_name
     return file_full_path
 
 #############################################################################################
-current_version = "9.9.0"
-api_version = "2.0.1"
+current_version = "9.11.0"
+api_version = "2.0.2"
 config = configparser.ConfigParser()
 ## atenção , sempre alterar esse PATH em Produção
 config_file = '../Excel_CSV_DB/PersonalDataWareHouse.cfg'
 os.environ['TZ'] = 'America/Sao_Paulo'
-## atenção , sempre descompentar a linha abaixo em prod
+## atenção , sempre descomentar a linha abaixo em prod
 #time.tzset()
 try:
     print('Reading configuration file ... .. .')

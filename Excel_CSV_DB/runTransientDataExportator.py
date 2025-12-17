@@ -1,4 +1,5 @@
-from  PersonalDataWareHouse import transient_data_exportator as TDE
+# from  PersonalDataWareHouse import transient_data_exportator as TDE
+from  PDW_deprecated_funcions import transient_data_exportator as TDE
 import configparser
 import os, platform, sys
 
@@ -17,7 +18,7 @@ def extrair_dados (db_input):
             print(f'The version in parameter file {config_file} does not Match')
             print(f'Informed :-> {parameters_version}')
             print(f'Expected :-> {current_version}')
-            exit(1)
+            # exit(1)
 
         dir_file_out = config['DIRECTORIES']['DIR_OUT']
         out_type = config['FILE_TYPES']['TYPE_OUT']

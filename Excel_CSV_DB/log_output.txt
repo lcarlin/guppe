@@ -1,0 +1,134 @@
+
+--- Execução em 2025-12-17 14:59:50.660884 ---
+Iniciando execução da função roda no script PersonalDataWareHouse...
+Executando função roda sem parâmetros.
+Reading configuration file ... .. .
+>========================================================================================================================<
+Current Version         :-> [32m9.11.0[0m
+Last RUN Date           :-> [32m2025/12/17 13:31:50 Started [0m
+Config/INI File         :-> [32mPersonalDataWareHouse.cfg[0m
+YAML Queries File       :-> [32mX:\\Documentos\\PDW\PDW_QUERIES.yaml[0m
+LOG File                :-> [32mX:\\Documentos\\PDW\PDW.log[0m 
+Excel Sheet  Input file :-> [32mX:\\Documentos\\PDW\PDW.xlsx[0m
+Output SQLite3 Database :-> [32mX:\\Documentos\\PDW\PDW.db[0m
+Guiding Excel Sheet     :-> [32mGUIDING[0m
+>========================================================================================================================<
+Personal Data Warehouse Processes are Starting | ET&L -> Extract, Transform & Loader !
+>========================================================================================================================<
+Connecting to SQLite3 Database ... .. .  
+Reading Data from Guindig Sheet :->  [32mGUIDING[0m ... .. .  
+Table LANCAMENTOS_GERAIS dropped... 
+Running Loader of the Sheets into database Tables ... .. .  
+[34m   . .. ... Step: 0001 ; Table (Sheet) :-> GUIDING                   ;[0m [32mLines Created :->     58 [0m
+[34m   . .. ... Step: 0002 ; Table (Sheet) :-> GamesWishList             ;[0m [32mLines Created :->    183 [0m
+[34m   . .. ... Step: 0003 ; Table (Sheet) :-> TiposLancamentos          ;[0m [32mLines Created :->    912 [0m
+[34m   . .. ... Step: 0004 ; Table (Sheet) :-> Despesas                  ;[0m [32mLines Created :->   4131 [0m
+[34m   . .. ... Step: 0005 ; Table (Sheet) :-> Banco1MasterCard          ;[0m [32mLines Created :->    158 [0m
+[34m   . .. ... Step: 0006 ; Table (Sheet) :-> Banespa                   ;[0m [32mLines Created :->     77 [0m
+[34m   . .. ... Step: 0007 ; Table (Sheet) :-> ItauUniclassVisa          ;[0m [32mLines Created :->    555 [0m
+[34m   . .. ... Step: 0008 ; Table (Sheet) :-> ItaU                      ;[0m [32mLines Created :->   9227 [0m
+[34m   . .. ... Step: 0009 ; Table (Sheet) :-> Amazon_Master             ;[0m [32mLines Created :->    813 [0m
+[34m   . .. ... Step: 0010 ; Table (Sheet) :-> BTG_Pactual               ;[0m [32mLines Created :->     24 [0m
+[34m   . .. ... Step: 0011 ; Table (Sheet) :-> Santander                 ;[0m [32mLines Created :->   2207 [0m
+[34m   . .. ... Step: 0012 ; Table (Sheet) :-> CrediCard_Master          ;[0m [32mLines Created :->   1009 [0m
+[34m   . .. ... Step: 0013 ; Table (Sheet) :-> XP_Inv_ContaC             ;[0m [32mLines Created :->    258 [0m
+[34m   . .. ... Step: 0014 ; Table (Sheet) :-> NUBank_Master             ;[0m [32mLines Created :->   1642 [0m
+[34m   . .. ... Step: 0015 ; Table (Sheet) :-> XP_Inv_Visa               ;[0m [32mLines Created :->   1486 [0m
+[34m   . .. ... Step: 0016 ; Table (Sheet) :-> MercadoPago_CC            ;[0m [32mLines Created :->    366 [0m
+[34m   . .. ... Step: 0017 ; Table (Sheet) :-> MercadoPago_Visa          ;[0m [32mLines Created :->    162 [0m
+[34m   . .. ... Step: 0018 ; Table (Sheet) :-> Real                      ;[0m [32mLines Created :->    580 [0m
+[34m   . .. ... Step: 0019 ; Table (Sheet) :-> RealVisa                  ;[0m [32mLines Created :->    276 [0m
+[34m   . .. ... Step: 0020 ; Table (Sheet) :-> Faturas de Cartão         ;[0m [32mLines Created :->     70 [0m
+[34m   . .. ... Step: 0021 ; Table (Sheet) :-> PortoSeguro_Master        ;[0m [32mLines Created :->     24 [0m
+[34m   . .. ... Step: 0022 ; Table (Sheet) :-> MagaLu_Visa_Plat          ;[0m [32mLines Created :->     53 [0m
+[34m   . .. ... Step: 0023 ; Table (Sheet) :-> Filmes                    ;[0m [32mLines Created :->    375 [0m
+[34m   . .. ... Step: 0024 ; Table (Sheet) :-> Livros                    ;[0m [32mLines Created :->     28 [0m
+[34m   . .. ... Step: 0025 ; Table (Sheet) :-> Games                     ;[0m [32mLines Created :->     27 [0m
+[34m   . .. ... Step: 0026 ; Table (Sheet) :-> Lista de CDs              ;[0m [32mLines Created :->    130 [0m
+[34m   . .. ... Step: 0027 ; Table (Sheet) :-> Lista de DVDs             ;[0m [32mLines Created :->    110 [0m
+[34m   . .. ... Step: 0028 ; Table (Sheet) :-> Amex                      ;[0m [32mLines Created :->     34 [0m
+[34m   . .. ... Step: 0029 ; Table (Sheet) :-> Amex_2010                 ;[0m [32mLines Created :->     76 [0m
+[34m   . .. ... Step: 0030 ; Table (Sheet) :-> Banco1                    ;[0m [32mLines Created :->    813 [0m
+[34m   . .. ... Step: 0031 ; Table (Sheet) :-> Carefour                  ;[0m [32mLines Created :->     70 [0m
+[34m   . .. ... Step: 0032 ; Table (Sheet) :-> CartaoSubMaRiNo           ;[0m [32mLines Created :->     25 [0m
+[34m   . .. ... Step: 0033 ; Table (Sheet) :-> CEF                       ;[0m [32mLines Created :->    301 [0m
+[34m   . .. ... Step: 0034 ; Table (Sheet) :-> CitiBank                  ;[0m [32mLines Created :->    482 [0m
+[34m   . .. ... Step: 0035 ; Table (Sheet) :-> CitiBankMastercard        ;[0m [32mLines Created :->    179 [0m
+[34m   . .. ... Step: 0036 ; Table (Sheet) :-> CitibankVisa              ;[0m [32mLines Created :->    208 [0m
+[34m   . .. ... Step: 0037 ; Table (Sheet) :-> DigioVisa                 ;[0m [32mLines Created :->    262 [0m
+[34m   . .. ... Step: 0038 ; Table (Sheet) :-> HSBC                      ;[0m [32mLines Created :->    942 [0m
+[34m   . .. ... Step: 0039 ; Table (Sheet) :-> HSBCVisa                  ;[0m [32mLines Created :->     91 [0m
+[34m   . .. ... Step: 0040 ; Table (Sheet) :-> ItauMasterCard            ;[0m [32mLines Created :->    475 [0m
+[34m   . .. ... Step: 0041 ; Table (Sheet) :-> ItauVisa                  ;[0m [32mLines Created :->   1425 [0m
+[34m   . .. ... Step: 0042 ; Table (Sheet) :-> ITI_Itau_CC               ;[0m [32mLines Created :->     37 [0m
+[34m   . .. ... Step: 0043 ; Table (Sheet) :-> Nubank_ContaC             ;[0m [32mLines Created :->    802 [0m
+[34m   . .. ... Step: 0044 ; Table (Sheet) :-> Parcelamentos             ;[0m [32mLines Created :->   2636 [0m
+[34m   . .. ... Step: 0045 ; Table (Sheet) :-> PortoSeguroVisa           ;[0m [32mLines Created :->    646 [0m
+[34m   . .. ... Step: 0046 ; Table (Sheet) :-> PoupanCaItau              ;[0m [32mLines Created :->    198 [0m
+[34m   . .. ... Step: 0047 ; Table (Sheet) :-> Real_2007                 ;[0m [32mLines Created :->   4618 [0m
+[34m   . .. ... Step: 0048 ; Table (Sheet) :-> RealVisa_2007             ;[0m [32mLines Created :->   2262 [0m
+[34m   . .. ... Step: 0049 ; Table (Sheet) :-> Santander_Master          ;[0m [32mLines Created :->   2434 [0m
+[34m   . .. ... Step: 0050 ; Table (Sheet) :-> Senhas                    ;[0m [32mLines Created :->    160 [0m
+[34m   . .. ... Step: 0051 ; Table (Sheet) :-> Trigg_Visa                ;[0m [32mLines Created :->     58 [0m
+[34m   . .. ... Step: 0052 ; Table (Sheet) :-> UnibancoVisa              ;[0m [32mLines Created :->     69 [0m
+[34m   . .. ... Step: 0053 ; Table (Sheet) :-> Vendas_diversas           ;[0m [32mLines Created :->     65 [0m
+[34m   . .. ... Step: 0054 ; Table (Sheet) :-> Tarot_Decks               ;[0m [32mLines Created :->    193 [0m
+[34m   . .. ... Step: 0055 ; Table (Sheet) :-> FGTS                      ;[0m [32mLines Created :->    148 [0m
+[34m   . .. ... Step: 0056 ; Table (Sheet) :-> Financ_NuBank_2025        ;[0m [32mLines Created :->     25 [0m
+[34m   . .. ... Step: 0057 ; Table (Sheet) :-> Vendas_diversas           ;[0m [32mLines Created :->     65 [0m
+[34m   . .. ... Step: 0058 ; Table (Sheet) :-> Resumo_Parcelamentos      ;[0m [32mLines Created :->    300 [0m
+[34m   . .. ... Sanitizing DataFrame       :-> [0m [32mDone !!! [0m
+[34m   . .. ... Writing Dataframe to Table :-> LANCAMENTOS_GERAIS :[0m [32mDone !!! [0m
+Normalizing data on LANCAMENTOS_GERAIS Table ...
+[34m   . .. ... Step: 0001 :-> Deleting NULL info        ;[0m [31mLines Affected:   812[0m
+[34m   . .. ... Step: 0002 :-> Deleting Parcelamentos    ;[0m [31mLines Affected:   366[0m
+[34m   . .. ... Step: 0003 :-> Dropping View             ;[0m [31mLines Affected:    -1[0m
+[34m   . .. ... Step: 0004 :-> Creating View             ;[0m [31mLines Affected:    -1[0m
+>========================================================================================================================<
+Creating pivot Tables ... .. . 
+                      ... .. . to Monthly Values to summarized in history ... .. .
+                      ... .. . to Monthly total to summarized in history ... .. .
+                      ... .. . to Anual Values to summarized in history ... .. .
+                      ... .. . to Anual total summarized in history ... .. .
+>========================================================================================================================<
+Creating Dynamic Reports for summarized history ... .. . 
+Dynamic Reports Table Created! Total of Dynamic Reports :-> [31m     2[0m 
+[34m   . .. ... Step: 0001 : Creating Dynamic Report Table[0m  :-> [33m"Custos Com Moradia"[0m 
+[34m   . .. ... Step: 0002 : Creating Dynamic Report Table[0m  :-> [33m"Entreterimento"[0m 
+>========================================================================================================================<
+Generating summaries of all accounting sheets into Resumido_In_Out table ... .. .
+>========================================================================================================================<
+Exporting X:\\Documentos\\PDW\LANCAMENTOS_GERAIS.FULL.v2 to file(s) 
+File(s) export(s) for table "LANCAMENTOS_GERAIS" has been created successfully! Total Lines exported :-> [32m35850[0m
+>========================================================================================================================<
+Creating payment in installments Summaries ... .. .  
+>========================================================================================================================<
+Queries File located :->[32m X:\\Documentos\\PDW\PDW_QUERIES.yaml[0m
+Totaling the Daily Amount of data ... .. . [32m Done !!!  8481 Days loaded [0m
+Exporting Summarized data ... .. .  
+[34m   . .. ... Step: 0001 :-> Exporting Sheet HistoricoGeral12Meses       [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0002 :-> Exporting Sheet HistoricoGeral              [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0003 :-> Exporting Sheet HistoricoAnual              [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0004 :-> Exporting Sheet HistoricoGeral_QTD12Meses   [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0005 :-> Exporting Sheet HistoricoGeral_QTD          [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0006 :-> Exporting Sheet HistoricoAnual_QTD          [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0007 :-> Exporting Sheet Ultimos30Dias               [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0008 :-> Exporting Sheet Iterações_Mensais           [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0009 :-> Exporting Sheet Iterações_Semanais_12M      [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0010 :-> Exporting Sheet Debitos Mensais             [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0011 :-> Exporting Sheet Histórico de Uso            [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0012 :-> Exporting Sheet Contagem dia-a-dia          [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0013 :-> Exporting Sheet Resumo de Parcelamentos     [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0014 :-> Exporting Sheet Resumos_In_out Mensal       [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0015 :-> Exporting Sheet Resumos_In_out Anual        [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0016 :-> Exporting Sheet Resumos_In_out FULL         [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0017 :-> Exporting Sheet Resumo Mensal Lancto        [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0018 :-> Exporting Sheet Resumo Anual Lancto         [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0019 :-> Exporting Sheet Custos Com Moradia          [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+[34m   . .. ... Step: 0020 :-> Exporting Sheet Entreterimento              [33mto X:\\Documentos\\PDW\PDW_REPORTS.v2.xlsx[0m
+>========================================================================================================================<
+All Personal Data Warehouse processes have ended! 
+2025/12/17 14:59:23 Started |2025/12/17 14:59:50 Ended |   27.20 TotalSecs | Version 9.11.0 | Hostname AVELL-STORM-BS | OS Windows
+>========================================================================================================================<
+Execução da função roda finalizada.
+

@@ -411,7 +411,8 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
 
     df_out = pd.read_sql(sqlStatment, connection)
     row_count = len(df_out.index)
-    df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='cp1252')
+    # df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='cp1252')
+    df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='utf-8-sig')
     if other_types:
         print(f"              Exporting JSON file(s) ")
         df_out.to_json(file_full_path + '.json', orient='records', lines=True, indent=1, force_ascii=False)
@@ -661,6 +662,7 @@ def clean_description_text(text_series):
         .str.replace(r"[;,]", "|", regex=True)  # Substitui vírgula e ponto-vírgula
         .str.replace("∴", " .'. ")  # Substitui caractere especial
         .str.replace("ś", "s")  # Remove acentuação
+        .str.replace('"','' ) # remover o "
         .str.strip()  # Remove espaços extras
     )
 

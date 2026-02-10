@@ -42,8 +42,9 @@
 # 2025-11-28 #  9.11.1  # Refactoring od XLSREPORT with YAML file      # Carlin, Luiz A. .'.
 # 2026-01-22 #  9.11.1  # Encodindig utf-8-sig on csv exporting        # Carlin, Luiz A. .'.
 #                       # remove  "  from descrição field              #
+# 2026-02-10 #  9.11.2  # Cosmetics: number of executions              # Carlin, Luiz A. .'.
 #############################################################################################
-# Current Version : 9.11.1
+# Current Version : 9.11.2
 #############################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -96,7 +97,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    current_version = "9.11.1"
+    current_version = "9.11.2"
     os_pataform = platform.system()
 
     # if the system is windows then use the below
@@ -214,6 +215,8 @@ def main(param_file):
 
     log_file = open(log_file_cfg, 'r+')
     if not is_log_empty and log_file_exists:
+        number_of_runs = sum(1 for _ in log_file)
+        log_file.seek(0)
         last_run_date = log_file.readlines()[-1].split('|')[0]
     # end of LOG block
     out_line = ">" + ("=" * 120) + "<"
@@ -223,6 +226,7 @@ def main(param_file):
     print(f'Config/INI File         :-> \033[32m{config_file}\033[0m')
     print(f'YAML Queries File       :-> \033[32m{pdw_sql_file}\033[0m')
     print(f'LOG File                :-> \033[32m{log_file_cfg}\033[0m ')
+    print(f'Number of executions    :-> \033[32m{number_of_runs}\033[0m')
     print(f'Excel Sheet  Input file :-> \033[32m{input_file}\033[0m')
     print(f'Output SQLite3 Database :-> \033[32m{sqlite_database}\033[0m')
     print(f'Guiding Excel Sheet     :-> \033[32m{guiding_table}\033[0m')

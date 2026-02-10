@@ -40,8 +40,10 @@
 # 2025-09-25 #  9.9.0   # Improvements on Dataframe Sanity             # Carlin, Luiz A. .'.
 # 2025-11-26 #  9.10.0  # ReFactoring of Data_loader function          # Carlin, Luiz A. .'.
 # 2025-11-28 #  9.11.1  # Refactoring od XLSREPORT with YAML file      # Carlin, Luiz A. .'.
+# 2026-01-22 #  9.11.1  # Encodindig utf-8-sig on csv exporting        # Carlin, Luiz A. .'.
+#                       # remove  "  from descrição field              #
 #############################################################################################
-# Current Version : 9.11.0
+# Current Version : 9.11.1
 #############################################################################################
 # TODO: GUI Interface
 # TODO: Use config file as parameters? (done)
@@ -94,7 +96,7 @@ def main(param_file):
     # current date and time
     start = time.time()
     started = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    current_version = "9.11.0"
+    current_version = "9.11.1"
     os_pataform = platform.system()
 
     # if the system is windows then use the below
@@ -412,6 +414,7 @@ def general_entries_file_exportator(data_base_file, dir_out, file_out, table_nam
     df_out = pd.read_sql(sqlStatment, connection)
     row_count = len(df_out.index)
     # df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='cp1252')
+    # 2026-01-22
     df_out.to_csv(file_full_path + '.csv', sep=';', index=False, encoding='utf-8-sig')
     if other_types:
         print(f"              Exporting JSON file(s) ")
@@ -662,7 +665,7 @@ def clean_description_text(text_series):
         .str.replace(r"[;,]", "|", regex=True)  # Substitui vírgula e ponto-vírgula
         .str.replace("∴", " .'. ")  # Substitui caractere especial
         .str.replace("ś", "s")  # Remove acentuação
-        .str.replace('"','' ) # remover o "
+        .str.replace('"','' ) # remover o " 2026-01-22
         .str.strip()  # Remove espaços extras
     )
 

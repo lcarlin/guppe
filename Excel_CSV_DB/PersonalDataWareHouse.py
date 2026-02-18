@@ -214,6 +214,7 @@ def main(param_file):
         new_log_file.close()
 
     log_file = open(log_file_cfg, 'r+')
+    number_of_runs = 0
     if not is_log_empty and log_file_exists:
         number_of_runs = sum(1 for _ in log_file)
         log_file.seek(0)
